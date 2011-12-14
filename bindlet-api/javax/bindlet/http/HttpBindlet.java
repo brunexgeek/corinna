@@ -20,6 +20,7 @@ package javax.bindlet.http;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
+import java.util.Date;
 
 import javax.bindlet.Bindlet;
 import javax.bindlet.IBindletRequest;
@@ -207,7 +208,6 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	 *         if the time is not known
 	 * 
 	 */
-
 	protected long getLastModified( IHttpBindletRequest request )
 	{
 		return -1;

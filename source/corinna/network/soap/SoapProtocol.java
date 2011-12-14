@@ -27,7 +27,7 @@ public class SoapProtocol extends Protocol<ISoapBindletRequest, ISoapBindletResp
 
 	private static final String PROTOCOL_SCHEME = "http";
 
-	private static final String PROTOCOL_VERSION = "1.0";
+	private static final String PROTOCOL_VERSION = "1.1";
 
 	private static final String PROTOCOL_NAME = "SAAJ-SOAP";
 

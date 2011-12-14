@@ -92,11 +92,11 @@ public class WebBindletRequest implements IWebBindletRequest
 	}
 
 	@Override
-	public Date getDateHeader( String name )
+	public long getDateHeader( String name )
 	{
 		String value = request.getHeader(name);
-		if (value == null) return null;
-		return HttpUtils.parseDateToDate(value);
+		if (value == null) return -1;
+		return HttpUtils.parseDateToLong(value);
 	}
 
 	@Override

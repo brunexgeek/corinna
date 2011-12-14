@@ -53,7 +53,8 @@ public class HttpUtils
 				if (pos == -1) pos = end;
 				// extract the key and value
 				String key = data.substring(start, pos);
-				String value = data.substring(pos + 1, end);
+				String value = "";
+				if (pos < end) value = data.substring(pos + 1, end);
 				list.put(key, value);
 			}
 			// find the next pair

@@ -36,7 +36,7 @@ public interface IWebBindletRequest extends IBindletRequest
 	 * @exception IllegalArgumentException
 	 *                if the header value can't be converted to a date
 	 */
-	public Date getDateHeader( String name );
+	public long getDateHeader( String name );
 
 	/**
 	 * Returns the value of the specified request header as a <code>String</code>. If the request

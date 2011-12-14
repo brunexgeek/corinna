@@ -30,7 +30,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
 
 import corinna.bindlet.soap.SoapBindletRequest;
 import corinna.bindlet.soap.SoapBindletResponse;

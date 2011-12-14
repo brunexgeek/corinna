@@ -18,7 +18,6 @@ package corinna.network.soap;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
