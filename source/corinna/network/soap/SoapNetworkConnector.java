@@ -51,14 +51,14 @@ public class SoapNetworkConnector extends NetworkConnector<ISoapBindletRequest, 
 
 	private SoapStreamHandler channelHandler;
 	
-	public SoapNetworkConnector( String name, String url ) throws MalformedURLException, SOAPException
+	public SoapNetworkConnector( String name, String url, int workers ) throws MalformedURLException, SOAPException
 	{
-		this( name, new URL(url) );
+		this( name, new URL(url), workers );
 	}
 	
-	public SoapNetworkConnector( String name, URL address ) throws SOAPException
+	public SoapNetworkConnector( String name, URL address, int workers ) throws SOAPException
 	{
-		super(name, address);
+		super(name, address, workers);
 		
 		this.decoder = new HttpRequestDecoder(1024, 4096, 8192);
 		this.encoder = new HttpResponseEncoder();

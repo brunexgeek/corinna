@@ -68,10 +68,15 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 
 	public NetworkConnector( String name, String url ) throws MalformedURLException
 	{
-		this( name, new URL(url) );
+		this( name, new URL(url), Runtime.getRuntime().availableProcessors() * 2 );
+	}
+
+	public NetworkConnector( String name, String url, int workers ) throws MalformedURLException
+	{
+		this( name, new URL(url), workers );
 	}
 	
-	public NetworkConnector( String name, URL address )
+	public NetworkConnector( String name, URL address, int workers )
 	{
 		if (address == null) 
 			throw new NullPointerException("The address is required");
@@ -83,7 +88,7 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 		this.params = new HashMap<String,String>();
 	
 		ChannelFactory factory = new NioServerSocketChannelFactory(
-			Executors.newCachedThreadPool(), Executors.newCachedThreadPool() );
+			Executors.newCachedThreadPool(), Executors.newCachedThreadPool(), workers);
 		this.bootstrap = new ServerBootstrap(factory);
 		this.bootstrap.setPipelineFactory(this);
 		

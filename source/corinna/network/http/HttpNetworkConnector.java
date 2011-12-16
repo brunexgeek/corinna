@@ -49,14 +49,14 @@ public class HttpNetworkConnector extends NetworkConnector<IHttpBindletRequest,
 
 	private HttpStreamHandler channelHandler;
 	
-	public HttpNetworkConnector( String name, String url ) throws MalformedURLException
+	public HttpNetworkConnector( String name, String url, int workers ) throws MalformedURLException
 	{
-		this( name, new URL(url) );
+		this( name, new URL(url), workers );
 	}
 	
-	public HttpNetworkConnector( String name, URL address )
+	public HttpNetworkConnector( String name, URL address, int workers )
 	{
-		super(name, address);
+		super(name, address, workers);
 		
 		this.decoder = new HttpRequestDecoder(1024, 4096, 8192);
 		this.encoder = new HttpResponseEncoder();

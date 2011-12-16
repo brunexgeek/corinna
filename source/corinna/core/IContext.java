@@ -26,6 +26,8 @@ import corinna.exception.BindletException;
 public interface IContext<R, P> extends IServiceRequestListener
 {
 
+	Class<?>[] CONSTRUCTOR_ARGS = { ContextConfig.class };
+
 	public IService getService();
 	
 	public IBindletContext getBindletContext();

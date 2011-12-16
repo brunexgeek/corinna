@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<domain>
+
+	<connectors>
+		<connector name="SOAP-NetworkConnector">
+			<connector-class>corinna.network.soap.SoapNetworkConnctor</connector-class>
+			<connector-address>127.0.0.1:8080</connector-address>
+		</connector>
+	</connectors>
+
+	<servers>
+		<server name="TTS-Server">
+			<server-title>TextToSpeech Server</server-title>
+			<server-class>corinna.core.Server</server-class>
+			<services>
+				<add-service>TTS-Service</add-service>
+			</services>
+		</server>
+	</servers>
+
+	<services>
+		<service name="TTS-Service">
+			<service-title>TextToSpeech Service</service-title>
+			<service-class>br.com.cpqd.vaas.service.TextToSpeechService
+			</service-class>
+			<contexts>
+				<add-context>TTS-SoapContext</add-context>
+			</contexts>
+		</service>
+	</services>
+
+	<contexts>
+		<context name="TTS-SoapContext">
+			<context-title>TTS - SOAP Context</context-title>
+			<context-class>corinna.core.soap.SoapContext</context-class>
+			<init-parameters>
+				<parameter>
+					<parameter-name>urlMapping</parameter-name>
+					<parameter-value>/vaas</parameter-value>
+				</parameter>
+			</init-parameters>
+			<bindlets>
+				<add-bindlet>TTS-SoapBindlet</add-bindlet>
+			</bindlets>
+		</context>
+	</contexts>
+
+	<bindlets>
+		<bindlet name="TTS-SoapBindlet">
+			<bindlet-title>TTS SOAP Bindlet</bindlet-title>
+			<bindlet-class>corinna.core.soap.SoapBindlet</bindlet-class>
+			<init-parameters>
+				<parameter>
+					<parameter-name>urlMapping</parameter-name>
+					<parameter-value>/vaas</parameter-value>
+				</parameter>
+			</init-parameters>
+		</bindlet>
+	</bindlets>
+
+</domain>

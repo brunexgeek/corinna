@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.bindlet.BindletConfig;
-import javax.bindlet.BindletContextConfig;
-import javax.bindlet.BindletContextInfo;
 import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletContext;
 import javax.xml.parsers.DocumentBuilder;
@@ -121,7 +119,7 @@ public class XMLDomainParser extends DefaultHandler implements IDomainParser
 		List<IServer> serverList;
 		Map<String, IService> serviceList;
 		Map<String, BindletEntry> bindletList = null;
-		Map<String, IBindletContext<?, ?>> contextList;
+		Map<String, IContext<?, ?>> contextList;
 		List<INetworkConnector<?, ?>> connectorList = null;
 		Element element, root;
 
@@ -269,12 +267,12 @@ public class XMLDomainParser extends DefaultHandler implements IDomainParser
 	 * @return
 	 * @throws ParseException
 	 */
-	private Map<String,IBindletContext<?,?>> parseContexts( Element parent,
+	private Map<String,IContext<?,?>> parseContexts( Element parent,
 		Map<String, BindletEntry> bindletEntries ) throws ParseException
 	{
 		if (!isTag(parent, XMLDomainTags.CONTEXTS)) throw new ParseException("Invalid tag name");
 
-		Map<String,IBindletContext<?,?>> output = new HashMap<String,IBindletContext<?,?>>();
+		Map<String,IContext<?,?>> output = new HashMap<String,IBindletContext<?,?>>();
 		NodeList list = getElementsByTag(parent, XMLDomainTags.CONTEXT);
 
 		// for each bindlet context...
@@ -300,25 +298,20 @@ public class XMLDomainParser extends DefaultHandler implements IDomainParser
 
 			try
 			{
-				// get the bindlet context class
-				contextClass = Class.forName(contextClassName);
 				// create and fill a new bindlet context configuration
-				BindletContextConfig config = new BindletContextConfig(contextName);
+				ContextConfig config = new ContextConfig(contextName, contextClassName);
 				for (IParameter current : params)
-					config.setContextParameter(current.getName(), current.getValue());
+					config.setInitParameter(current.getName(), current.getValue());
 
 				// create a new bindlet context instance
-				Constructor<?> ctor = contextClass.getConstructor(IBindletContext.CONSTRUCTOR_ARGS);
-				IBindletContext<?, ?> context = (IBindletContext<?, ?>) ctor.newInstance(config);
+				Constructor<?> ctor = contextClass.getConstructor(IContext.CONSTRUCTOR_ARGS);
+				IContext<?, ?> context = (IContext<?, ?>) ctor.newInstance(config);
 
-				// found and create the associated bindlets
+				// found and register the associated bindlets
 				temp = getElementByTag(element, XMLDomainTags.BINDLETS);
 				List<String> bindletNames = parseAssociatedBindlets(temp);
-				List<IBindlet<?,?>> bindlets = createBindlets(bindletNames, bindletEntries, context);
-
-				for ( IBindlet<?,?> current : bindlets )
-					context.addGenericBindlet(current);
-				
+				registerBindlets(bindletNames, bindletEntries, context);
+								
 				output.put(contextName, context);
 			} catch (Exception e)
 			{
@@ -354,8 +347,8 @@ public class XMLDomainParser extends DefaultHandler implements IDomainParser
 		return output;
 	}
 
-	protected List<IBindlet<?, ?>> createBindlets( List<String> bindletNames,
-		Map<String, BindletEntry> bindletInfos, IBindletContext<?, ?> context )
+	protected List<IBindlet<?, ?>> registerBindlets( List<String> bindletNames,
+		Map<String, BindletEntry> bindletInfos, IContext<?, ?> context )
 		throws ParseException
 	{
 		List<IBindlet<?, ?>> output = new LinkedList<IBindlet<?, ?>>();
@@ -363,7 +356,7 @@ public class XMLDomainParser extends DefaultHandler implements IDomainParser
 		for (String currentName : bindletNames)
 		{
 			BindletEntry entry = bindletInfos.get(currentName);
-			if (entry == null) throw new ParseException("Referenced unknown bindlet");
+			if (entry == null) throw new ParseException("The referenced bindlet does not exist: " + currentName);
 			
 			try
 			{
