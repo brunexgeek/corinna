@@ -30,7 +30,7 @@ public abstract class SoapBindlet extends Bindlet<ISoapBindletRequest, ISoapBind
 		super();
 	}
 	
-	public void doWsdl( ISoapBindletResponse response ) throws BindletException, IOException
+	public void doWsdl( ISoapBindletRequest req, ISoapBindletResponse response ) throws BindletException, IOException
 	{
 	}
 	
@@ -44,7 +44,7 @@ public abstract class SoapBindlet extends Bindlet<ISoapBindletRequest, ISoapBind
 		throws BindletException, IOException
 	{
 		if (req != null && req.getRequestURI().toString().endsWith(WSDL_SUFFIX))
-			doWsdl(res);
+			doWsdl(req, res);
 		else
 		if (req == null || req.getMessage() == null)
 			res.sendError(HttpStatus.BAD_REQUEST);

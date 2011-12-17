@@ -70,9 +70,11 @@ public class SoapContext extends Context<ISoapBindletRequest, ISoapBindletRespon
 		String path = req.getResourcePath();
 		if (value == null || path == null) return false;
 
-		if (!value.isEmpty() && value.charAt( value.length()-1 ) != '/') value += '/';
-		if (!path.isEmpty() && path.charAt( path.length()-1 ) != '/') path += '/';
-
+		//if (!value.isEmpty() && value.charAt( value.length()-1 ) != '/') value += '/';
+		//if (!path.isEmpty() && path.charAt( path.length()-1 ) != '/') path += '/';
+		if (value.isEmpty() || !value.startsWith("/")) value = '/' + value;
+		//if (value.charAt( value.length()-1 ) != '/') value += '/';
+		
 		Pattern pattern = Pattern.compile(value);
 		Matcher match = pattern.matcher(path);
 		

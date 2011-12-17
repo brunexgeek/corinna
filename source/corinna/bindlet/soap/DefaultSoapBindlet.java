@@ -82,13 +82,13 @@ public class DefaultSoapBindlet extends SoapBindlet
 	}
 
 	@Override
-	public void doWsdl( ISoapBindletResponse response ) throws BindletException, IOException
+	public void doWsdl( ISoapBindletRequest req, ISoapBindletResponse response ) throws BindletException, IOException
 	{
 		response.setContentType("text/xml");
 		response.setChunked(true);
 		
 		BindletOutputStream output = response.getOutputStream();
-		output.write( getWsdl() );
+		output.write( getWsdl(req) );
 		output.close();
 	}
 
@@ -207,13 +207,13 @@ public class DefaultSoapBindlet extends SoapBindlet
 		return message;
 	}
 
-	protected String generateWsdl( ) throws BindletException
+	protected String generateWsdl( ISoapBindletRequest req ) throws BindletException
 	{
 		wsdlLock.writeLock();
 		try
 		{
 			ClassDescriptor desc = new ClassDescriptor(runner.getInterfaceClass());
-			WsdlGenerator wsdlgen = new WsdlGenerator(DEFAULT_ENDPOINT);
+			WsdlGenerator wsdlgen = new WsdlGenerator(req.getRequestURL());
 			return (wsdl = wsdlgen.generateWsdl(desc));
 		} catch (Exception e)
 		{
@@ -224,7 +224,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 		}
 	}
 
-	protected String getWsdl() throws BindletException
+	protected String getWsdl( ISoapBindletRequest req ) throws BindletException
 	{
 		boolean hasWsdl = true;
 		String text = null;
@@ -237,7 +237,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 		if (hasWsdl)
 			return text;
 		else
-			return generateWsdl();
+			return generateWsdl(req);
 	}
 	
 }

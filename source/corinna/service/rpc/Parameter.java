@@ -16,6 +16,7 @@
 
 package corinna.service.rpc;
 
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -30,19 +31,18 @@ public @interface Parameter
 {
 
 	/**
-	 * Retorna o nome do parâmetro.
+	 * The name by which the procedure parameter will be accessible.
 	 * 
 	 * @return Nome do parâmetro.
 	 */
 	public String name();
-	
-	
+
 	/**
-	 * Indica se o valor do parâmetro deve ser fornecido obrigatoriamente. Somente parâmetros cujo
-	 * tipo não é um tipo primitivo podem ser opcionais.
+	 * Indicates that the procedure parameter is required. Optional parameters can not be of
+	 * primitive types.
 	 * 
-	 * @return <code>True</code> se o parâmetro é obrigatório ou <code>false</code> caso contrário.
+	 * @return <code>True</code> if the parameter is required.
 	 */
 	public boolean required() default true;
-	
+
 }

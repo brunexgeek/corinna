@@ -31,7 +31,7 @@ public class MyBindlet extends SoapBindlet
 	}
 	
 	@Override
-	public void doWsdl( ISoapBindletResponse response ) throws BindletException, IOException
+	public void doWsdl( ISoapBindletRequest request, ISoapBindletResponse response ) throws BindletException, IOException
 	{
 		response.setContentType("text/html", "UTF-8");
 		BindletOutputStream stream = response.getOutputStream();
