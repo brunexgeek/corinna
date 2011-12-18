@@ -1,5 +1,6 @@
 package corinna.core;
 
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -28,6 +29,7 @@ public final class ContextConfig implements IContextConfig
 		
 		this.name = name;
 		this.classRef = classRef;
+		this.params = new HashMap<String, String>();
 	}
 
 	@Override

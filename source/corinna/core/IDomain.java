@@ -41,10 +41,10 @@ public interface IDomain extends INetworkConnectorListener
 	
 	public IServer getServer( String name );
 	
-	public void addServer( IServer server, String connectorName );
+	public void addServer( IServer server );
 	
-	public void removeServer( IServer server );
+	public IServer removeServer( IServer server );
 	
-	public void removeServer( String name );
+	public IServer removeServer( String name );
 	
 }

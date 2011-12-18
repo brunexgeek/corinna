@@ -48,9 +48,9 @@ public final class Domain implements IDomain
 	
 	private Map<String, List<INetworkConnector<?, ?>>> connectorsByProtocol;
 	
-	private Map<String, List<INetworkConnector<?, ?>>> connectorsByServer;
+	//private Map<String, List<INetworkConnector<?, ?>>> connectorsByServer;
 
-	private Map<String, List<IServer>> serversByConnector;
+	//private Map<String, List<IServer>> serversByConnector;
 	
 	private Map<String, IServer> servers;
 	
@@ -62,11 +62,7 @@ public final class Domain implements IDomain
 		
 		connectorsByName = new HashMap<String, INetworkConnector<?, ?>>();
 		connectorsByProtocol = new HashMap<String, List<INetworkConnector<?, ?>>>();
-		connectorsByServer = new HashMap<String, List<INetworkConnector<?, ?>>>();
-		serversByConnector = new HashMap<String, List<IServer>>();
-		
 		servers = new HashMap<String, IServer>();
-		
 		connectorsLock = new ObjectLocker();
 		serversLock = new ObjectLocker();
 	}
@@ -155,11 +151,6 @@ public final class Domain implements IDomain
 		connectorsLock.writeLock();
 		try
 		{
-			// check if have some server using the connector
-			List<IServer> serverList = serversByConnector.get( connector.getName() );
-			if (serverList != null && !serverList.isEmpty()) 
-				throw new ConnectorInUseException("The connector can not be removed because are in use");
-			serversByConnector.remove( connector.getName() );
 			// remove connector by name
 			connectorsByName.remove( connector.getName() );
 			// remove connector by protocol
@@ -208,35 +199,15 @@ public final class Domain implements IDomain
 	}
 
 	@Override
-	public void addServer( IServer server, String connectorName )
+	public void addServer( IServer server )
 	{
 		if (server == null) return;
 
 		serversLock.writeLock();
 		try
 		{
-			// check if have some connector with that name
-			INetworkConnector<?, ?> connector = getConnector(connectorName);
-			if (connector == null)
-				throw new IllegalArgumentException("Unknown network connector");
 			// add server by name
 			servers.put(server.getName(), server);
-			// add server by connector
-			List<IServer> list = serversByConnector.get(connectorName);
-			if (list == null)
-			{
-				list = new LinkedList<IServer>();
-				serversByConnector.put(connectorName, list);
-			}
-			list.add(server);
-			// add connector by server
-			List<INetworkConnector<?,?>> connectorList = connectorsByServer.get( server.getName() );
-			if (connectorList == null)
-			{
-				connectorList = new LinkedList<INetworkConnector<?,?>>();
-				connectorsByServer.put(connectorName, connectorList);
-			}
-			connectorList.add(connector);
 		} finally
 		{
 			serversLock.writeUnlock();
@@ -244,35 +215,23 @@ public final class Domain implements IDomain
 	}
 
 	@Override
-	public void removeServer( IServer server )
+	public IServer removeServer( IServer server )
 	{
-		if (server == null) return;
+		if (server == null) return null;
 
-		removeServer( server.getName() );
+		return removeServer( server.getName() );
 	}
 
 	@Override
-	public void removeServer( String name )
+	public IServer removeServer( String name )
 	{
-		if (name == null) return;
+		if (name == null) return null;
 
 		serversLock.writeLock();
 		try
 		{
 			// remove the server by name
-			IServer server = servers.remove(name);
-			if (server == null) return;
-			// remove the server by connector
-			List<INetworkConnector<?, ?>> connectorList = connectorsByServer.get(name);
-			if (connectorList == null || connectorList.isEmpty()) return;
-			for ( INetworkConnector<?, ?> connector : connectorList )
-			{
-				List<IServer> serverList = serversByConnector.get( connector.getName() );
-				if (serverList == null || serverList.isEmpty()) continue;
-				serverList.remove(server);
-			}
-			connectorList.clear();
-			connectorsByServer.remove(name);
+			return servers.remove(name);
 		} finally
 		{
 			serversLock.writeUnlock();
@@ -286,14 +245,15 @@ public final class Domain implements IDomain
 		serversLock.readLock();
 		try
 		{
-			// obtém a lista de servidores que utilizam o conector
-			List<IServer> list = serversByConnector.get( connector.getName() );
-			if (list == null || list.isEmpty()) return;
 			// itera entre os servidores
-			for (IServer server : list)
+			for (Map.Entry<String, IServer> entry : servers.entrySet())
 			{
+				IServer server = entry.getValue();
+				if (server == null) continue;
+				
 				if (log.isDebugEnabled())
 					log.debug("Dispatching event to server " + server.getName());
+				
 				server.domainRequestReceived(this, event);
 				if ( event.isHandled() ) break;
 			}

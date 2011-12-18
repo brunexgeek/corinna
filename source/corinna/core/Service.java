@@ -175,5 +175,29 @@ public abstract class Service implements IService
 	{
 		dispatchEventToContexts(event);
 	}
+
+	@Override
+	public void init()
+	{
+		// does nothing		
+	}
+
+	@Override
+	public void start()
+	{
+		// does nothing
+	}
+
+	@Override
+	public void stop()
+	{
+		// does nothing
+	}
+
+	@Override
+	public void destroy()
+	{
+		// does nothing
+	}
 	
 }

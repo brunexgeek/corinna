@@ -23,9 +23,11 @@ import corinna.exception.ParseException;
  * Parse a configuration file to get the required information to create a domain and all
  * related elements.
  * 
- * @author bruno
- *
+ * @author Bruno Ribeiro
+ * @version 1.0
+ * @since 1.0
  */
+// TODO: move to 'corinna.core.parser'
 public interface IDomainParser
 {
 

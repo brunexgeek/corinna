@@ -50,7 +50,7 @@ public enum XMLDomainTags
 	
 	INIT_PARAMETERS("init-parameters"),
 	
-	CONTEXT_PARAMETERS("context-parameters"),
+	CONTEXT_PARAMETERS("init-parameters"),
 	
 	ADD_BINDLET("add-bindlet"),
 	

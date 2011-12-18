@@ -2,15 +2,9 @@ package corinna.test;
 
 import org.apache.log4j.BasicConfigurator;
 
-import corinna.bindlet.soap.DefaultSoapBindlet;
-import corinna.core.DefaultServer;
-import corinna.core.Domain;
-import corinna.core.IBindletRegistration;
 import corinna.core.IDomain;
-import corinna.core.IServer;
-import corinna.core.IService;
-import corinna.core.soap.SoapContext;
-import corinna.network.soap.SoapNetworkConnector;
+import corinna.core.XMLDomainParser;
+import corinna.util.ClassLoaderManager;
 
 
 public class MainTest
@@ -18,6 +12,12 @@ public class MainTest
 
 	public static void main( String[] args ) throws Exception
 	{
+		BasicConfigurator.configure();
+		
+		/**
+		 * HTML
+		 */
+		
 		/*BasicConfigurator.configure();
 		
 		HttpNetworkConnector connector = new HttpNetworkConnector("SOAP", "http://localhost:8080", 4);
@@ -43,7 +43,11 @@ public class MainTest
 
 		service.addContext(context);*/
 		
-		BasicConfigurator.configure();
+		/**
+		 * SOAP
+		 */
+		
+		/*
 		
 		SoapNetworkConnector connector = new SoapNetworkConnector("SOAP", "http://localhost:8080", 4);
 		connector.init();
@@ -66,12 +70,20 @@ public class MainTest
 		reg.setBindletParameter("interfaceClass", MyInterface.class.getName());
 		reg.setBindletParameter("implementationClass", MyImpl.class.getName());
 
-		service.addContext(context);
+		service.addContext(context);*/
 		
 		/*ClassDescriptor desc = new ClassDescriptor(MyInterface.class);
 		WsdlGenerator wsdl = new WsdlGenerator("http://cpqd.com.br/vaas");
 		wsdl.setServiceName("Voice-as-a-Service");
 		System.out.println( wsdl.generateWsdl(desc) );*/
+		
+		/**
+		 * XML Parser
+		 */
+		XMLDomainParser parser = new XMLDomainParser("/media/bruno/projetos/java/corinna/devel/test/corinna/test/domain.xml");
+		IDomain domain = parser.parse();
+		
 	}
+	
 	
 }

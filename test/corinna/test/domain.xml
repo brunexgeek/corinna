@@ -48,7 +48,7 @@
 	<bindlets>
 		<bindlet name="TTS-SoapBindlet">
 			<bindlet-title>TTS SOAP Bindlet</bindlet-title>
-			<bindlet-class>corinna.core.soap.SoapBindlet</bindlet-class>
+			<bindlet-class>corinna.bindlet.soap.DefaultSoapBindlet</bindlet-class>
 			<init-parameters>
 				<parameter>
 					<parameter-name>urlMapping</parameter-name>
