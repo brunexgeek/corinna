@@ -107,29 +107,30 @@ public abstract class Context<R, P> implements IContext<R, P>
 			throw new BindletException("Incompatible bindlet request for this context", e);
 		}
 		
-		if (acceptRequest(request)) 
+		if (acceptRequest(request))
 		{
-			dispatchEventToBindlet(request, response);
-			event.setHandled(true);
+			boolean result = dispatchEventToBindlet(request, response);
+			event.setHandled(result);
 		}
 	}
 
 	protected abstract boolean acceptRequest( R request );
 	
 	@SuppressWarnings("unchecked")
-	protected void dispatchEventToBindlet( R request, P response ) throws BindletException, IOException
+	protected boolean dispatchEventToBindlet( R request, P response ) throws BindletException, IOException
 	{
 		// find the registration of the bindlet that must process this request
 		IBindletRegistration reg = getBindletRegistration(request);
-		if (reg == null)
-			throw new BindletException("There are no registred bindlet compatible with a request '"
-				+ request.getClass() + "'");
+		if (reg == null) return false;
+			/*throw new BindletException("There are no registred bindlet compatible with a request '"
+				+ request.getClass() + "'");*/
 		//IBindlet<R, P> bindlet = createBindlet(reg.getBindletName());
 		IBindlet<R, P> bindlet = (IBindlet<R, P>) reg.createBindlet();
 		// process the request event
 		bindlet.init(reg.getBindletConfig());
 		bindlet.process(request, response);
 		bindlet.destroy();
+		return true;
 	}
 
 	@Override

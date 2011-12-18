@@ -145,4 +145,84 @@ public class HttpUtils
 		}
 	}
 	
+	public static String matchURI( String pattern, String uri )
+	{
+		if (uri == null || uri.isEmpty())
+			throw new IllegalArgumentException("The uri can not be null or empty");
+
+		// handle the root pattern
+		if (pattern == null || pattern.isEmpty() || pattern.equals("/")) return "";
+
+		// ensures the first slash
+		if (pattern.charAt(0) != '/') pattern = "/" + pattern;
+		if (uri.charAt(0) != '/') uri = "/" + uri;
+		// ensures the last character in pattern is not a slash
+		if (pattern.charAt(pattern.length() - 1) == '/') pattern = pattern.substring(0, pattern.length() - 1);
+		
+		// indexes
+		int pi = 0;
+		int ui = 0;
+		// lengths
+		int pl = pattern.length();
+		int ul = uri.length();
+		
+		char pc = '\0', uc = '\0';
+		
+		while (pi < pl && ui < ul)
+		{
+			pc = pattern.charAt(pi);
+			uc = uri.charAt(ui);
+			
+			// handle the asterisk operator
+			if (pc == '*' && uc != '/')
+				ui++;
+			else
+			if (pc == '*')
+				pi++;
+			else
+			// handle the regular character
+			if (uc != pc)
+				return null;
+			else
+			{
+				ui++;
+				pi++;
+			}
+		}
+		
+		// if not reached the end of pattern AND the last pattern chaarcter is not a asterisk
+		if (pi < pl && pc != '*') return null;
+		// check if the last character founded (or the next) is a slash
+		if (uri.charAt(ui-1) != '/' && (ui < ul && uri.charAt(ui) != '/') ) return null;
+		
+		return uri.substring(0, ui);
+	}
+
+	public static String clearUri( String uri )
+	{
+		if (uri == null) return null;
+		
+		StringBuffer sb = new StringBuffer(uri.length());
+		
+		// remove all repeated slashes of URI
+		int c = 0;
+		boolean slash = false;
+		boolean end = false;
+		while (c < uri.length())
+		{
+			char current = uri.charAt(c++);
+			end = (current == '?');
+			
+			if (!end && current == '/')
+			{
+				if (slash) continue;
+				slash = true;
+			}
+			else
+				slash = false;
+			sb.append(current);
+		}
+		return sb.toString();
+	}
+	
 }

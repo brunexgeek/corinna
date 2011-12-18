@@ -20,9 +20,7 @@ import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 
 import corinna.bindlet.BindletContext;
-import corinna.core.IContext;
 import corinna.core.http.IHttpContext;
-import corinna.network.IProtocol;
 import corinna.util.IComponentInformation;
 
 

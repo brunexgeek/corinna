@@ -27,12 +27,4 @@ public class MyImpl implements MyInterface
 			return -1;
 	}
 
-	@Override
-	public int setAttributes( MultipleReturnValue atts )
-	{
-		System.out.println("Attributes: " + atts.toString() );
-		return 0;
-	}
-
-
 }

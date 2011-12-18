@@ -1,9 +1,6 @@
 package corinna.core.http;
 
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletContext;
 import javax.bindlet.http.IHttpBindletRequest;
@@ -49,18 +46,23 @@ public class HttpContext extends Context<IHttpBindletRequest, IHttpBindletRespon
 
 		for (IBindletRegistration current : regs)
 		{
-			String value = current.getBindletParameter(BINDLET_URL_MAPPING);
-			if (value == null) continue;
+			String pattern = current.getBindletParameter(BINDLET_URL_MAPPING);
+			String path = request.getResourcePath();
+			if (pattern == null || path == null) continue;
 
-			Pattern pattern = Pattern.compile(value);
-			Matcher match = pattern.matcher( request.getResourcePath() );
-
-			if (match.find() && match.start() == 0)
+			try
 			{
+				String value = HttpUtils.matchURI(pattern, path);
+				if (value == null) continue;
+				
 				if (request instanceof HttpBindletRequest)
-					((HttpBindletRequest)request).setBindletPath(match.group());
-				return current;
+					((HttpBindletRequest)request).setBindletPath(value);
+			} catch (Exception e)
+			{
+				continue;
 			}
+
+			return current;
 		}
 		
 		return null;
@@ -69,28 +71,24 @@ public class HttpContext extends Context<IHttpBindletRequest, IHttpBindletRespon
 	@Override
 	protected boolean acceptRequest( IHttpBindletRequest request )
 	{
-		if (!(request instanceof HttpBindletRequest)) return false;
-		
-		HttpBindletRequest req = (HttpBindletRequest) request;
-		
 		// check if the URL of the request match with the current context path
-		String value = getParameter(CONTEXT_URL_MAPPING);
-		String path = req.getResourcePath();
-		if (value == null || path == null) return false;
+		String pattern = getParameter(CONTEXT_URL_MAPPING);
+		String path = request.getResourcePath();
+		if (pattern == null || path == null) return false;
 
-		if (!value.isEmpty() && value.charAt( value.length()-1 ) != '/') value += '/';
-		if (!path.isEmpty() && path.charAt( path.length()-1 ) != '/') path += '/';
-
-		Pattern pattern = Pattern.compile(value);
-		Matcher match = pattern.matcher(path);
-		
-		if (match.find() && match.start() == 0)
+		try
 		{
-			req.setContextPath(match.group());
-			return true;
+			String value = HttpUtils.matchURI(pattern, path);
+			if (value == null) return false;
+			
+			if (request instanceof HttpBindletRequest)
+				((HttpBindletRequest)request).setContextPath(value);
+		} catch (Exception e)
+		{
+			return false;
 		}
 		
-		return false;
+		return true;
 	}
 
 }

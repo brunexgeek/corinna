@@ -11,7 +11,10 @@ import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletConfig;
 import javax.bindlet.IRecyclable;
 
+import org.apache.log4j.Logger;
+
 import corinna.exception.BindletException;
+import corinna.thread.ObjectLocker;
 
 /**
  * 
@@ -25,6 +28,8 @@ import corinna.exception.BindletException;
 public class BindletRegistration implements IBindletRegistration
 {
 
+	private static Logger log = Logger.getLogger(BindletRegistration.class);
+	
 	private IBindletConfig config = null;
 
 	private Boolean isModified = false;
@@ -44,6 +49,10 @@ public class BindletRegistration implements IBindletRegistration
 	private Class<? extends IBindlet<?,?>> bindletClass;
 
 	private Model bindletModel = Model.STATEFULL;
+	
+	private IBindlet<?,?> bindletInstance = null;
+	
+	private ObjectLocker bindletInstanceLock = null;
 
 	@SuppressWarnings("unchecked")
 	public BindletRegistration( IContext<?, ?> context, String bindletName, String bindletClassName )
@@ -60,6 +69,7 @@ public class BindletRegistration implements IBindletRegistration
 		this.bindletName = bindletName;
 		this.bindletClassName = bindletClassName;
 		this.parameters = new HashMap<String,String>();
+		this.bindletInstanceLock = new ObjectLocker();
 
 		// try to load the bindlet class
 		try
@@ -71,7 +81,7 @@ public class BindletRegistration implements IBindletRegistration
 		}
 		// check the bindlet model
 		BindletModel annot = this.bindletClass.getAnnotation(BindletModel.class);
-		if (annot != null) bindletModel = annot.model();
+		if (annot != null) bindletModel = annot.value();
 		// ensures that the bindlet implements IRecyclable if was marked with this model
 		if (bindletModel == Model.RECYCLABLE && !bindletClass.isAssignableFrom(IRecyclable.class))
 			throw new BindletException("Recyclable bindlets must be implements 'IRecyclable'"
@@ -113,18 +123,61 @@ public class BindletRegistration implements IBindletRegistration
 	}
 
 	@Override
+	// TODO: need to handle the recyclable bindlet creation
 	public IBindlet<?, ?> createBindlet() throws BindletException
 	{
+		IBindlet<?,?> instance = null;
+		
+		if (bindletModel == Model.STATELESS) 
+		{
+			instance = getBindletInstance();
+			log.debug("Using a shared instance of the stateless bindlet");
+		}
+		else
+		//if (bindletModel == Model.STATEFULL)
+		{
+			instance = createBindletInstance();
+			log.debug("Create a instance of the statefull bindlet");
+		}
+		
+		return instance;
+	}
+
+	protected IBindlet<?,?> getBindletInstance() throws BindletException
+	{
+		IBindlet<?,?> instance;
+		
+		bindletInstanceLock.readLock();
+		instance = bindletInstance;
+		bindletInstanceLock.readUnlock();
+		
+		if (instance == null)
+		{
+			instance = createBindletInstance();
+			bindletInstanceLock.writeLock();
+			bindletInstance = instance;
+			bindletInstanceLock.writeUnlock();
+		}
+		
+		return instance;
+	}
+	
+	protected IBindlet<?,?> createBindletInstance() throws BindletException
+	{
+		IBindlet<?,?> instance;
+
 		try
 		{
-			return (IBindlet<?, ?>) bindletClass.newInstance();
+			instance = (IBindlet<?, ?>) bindletClass.newInstance();
 		} catch (Exception e)
 		{
 			throw new BindletException("Error creating a new instance of bindlet class '"
 				+ bindletClassName + "'", e);
 		}
+		
+		return instance;
 	}
-
+	
 	@Override
 	public boolean isLoadOnStartup()
 	{

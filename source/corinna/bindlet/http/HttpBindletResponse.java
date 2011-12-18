@@ -18,7 +18,6 @@ package corinna.bindlet.http;
 
 
 import javax.bindlet.http.Cookie;
-import javax.bindlet.http.HttpBindletOutputStream;
 import javax.bindlet.http.IHttpBindletResponse;
 
 import org.jboss.netty.channel.Channel;
@@ -29,8 +28,6 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 
 public class HttpBindletResponse extends WebBindletResponse implements IHttpBindletResponse
 {
-
-	private HttpBindletOutputStream outputStream = null;
 
 	public HttpBindletResponse( Channel channel, HttpVersion version )
 	{

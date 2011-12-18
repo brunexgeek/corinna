@@ -1,18 +1,15 @@
 package corinna.core.soap;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.bindlet.IBindletContext;
 import javax.bindlet.soap.ISoapBindletRequest;
 import javax.bindlet.soap.ISoapBindletResponse;
 
-import corinna.bindlet.http.HttpBindletRequest;
 import corinna.bindlet.soap.SoapBindletContext;
 import corinna.bindlet.soap.SoapBindletRequest;
 import corinna.core.Context;
 import corinna.core.IBindletRegistration;
 import corinna.core.IService;
+import corinna.core.http.HttpUtils;
 
 
 public class SoapContext extends Context<ISoapBindletRequest, ISoapBindletResponse> implements ISoapContext
@@ -41,18 +38,23 @@ public class SoapContext extends Context<ISoapBindletRequest, ISoapBindletRespon
 
 		for (IBindletRegistration current : regs)
 		{
-			String value = current.getBindletParameter(BINDLET_URL_MAPPING);
-			if (value == null) continue;
+			String pattern = current.getBindletParameter(BINDLET_URL_MAPPING);
+			String path = request.getResourcePath();
+			if (pattern == null || path == null) continue;
 
-			Pattern pattern = Pattern.compile(value);
-			Matcher match = pattern.matcher( request.getResourcePath() );
-
-			if (match.find() && match.start() == 0)
+			try
 			{
-				if (request instanceof HttpBindletRequest)
-					((HttpBindletRequest)request).setBindletPath(match.group());
-				return current;
+				String value = HttpUtils.matchURI(pattern, path);
+				if (value == null) continue;
+				
+				if (request instanceof SoapBindletRequest)
+					((SoapBindletRequest)request).setBindletPath(value);
+			} catch (Exception e)
+			{
+				continue;
 			}
+
+			return current;
 		}
 		
 		return null;
@@ -61,30 +63,24 @@ public class SoapContext extends Context<ISoapBindletRequest, ISoapBindletRespon
 	@Override
 	protected boolean acceptRequest( ISoapBindletRequest request )
 	{
-		if (!(request instanceof SoapBindletRequest)) return false;
-		
-		SoapBindletRequest req = (SoapBindletRequest) request;
-		
 		// check if the URL of the request match with the current context path
-		String value = getParameter(CONTEXT_URL_MAPPING);
-		String path = req.getResourcePath();
-		if (value == null || path == null) return false;
+		String pattern = getParameter(CONTEXT_URL_MAPPING);
+		String path = request.getResourcePath();
+		if (pattern == null || path == null) return false;
 
-		//if (!value.isEmpty() && value.charAt( value.length()-1 ) != '/') value += '/';
-		//if (!path.isEmpty() && path.charAt( path.length()-1 ) != '/') path += '/';
-		if (value.isEmpty() || !value.startsWith("/")) value = '/' + value;
-		//if (value.charAt( value.length()-1 ) != '/') value += '/';
-		
-		Pattern pattern = Pattern.compile(value);
-		Matcher match = pattern.matcher(path);
-		
-		if (match.find() && match.start() == 0)
+		try
 		{
-			req.setContextPath(match.group());
-			return true;
+			String value = HttpUtils.matchURI(pattern, path);
+			if (value == null) return false;
+			
+			if (request instanceof SoapBindletRequest)
+				((SoapBindletRequest)request).setContextPath(value);
+		} catch (Exception e)
+		{
+			return false;
 		}
 		
-		return false;
+		return true;
 	}
 
 }

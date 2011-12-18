@@ -84,6 +84,12 @@ public class DefaultSoapBindlet extends SoapBindlet
 	@Override
 	public void doWsdl( ISoapBindletRequest req, ISoapBindletResponse response ) throws BindletException, IOException
 	{
+		String resource = req.getResourcePath();
+		if (!resource.isEmpty())
+		{
+			response.sendError(HttpStatus.NOT_FOUND);
+			return;
+		}
 		response.setContentType("text/xml");
 		response.setChunked(true);
 		

@@ -8,7 +8,6 @@ import javax.bindlet.soap.ISoapBindletResponse;
 import javax.bindlet.soap.SoapBindlet;
 
 import corinna.exception.BindletException;
-import corinna.util.IComponentInformation;
 
 
 public class MyBindlet extends SoapBindlet

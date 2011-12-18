@@ -24,6 +24,8 @@ package corinna.util;
  * @author bruno
  *
  */
+// TODO: remove this class
+@Deprecated
 public @interface Stateless
 {
 	

@@ -1,9 +1,8 @@
 package corinna.test;
 
-import javax.bindlet.IBindlet;
-
 import org.apache.log4j.BasicConfigurator;
 
+import corinna.bindlet.soap.DefaultSoapBindlet;
 import corinna.core.DefaultServer;
 import corinna.core.Domain;
 import corinna.core.IBindletRegistration;
@@ -36,16 +35,13 @@ public class MainTest
 
 		//BindletContextConfig contextConfig = new BindletContextConfig("Test");
 		HttpContext context = new HttpContext("MyContext", service);
-		context.setParameter("urlMapping", "/vaas");
+		context.setParameter("urlMapping", "*");
 		IBindletRegistration reg = context.addBindlet("MyBindlet", MyHttpBindlet.class);
-		reg.setBindletParameter("urlMapping", "/soap");
+		reg.setBindletParameter("urlMapping", "*");
 		reg.setBindletParameter("interfaceClass", MyInterface.class.getName());
 		reg.setBindletParameter("implementationClass", MyImpl.class.getName());
 
-		service.addContext(context);
-		
-		IBindlet<?,?> bindlet = context.createBindlet("MyBindlet");
-		bindlet.init();*/
+		service.addContext(context);*/
 		
 		BasicConfigurator.configure();
 		
@@ -64,16 +60,13 @@ public class MainTest
 
 		//BindletContextConfig contextConfig = new BindletContextConfig("Test");
 		SoapContext context = new SoapContext("MyContext", service);
-		context.setParameter("urlMapping", "/vaas");
-		IBindletRegistration reg = context.addBindlet("MyBindlet", MyBindlet.class);
-		reg.setBindletParameter("urlMapping", "/soap");
+		context.setParameter("urlMapping", "*");
+		IBindletRegistration reg = context.addBindlet("MyBindlet", DefaultSoapBindlet.class);
+		reg.setBindletParameter("urlMapping", "/*");
 		reg.setBindletParameter("interfaceClass", MyInterface.class.getName());
 		reg.setBindletParameter("implementationClass", MyImpl.class.getName());
 
 		service.addContext(context);
-		
-		IBindlet<?,?> bindlet = context.createBindlet("MyBindlet");
-		bindlet.init();
 		
 		/*ClassDescriptor desc = new ClassDescriptor(MyInterface.class);
 		WsdlGenerator wsdl = new WsdlGenerator("http://cpqd.com.br/vaas");
