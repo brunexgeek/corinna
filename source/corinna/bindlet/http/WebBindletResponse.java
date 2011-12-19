@@ -341,8 +341,8 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	{
 		if (isClosed()) return;
 
+		if (outputStream == null) getOutputStream();
 		setClosed(true);
-
 		if (outputStream != null && !outputStream.isClosed()) outputStream.close();
 	}
 	

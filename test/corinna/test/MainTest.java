@@ -30,7 +30,7 @@ public class MainTest
 		HttpContext context1 = new HttpContext("HttpContext");
 		context1.setParameter("urlMapping", "http");
 		IBindletRegistration reg1 = context1.addBindlet("MyBindlet", MyHttpBindlet.class);
-		reg1.setBindletParameter("urlMapping", "");
+		reg1.setBindletParameter("urlMapping", "login");
 		
 		/**
 		 * SOAP Context
@@ -39,7 +39,7 @@ public class MainTest
 		SoapContext context2 = new SoapContext("SoapContext");
 		context2.setParameter("urlMapping", "soap");
 		IBindletRegistration reg2 = context2.addBindlet("MyBindlet", DefaultSoapBindlet.class);
-		reg2.setBindletParameter("urlMapping", "");
+		reg2.setBindletParameter("urlMapping", "call");
 		reg2.setBindletParameter("interfaceClass", MyInterface.class.getName());
 		reg2.setBindletParameter("implementationClass", MyImpl.class.getName());
 		

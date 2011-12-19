@@ -6,8 +6,11 @@ import javax.bindlet.BindletModel;
 import javax.bindlet.BindletOutputStream;
 import javax.bindlet.BindletModel.Model;
 import javax.bindlet.http.HttpBindlet;
+import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
+
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 
 import corinna.exception.BindletException;
 
@@ -27,7 +30,14 @@ public class MyHttpBindlet extends HttpBindlet
 	protected void doGet( IHttpBindletRequest req, IHttpBindletResponse resp )
 	throws BindletException, IOException
 	{
-		resp.setContentLength(10);
+		String header = "Digest realm=\"testrealm@host.com\",\r\n\tqop=\"auth,auth-int\",\r\n\tnonce=\"dcd98b7102dd2f0e8b11d0f600bfb0c093\",\r\n\topaque=\"5ccc069c403ebaf9f0171e9517f40e41\"";
+		
+		resp.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, header);
+		resp.setStatus(HttpStatus.UNAUTHORIZED);
+		
+		resp.close();
+		
+		/*resp.setContentLength(10);
 		BindletOutputStream out = resp.getOutputStream();
 		out.write("<html><body><h1>Teste de envio de texto</h1>");
 		out.write("Context Path: " + req.getContextPath());
@@ -38,7 +48,7 @@ public class MyHttpBindlet extends HttpBindlet
 		out.write("<br/>Request Length: " + req.getContentLength());
 		out.write("<br/>Shared value: " + getNextValue());
 		out.write("</body></html>");
-		out.close();
+		out.close();*/
 	}
 
 	private int getNextValue()
