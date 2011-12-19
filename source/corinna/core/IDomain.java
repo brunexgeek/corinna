@@ -17,6 +17,7 @@
 package corinna.core;
 
 import corinna.exception.ConnectorInUseException;
+import corinna.exception.ServerInUseException;
 import corinna.network.INetworkConnector;
 import corinna.network.INetworkConnectorListener;
 import corinna.network.IProtocol;
@@ -41,10 +42,10 @@ public interface IDomain extends INetworkConnectorListener
 	
 	public IServer getServer( String name );
 	
-	public void addServer( IServer server );
+	public void addServer( IServer server ) throws ServerInUseException;
 	
-	public IServer removeServer( IServer server );
+	public IServer removeServer( IServer server ) throws ServerInUseException;
 	
-	public IServer removeServer( String name );
+	public IServer removeServer( String name ) throws ServerInUseException;
 	
 }

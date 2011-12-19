@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package corinna.core;
+package corinna.core.parser;
 
+import corinna.core.IDomain;
 import corinna.exception.ParseException;
 
 

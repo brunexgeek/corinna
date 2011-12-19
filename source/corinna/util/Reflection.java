@@ -28,6 +28,7 @@ public class Reflection
 	{
 	}
 
+	// XXX: this method do not identify the generic types if the imediate class is the wanted 
 	public static <T> Class<?> getGenericParameter( Object classRef, Class<T> baseClass, int index )
 	{
 		Class<?> next = classRef.getClass();

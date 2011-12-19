@@ -11,9 +11,9 @@ import corinna.network.INetworkConnector;
 public class MyService extends Service
 {
 
-	public MyService( String name, IServer server )
+	public MyService( String name )
 	{
-		super(name, server);
+		super(name);
 	}
 
 	@Override

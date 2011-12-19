@@ -16,6 +16,8 @@
 
 package corinna.core;
 
+import corinna.core.parser.IDomainParser;
+
 
 public interface IApplication
 {

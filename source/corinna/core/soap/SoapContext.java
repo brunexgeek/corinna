@@ -20,9 +20,9 @@ public class SoapContext extends Context<ISoapBindletRequest, ISoapBindletRespon
 	private static final String CONTEXT_URL_MAPPING = "urlMapping";
 
 	
-	public SoapContext( String name, IService service )
+	public SoapContext( String name )
 	{
-		super(name, service);
+		super(name);
 	}
 
 	@Override

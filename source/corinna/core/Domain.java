@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 
 import corinna.exception.BindletException;
 import corinna.exception.ConnectorInUseException;
+import corinna.exception.ServerInUseException;
 import corinna.network.INetworkConnector;
 import corinna.network.IProtocol;
 import corinna.network.NetworkConnector;
@@ -47,10 +48,6 @@ public final class Domain implements IDomain
 	private Map<String, INetworkConnector<?, ?>> connectorsByName;
 	
 	private Map<String, List<INetworkConnector<?, ?>>> connectorsByProtocol;
-	
-	//private Map<String, List<INetworkConnector<?, ?>>> connectorsByServer;
-
-	//private Map<String, List<IServer>> serversByConnector;
 	
 	private Map<String, IServer> servers;
 	
@@ -132,7 +129,7 @@ public final class Domain implements IDomain
 				removeConnector( connector.getName() );
 			} catch (ConnectorInUseException er)
 			{
-				// supress errors
+				// supress any errors
 			}
 		}
 		finally
@@ -151,6 +148,9 @@ public final class Domain implements IDomain
 		connectorsLock.writeLock();
 		try
 		{
+			// set the domain
+			if ( !connector.setDomain(null) )
+				throw new ConnectorInUseException("The connector can not be removed because are in use by the domain");
 			// remove connector by name
 			connectorsByName.remove( connector.getName() );
 			// remove connector by protocol
@@ -199,13 +199,16 @@ public final class Domain implements IDomain
 	}
 
 	@Override
-	public void addServer( IServer server )
+	public void addServer( IServer server ) throws ServerInUseException
 	{
 		if (server == null) return;
 
 		serversLock.writeLock();
 		try
 		{
+			// set the domain
+			if ( !server.setDomain(this) )
+				throw new ServerInUseException("The connector can not be removed because are in use by another domain");
 			// add server by name
 			servers.put(server.getName(), server);
 		} finally
@@ -215,27 +218,30 @@ public final class Domain implements IDomain
 	}
 
 	@Override
-	public IServer removeServer( IServer server )
+	public IServer removeServer( IServer server ) throws ServerInUseException
 	{
 		if (server == null) return null;
-
-		return removeServer( server.getName() );
-	}
-
-	@Override
-	public IServer removeServer( String name )
-	{
-		if (name == null) return null;
 
 		serversLock.writeLock();
 		try
 		{
+			// set the domain
+			if ( !server.setDomain(null) )
+				throw new ServerInUseException("The connector can not be removed because are in use by the domain");
 			// remove the server by name
 			return servers.remove(name);
 		} finally
 		{
 			serversLock.writeUnlock();
 		}
+	}
+
+	@Override
+	public IServer removeServer( String name ) throws ServerInUseException
+	{
+		if (name == null) return null;
+
+		return removeServer( getServer(name) );
 	}
 	
 	@Override

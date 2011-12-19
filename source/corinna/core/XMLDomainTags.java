@@ -74,7 +74,9 @@ public enum XMLDomainTags
 	
 	ADD_CONTEXT("add-context"),
 	
-	UNKNOW(null);
+	ADD_SERVICE("add-service"),
+	
+	UNKNOW(null), ;
 	
 	private String tag;
 	

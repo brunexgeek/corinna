@@ -2,9 +2,17 @@ package corinna.test;
 
 import org.apache.log4j.BasicConfigurator;
 
+import corinna.bindlet.soap.DefaultSoapBindlet;
+import corinna.core.DefaultServer;
+import corinna.core.Domain;
+import corinna.core.IBindletRegistration;
 import corinna.core.IDomain;
-import corinna.core.XMLDomainParser;
-import corinna.util.ClassLoaderManager;
+import corinna.core.IServer;
+import corinna.core.IService;
+import corinna.core.http.HttpContext;
+import corinna.core.soap.SoapContext;
+import corinna.network.http.HttpNetworkConnector;
+import corinna.network.web.WebNetworkConnector;
 
 
 public class MainTest
@@ -15,73 +23,52 @@ public class MainTest
 		BasicConfigurator.configure();
 		
 		/**
-		 * HTML
+		 * HTTP Context
 		 */
-		
-		/*BasicConfigurator.configure();
-		
-		HttpNetworkConnector connector = new HttpNetworkConnector("SOAP", "http://localhost:8080", 4);
-		connector.init();
-		
-		IServer server = new DefaultServer("MyServer");
-		IService service = new MyService("myService", server);
-		server.addService(service);
-		
-		IDomain domain = new Domain("vaas.cpqd.com.br");
-		domain.addConnector(connector);
-		domain.addServer(server, "SOAP");
 
-		connector.start();
-
-		//BindletContextConfig contextConfig = new BindletContextConfig("Test");
-		HttpContext context = new HttpContext("MyContext", service);
-		context.setParameter("urlMapping", "*");
-		IBindletRegistration reg = context.addBindlet("MyBindlet", MyHttpBindlet.class);
-		reg.setBindletParameter("urlMapping", "*");
-		reg.setBindletParameter("interfaceClass", MyInterface.class.getName());
-		reg.setBindletParameter("implementationClass", MyImpl.class.getName());
-
-		service.addContext(context);*/
+		HttpContext context1 = new HttpContext("HttpContext");
+		context1.setParameter("urlMapping", "http");
+		IBindletRegistration reg1 = context1.addBindlet("MyBindlet", MyHttpBindlet.class);
+		reg1.setBindletParameter("urlMapping", "");
 		
 		/**
-		 * SOAP
+		 * HTTP Context
 		 */
 		
-		/*
+		SoapContext context2 = new SoapContext("SoapContext");
+		context2.setParameter("urlMapping", "soap");
+		IBindletRegistration reg2 = context2.addBindlet("MyBindlet", DefaultSoapBindlet.class);
+		reg2.setBindletParameter("urlMapping", "");
+		reg2.setBindletParameter("interfaceClass", MyInterface.class.getName());
+		reg2.setBindletParameter("implementationClass", MyImpl.class.getName());
 		
-		SoapNetworkConnector connector = new SoapNetworkConnector("SOAP", "http://localhost:8080", 4);
+		/**
+		 * Another elements
+		 */
+		
+		IService service = new MyService("myService");
+		service.addContext(context1);
+		service.addContext(context2);
+		service.init();
+		
+		WebNetworkConnector connector = new WebNetworkConnector("Web", "http://localhost:8080", 4);
 		connector.init();
 		
 		IServer server = new DefaultServer("MyServer");
-		IService service = new MyService("myService", server);
 		server.addService(service);
+		server.init();
 		
 		IDomain domain = new Domain("vaas.cpqd.com.br");
 		domain.addConnector(connector);
-		domain.addServer(server, "SOAP");
+		domain.addServer(server);
 
 		connector.start();
-
-		//BindletContextConfig contextConfig = new BindletContextConfig("Test");
-		SoapContext context = new SoapContext("MyContext", service);
-		context.setParameter("urlMapping", "*");
-		IBindletRegistration reg = context.addBindlet("MyBindlet", DefaultSoapBindlet.class);
-		reg.setBindletParameter("urlMapping", "/*");
-		reg.setBindletParameter("interfaceClass", MyInterface.class.getName());
-		reg.setBindletParameter("implementationClass", MyImpl.class.getName());
-
-		service.addContext(context);*/
-		
-		/*ClassDescriptor desc = new ClassDescriptor(MyInterface.class);
-		WsdlGenerator wsdl = new WsdlGenerator("http://cpqd.com.br/vaas");
-		wsdl.setServiceName("Voice-as-a-Service");
-		System.out.println( wsdl.generateWsdl(desc) );*/
 		
 		/**
 		 * XML Parser
 		 */
-		XMLDomainParser parser = new XMLDomainParser("/media/bruno/projetos/java/corinna/devel/test/corinna/test/domain.xml");
-		IDomain domain = parser.parse();
+		//XMLDomainParser parser = new XMLDomainParser("/media/bruno/projetos/java/corinna/devel/test/corinna/test/domain.xml");
+		//IDomain domain = parser.parse();
 		
 	}
 	

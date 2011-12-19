@@ -10,9 +10,8 @@ import corinna.bindlet.http.HttpBindletContext;
 import corinna.bindlet.http.HttpBindletRequest;
 import corinna.core.Context;
 import corinna.core.IBindletRegistration;
-import corinna.core.IService;
 
-// TODO: essa classe é igual à 'SoapContext'
+
 public class HttpContext extends Context<IHttpBindletRequest, IHttpBindletResponse> implements
 	IHttpContext
 {
@@ -21,9 +20,9 @@ public class HttpContext extends Context<IHttpBindletRequest, IHttpBindletRespon
 	
 	private static final String CONTEXT_URL_MAPPING = "urlMapping";
 
-	public HttpContext( String name, IService service )
+	public HttpContext( String name)
 	{
-		super(name, service);
+		super(name);
 	}
 
 	@Override

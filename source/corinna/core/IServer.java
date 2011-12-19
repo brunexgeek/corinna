@@ -49,4 +49,8 @@ public interface IServer extends ILifecycle, IServiceEventListener, IDomainListe
 	
 	public IService removeService( String name );
 	
+	public IDomain getDomain();
+	
+	public boolean setDomain( IDomain domain );
+	
 }

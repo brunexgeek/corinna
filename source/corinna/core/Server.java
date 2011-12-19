@@ -31,7 +31,7 @@ import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
 
 
-public abstract class Server implements IServer
+public class Server implements IServer
 {
 
 	private Logger log = Logger.getLogger(Server.class);
@@ -43,6 +43,8 @@ public abstract class Server implements IServer
 	private ObjectLocker servicesLock;
 	
 	private String name;
+	
+	private IDomain domain = null;
 
 	public Server( String name )
 	{
@@ -55,6 +57,14 @@ public abstract class Server implements IServer
 		servicesLock = new ObjectLocker();
 	}
 
+	@Override
+	public boolean setDomain( IDomain domain )
+	{
+		if (domain != null && this.domain != null) return false;
+		this.domain = domain;
+		return true;
+	}
+	
 	@Override
 	public String getName()
 	{
@@ -113,10 +123,11 @@ public abstract class Server implements IServer
 	@Override
 	public void addService( IService service )
 	{
-		if (!(service instanceof Service)) return;
 		servicesLock.writeLock();
 		try
 		{
+			if (service instanceof Service)
+				((Service)service).setServer(this);
 			services.put(service.getName(), service);
 		} finally
 		{
@@ -203,7 +214,10 @@ public abstract class Server implements IServer
 		}
 	}
 
-	protected abstract void initInternal() throws LifecycleException;
+	protected void initInternal() throws LifecycleException
+	{
+		// does nothing
+	}
 
 	@Override
 	public void init() throws LifecycleException
@@ -222,7 +236,10 @@ public abstract class Server implements IServer
 		}
 	}
 
-	protected abstract void startInternal() throws LifecycleException;
+	protected void startInternal() throws LifecycleException
+	{
+		// does nothing
+	}
 
 	@Override
 	public void start() throws LifecycleException
@@ -241,7 +258,10 @@ public abstract class Server implements IServer
 		}
 	}
 
-	protected abstract void stopInternal() throws LifecycleException;
+	protected void stopInternal() throws LifecycleException
+	{
+		// does nothing
+	}
 
 	@Override
 	public void stop() throws LifecycleException
@@ -260,7 +280,10 @@ public abstract class Server implements IServer
 		}
 	}
 
-	protected abstract void destroyInternal() throws LifecycleException;
+	protected void destroyInternal() throws LifecycleException
+	{
+		// does nothing
+	}
 
 	@Override
 	public void destroy() throws LifecycleException
@@ -322,6 +345,12 @@ public abstract class Server implements IServer
 		BindletException, IOException
 	{
 		dispatchEventToServices(event);
+	}
+
+	@Override
+	public IDomain getDomain()
+	{
+		return domain;
 	}
 	
 }

@@ -120,12 +120,9 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 		domainLock.writeLock();
 		try
 		{
-			if (this.domain == null)
-			{
-				this.domain = domain;
-				return true;
-			}
-			return false;
+			if (domain != null && this.domain != null) return false;
+			this.domain = domain;
+			return true;
 		} finally
 		{
 			domainLock.writeUnlock();
@@ -221,6 +218,30 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 	public String[] getParameterNames()
 	{
 		return params.keySet().toArray(new String[0]);
+	}
+	
+	@Override
+	protected void initInternal() throws LifecycleException
+	{
+		// does nothing
+	}
+
+	@Override
+	protected void startInternal() throws LifecycleException
+	{
+		// does nothing
+	}
+
+	@Override
+	protected void stopInternal() throws LifecycleException
+	{
+		// does nothing
+	}
+
+	@Override
+	protected void destroyInternal() throws LifecycleException
+	{
+		// does nothing
 	}
 	
 }

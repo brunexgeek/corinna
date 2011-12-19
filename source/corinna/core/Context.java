@@ -29,7 +29,7 @@ import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
 import corinna.util.Reflection;
 
-//TODO: mover para 'corinna.service'
+
 public abstract class Context<R, P> implements IContext<R, P>
 {
 
@@ -43,7 +43,7 @@ public abstract class Context<R, P> implements IContext<R, P>
 	
 	private Class<?> currentResponseType = null;
 	
-	private IService service;
+	private IService service = null;
 	
 	private String name;
 
@@ -57,15 +57,12 @@ public abstract class Context<R, P> implements IContext<R, P>
 
 	private String[] paramsArray = null;
 	
-	public Context( String name, IService service )
+	public Context( String name )
 	{
-		if (service == null)
-			throw new NullPointerException("The service object can not be null");
 		if (name == null || name.isEmpty())
 			throw new IllegalArgumentException("The context name can not be null or empty");
 		
 		this.name = name;
-		this.service = service;
 		bindletContext = createBindletContext();
 		repos = new HashMap<String, IBindletRegistration>();
 		reposLock = new ObjectLocker();
@@ -75,6 +72,13 @@ public abstract class Context<R, P> implements IContext<R, P>
 		currentResponseType = Reflection.getGenericParameter(this, Context.class, 1);
 	}
 
+	protected final void setService( IService service )
+	{
+		if (service == null)
+			throw new NullPointerException("The service object can not be null");
+		this.service = service;
+	}
+	
 	protected abstract IBindletContext createBindletContext();
 	
 	@Override

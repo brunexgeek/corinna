@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package corinna.core;
+package corinna.core.parser;
 
 
 public interface IParameter
