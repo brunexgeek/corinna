@@ -25,9 +25,9 @@ public class RestContext extends Context<IRestBindletRequest, IRestBindletRespon
 	
 	private static final String CONTEXT_URL_MAPPING = "urlMapping";
 	
-	public RestContext( String name, IService service )
+	public RestContext( String name )
 	{
-		super(name, service);
+		super(name);
 	}
 
 	@Override

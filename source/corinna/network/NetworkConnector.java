@@ -17,10 +17,7 @@
 package corinna.network;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.SocketAddress;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -48,13 +45,13 @@ import corinna.thread.ObjectLocker;
  * @param <R> bindlet request type
  * @param <P> bindlet resposne type
  */
-public abstract class NetworkConnector<R,P> extends Lifecycle implements INetworkConnector<R,P>, 
-	ChannelPipelineFactory, IStreamHandlerListener<R,P>
+public abstract class NetworkConnector extends Lifecycle implements INetworkConnector, 
+	ChannelPipelineFactory, IStreamHandlerListener
 {
 
 	private ServerBootstrap bootstrap;
 
-	private SocketAddress address;
+	private NetworkConfig config;
 	
 	private IDomain domain = null;
 	
@@ -62,33 +59,18 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 	
 	private Channel channel = null;
 	
-	private String name;
-	
 	private Map<String,String> params;
-
-	public NetworkConnector( String name, String url ) throws MalformedURLException
-	{
-		this( name, new URL(url), Runtime.getRuntime().availableProcessors() * 2 );
-	}
-
-	public NetworkConnector( String name, String url, int workers ) throws MalformedURLException
-	{
-		this( name, new URL(url), workers );
-	}
 	
-	public NetworkConnector( String name, URL address, int workers )
+	public NetworkConnector( NetworkConfig config )
 	{
-		if (address == null) 
-			throw new NullPointerException("The address is required");
-		if (name == null)
-			throw new IllegalArgumentException("The connector name can not be null or empty");
+		if (config == null)
+			throw new IllegalArgumentException("The network configuration can not be null");
 
-		this.address = new InetSocketAddress(address.getHost(), address.getPort());
-		this.name = name;
+		this.config = config;
 		this.params = new HashMap<String,String>();
 	
 		ChannelFactory factory = new NioServerSocketChannelFactory(
-			Executors.newCachedThreadPool(), Executors.newCachedThreadPool(), workers);
+			Executors.newCachedThreadPool(), Executors.newCachedThreadPool(), config.getMaxWorkers());
 		this.bootstrap = new ServerBootstrap(factory);
 		this.bootstrap.setPipelineFactory(this);
 		
@@ -98,7 +80,7 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 	@Override
 	public SocketAddress getAddress()
 	{
-		return address;
+		return config.getAddress();
 	}
 	
 	@Override
@@ -129,7 +111,7 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 		}
 	}
 	
-	protected void dispatchEventToDomain( RequestEvent<R,P> event ) throws BindletException, 
+	protected void dispatchEventToDomain( RequestEvent<?,?> event ) throws BindletException, 
 		IOException
 	{
 		if (event == null || domain == null) return;
@@ -145,7 +127,7 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 	}
 	
 	@Override
-	public void handlerRequestReceived( StreamHandler handler, RequestEvent<R,P> event ) 
+	public void handlerRequestReceived( StreamHandler handler, RequestEvent<?,?> event ) 
 		throws BindletException, IOException
 	{
 		dispatchEventToDomain(event);
@@ -162,7 +144,7 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 			if ( getDomain() == null )
 				throw new NullPointerException("Invalid domain");
 			startInternal();
-			this.channel = bootstrap.bind(this.address);
+			this.channel = bootstrap.bind(config.getAddress());
 			lifecycle.changeLifecycleState(LifecycleState.STARTED);
 		} catch (Exception e)
 		{
@@ -194,7 +176,7 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 	@Override
 	public String getName()
 	{
-		return name;
+		return config.getName();
 	}
 
 	@Override

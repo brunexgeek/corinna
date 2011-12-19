@@ -11,6 +11,7 @@ import corinna.core.IServer;
 import corinna.core.IService;
 import corinna.core.http.HttpContext;
 import corinna.core.soap.SoapContext;
+import corinna.network.NetworkConfig;
 import corinna.network.http.HttpNetworkConnector;
 import corinna.network.web.WebNetworkConnector;
 
@@ -32,7 +33,7 @@ public class MainTest
 		reg1.setBindletParameter("urlMapping", "");
 		
 		/**
-		 * HTTP Context
+		 * SOAP Context
 		 */
 		
 		SoapContext context2 = new SoapContext("SoapContext");
@@ -51,7 +52,8 @@ public class MainTest
 		service.addContext(context2);
 		service.init();
 		
-		WebNetworkConnector connector = new WebNetworkConnector("Web", "http://localhost:8080", 4);
+		NetworkConfig config = new NetworkConfig("WebConnector", "localhost", 8080);
+		WebNetworkConnector connector = new WebNetworkConnector(config);
 		connector.init();
 		
 		IServer server = new DefaultServer("MyServer");

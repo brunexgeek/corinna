@@ -28,13 +28,13 @@ public interface IDomain extends INetworkConnectorListener
 
 	public String getName();
 	
-	public INetworkConnector<?, ?> getConnector( String name );
+	public INetworkConnector getConnector( String name );
 	
-	public INetworkConnector<?,?> getConnector( IProtocol<?,?> protocol, int index );
+	public INetworkConnector getConnector( IProtocol<?,?> protocol, int index );
 	
-	public void addConnector( INetworkConnector<?,?> connector ) throws ConnectorInUseException;
+	public void addConnector( INetworkConnector connector ) throws ConnectorInUseException;
 	
-	public void removeConnector( INetworkConnector<?,?> connector ) throws ConnectorInUseException;
+	public void removeConnector( INetworkConnector connector ) throws ConnectorInUseException;
 	
 	public void removeConnector( String name ) throws ConnectorInUseException;
 		

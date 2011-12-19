@@ -18,11 +18,7 @@ package corinna.util;
 
 
 /**
- * Indica que objetos de uma determinada classe não retém informações de estado e podem ser 
- * reutilizados em diferentes contextos.
- * 
- * @author bruno
- *
+ * @deprecated Use 'StateModel' instead
  */
 // TODO: remove this class
 @Deprecated

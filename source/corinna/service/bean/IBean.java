@@ -16,7 +16,7 @@
 
 package corinna.service.bean;
 
-import corinna.core.IDomainParser;
+import corinna.core.parser.IDomainParser;
 
 
 public interface IBean

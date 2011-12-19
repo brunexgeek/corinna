@@ -2,15 +2,11 @@ package corinna.bindlet.soap;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.security.Principal;
 
-import javax.bindlet.http.Cookie;
-import javax.bindlet.http.ISession;
 import javax.bindlet.soap.ISoapBindletRequest;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
-import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import corinna.bindlet.http.WebBindletRequest;
@@ -33,16 +29,12 @@ public class SoapBindletRequest extends WebBindletRequest implements ISoapBindle
 	{
 		super(request);
 		this.request = request;
-		
-		// get the content charset
-		String value = request.getHeader(HttpHeaders.Names.CONTENT_ENCODING);
-		if (value == null)
-			charset = Charset.defaultCharset();
-		else
-			charset = Charset.forName(value);
+
+		String encoding = getCharacterEncoding(); 
+		if (encoding != null && !encoding.isEmpty()) charset = Charset.forName(encoding);
 		
 		// get the content
-		if ( request.getContent() == null)
+		if ( request.getContent() == null || request.getUri().endsWith(ISoapBindletRequest.URI_WSDL))
 			content = "";
 		else
 		{

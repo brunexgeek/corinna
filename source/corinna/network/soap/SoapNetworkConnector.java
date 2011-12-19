@@ -16,9 +16,6 @@
 
 package corinna.network.soap;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import javax.bindlet.soap.ISoapBindletRequest;
 import javax.bindlet.soap.ISoapBindletResponse;
 import javax.xml.soap.SOAPException;
@@ -30,14 +27,15 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
-import corinna.exception.LifecycleException;
 import corinna.network.IProtocol;
+import corinna.network.NetworkConfig;
 import corinna.network.NetworkConnector;
-import corinna.network.rest.RestStreamHandler;
-import corinna.util.Stateless;
+import corinna.network.http.HttpStreamHandler;
+import corinna.util.StateModel;
+import corinna.util.StateModel.Model;
 
 
-public class SoapNetworkConnector extends NetworkConnector<ISoapBindletRequest, ISoapBindletResponse>
+public class SoapNetworkConnector extends NetworkConnector
 {
 
 
@@ -51,20 +49,17 @@ public class SoapNetworkConnector extends NetworkConnector<ISoapBindletRequest, 
 
 	private SoapStreamHandler channelHandler;
 	
-	public SoapNetworkConnector( String name, String url, int workers ) throws MalformedURLException, SOAPException
+	public SoapNetworkConnector( NetworkConfig config ) throws SOAPException
 	{
-		this( name, new URL(url), workers );
-	}
-	
-	public SoapNetworkConnector( String name, URL address, int workers ) throws SOAPException
-	{
-		super(name, address, workers);
+		super(config);
 		
 		this.decoder = new HttpRequestDecoder(1024, 4096, 8192);
 		this.encoder = new HttpResponseEncoder();
 		this.aggregator = new HttpChunkAggregator(1024 * 1024);
 		this.chunkedWriter = new ChunkedWriteHandler();
-		if (RestStreamHandler.class.isAnnotationPresent(Stateless.class))
+		
+		StateModel state = HttpStreamHandler.class.getAnnotation(StateModel.class);
+		if (state != null && state.value() == Model.STATELESS)
 			this.channelHandler = new SoapStreamHandler(this);
 		else
 			this.channelHandler = null;
@@ -85,26 +80,6 @@ public class SoapNetworkConnector extends NetworkConnector<ISoapBindletRequest, 
 		pipeline.addLast("handler", handler);
 
 		return pipeline;
-	}
-
-	@Override
-	protected void initInternal() throws LifecycleException
-	{
-	}
-
-	@Override
-	protected void startInternal() throws LifecycleException
-	{
-	}
-
-	@Override
-	protected void stopInternal() throws LifecycleException
-	{
-	}
-
-	@Override
-	protected void destroyInternal() throws LifecycleException
-	{
 	}
 
 	@Override

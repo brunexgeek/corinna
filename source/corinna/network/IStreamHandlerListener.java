@@ -21,10 +21,10 @@ import java.io.IOException;
 import corinna.exception.BindletException;
 
 
-public interface IStreamHandlerListener<R,P>
+public interface IStreamHandlerListener
 {
 
-	public void handlerRequestReceived( StreamHandler handler, RequestEvent<R,P> event ) 
+	public void handlerRequestReceived( StreamHandler handler, RequestEvent<?,?> event ) 
 	throws BindletException, IOException;
 	
 }

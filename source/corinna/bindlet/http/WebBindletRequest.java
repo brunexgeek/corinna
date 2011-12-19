@@ -250,7 +250,7 @@ public class WebBindletRequest implements IWebBindletRequest
 
 		contentType = value.substring(0, pos).trim();
 		pos = value.indexOf("charset=");
-		if (pos >= 0) characterEncoding = value.substring(pos + 7);
+		if (pos >= 0) characterEncoding = value.substring(pos + 8);
 	}
 
 	protected void parseForm()

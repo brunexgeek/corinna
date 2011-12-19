@@ -16,8 +16,7 @@
 
 package corinna.network.http;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.lang.annotation.Annotation;
 
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
@@ -29,14 +28,15 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
-import corinna.exception.LifecycleException;
 import corinna.network.IProtocol;
+import corinna.network.NetworkConfig;
 import corinna.network.NetworkConnector;
+import corinna.util.StateModel;
+import corinna.util.StateModel.Model;
 import corinna.util.Stateless;
 
 
-public class HttpNetworkConnector extends NetworkConnector<IHttpBindletRequest, 
-	IHttpBindletResponse>
+public class HttpNetworkConnector extends NetworkConnector
 {
 
 	private HttpRequestDecoder decoder;
@@ -49,20 +49,17 @@ public class HttpNetworkConnector extends NetworkConnector<IHttpBindletRequest,
 
 	private HttpStreamHandler channelHandler;
 	
-	public HttpNetworkConnector( String name, String url, int workers ) throws MalformedURLException
+	public HttpNetworkConnector( NetworkConfig config )
 	{
-		this( name, new URL(url), workers );
-	}
-	
-	public HttpNetworkConnector( String name, URL address, int workers )
-	{
-		super(name, address, workers);
+		super(config);
 		
 		this.decoder = new HttpRequestDecoder(1024, 4096, 8192);
 		this.encoder = new HttpResponseEncoder();
 		this.aggregator = new HttpChunkAggregator(1024 * 1024);
 		this.chunkedWriter = new ChunkedWriteHandler();
-		if (HttpStreamHandler.class.isAnnotationPresent(Stateless.class))
+		
+		StateModel state = HttpStreamHandler.class.getAnnotation(StateModel.class);
+		if (state != null && state.value() == Model.STATELESS)
 			this.channelHandler = new HttpStreamHandler(this);
 		else
 			this.channelHandler = null;
@@ -83,26 +80,6 @@ public class HttpNetworkConnector extends NetworkConnector<IHttpBindletRequest,
 		pipeline.addLast("handler", handler);
 
 		return pipeline;
-	}
-
-	@Override
-	protected void initInternal() throws LifecycleException
-	{
-	}
-
-	@Override
-	protected void startInternal() throws LifecycleException
-	{
-	}
-
-	@Override
-	protected void stopInternal() throws LifecycleException
-	{
-	}
-
-	@Override
-	protected void destroyInternal() throws LifecycleException
-	{
 	}
 
 	@Override

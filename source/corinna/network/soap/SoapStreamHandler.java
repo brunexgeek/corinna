@@ -34,8 +34,10 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import corinna.bindlet.soap.SoapBindletRequest;
 import corinna.bindlet.soap.SoapBindletResponse;
 import corinna.network.StreamHandler;
+import corinna.util.StateModel;
+import corinna.util.StateModel.Model;
 
-
+@StateModel(Model.STATELESS)
 public class SoapStreamHandler extends StreamHandler
 {
 

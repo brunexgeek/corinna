@@ -45,9 +45,9 @@ public final class Domain implements IDomain
 
 	private ObjectLocker serversLock;
 	
-	private Map<String, INetworkConnector<?, ?>> connectorsByName;
+	private Map<String, INetworkConnector> connectorsByName;
 	
-	private Map<String, List<INetworkConnector<?, ?>>> connectorsByProtocol;
+	private Map<String, List<INetworkConnector>> connectorsByProtocol;
 	
 	private Map<String, IServer> servers;
 	
@@ -57,15 +57,15 @@ public final class Domain implements IDomain
 			throw new IllegalArgumentException("The domain name can not be null or empty");
 		this.name = name;
 		
-		connectorsByName = new HashMap<String, INetworkConnector<?, ?>>();
-		connectorsByProtocol = new HashMap<String, List<INetworkConnector<?, ?>>>();
+		connectorsByName = new HashMap<String, INetworkConnector>();
+		connectorsByProtocol = new HashMap<String, List<INetworkConnector>>();
 		servers = new HashMap<String, IServer>();
 		connectorsLock = new ObjectLocker();
 		serversLock = new ObjectLocker();
 	}
 	
 	@Override
-	public INetworkConnector<?, ?> getConnector( String name )
+	public INetworkConnector getConnector( String name )
 	{
 		if (name == null || name.isEmpty()) return null;
 
@@ -84,14 +84,14 @@ public final class Domain implements IDomain
 	 * se o índice especificado não existe, é retornado null.
 	 */
 	@Override
-	public INetworkConnector<?, ?> getConnector( IProtocol<?, ?> protocol, int index )
+	public INetworkConnector getConnector( IProtocol<?, ?> protocol, int index )
 	{
 		if (name == null || name.isEmpty()) return null;
 
 		connectorsLock.readLock();
 		try
 		{
-			List<INetworkConnector<?, ?>> list = connectorsByProtocol.get(protocol.toString());
+			List<INetworkConnector> list = connectorsByProtocol.get(protocol.toString());
 			if (list == null || list.size() <= index) return null;
 			return list.get(index);
 		} finally
@@ -101,7 +101,7 @@ public final class Domain implements IDomain
 	}
 
 	@Override
-	public void addConnector( INetworkConnector<?, ?> connector ) throws ConnectorInUseException
+	public void addConnector( INetworkConnector connector ) throws ConnectorInUseException
 	{
 		if (connector == null) return;
 		
@@ -115,10 +115,10 @@ public final class Domain implements IDomain
 			connectorsByName.put(connector.getName(), connector);
 			// add connector by protocol
 			String protocol = connector.getProtocol().toString();
-			List<INetworkConnector<?, ?>> list = connectorsByProtocol.get(protocol);
+			List<INetworkConnector> list = connectorsByProtocol.get(protocol);
 			if (list == null) 
 			{
-				list = new LinkedList<INetworkConnector<?, ?>>();
+				list = new LinkedList<INetworkConnector>();
 				connectorsByProtocol.put(protocol, list);
 			}
 			list.add(connector);
@@ -139,7 +139,7 @@ public final class Domain implements IDomain
 	}
 
 	@Override
-	public void removeConnector( INetworkConnector<?, ?> connector ) throws ConnectorInUseException
+	public void removeConnector( INetworkConnector connector ) throws ConnectorInUseException
 	{
 		if (connector == null) return;
 
@@ -154,7 +154,7 @@ public final class Domain implements IDomain
 			// remove connector by name
 			connectorsByName.remove( connector.getName() );
 			// remove connector by protocol
-			List<INetworkConnector<?, ?>> connectorList = connectorsByProtocol.get( connector.getProtocol().toString() );
+			List<INetworkConnector> connectorList = connectorsByProtocol.get( connector.getProtocol().toString() );
 			if (connectorList != null) connectorList.remove(connector);
 			// unset the domain
 			connector.setDomain(null);
@@ -245,7 +245,7 @@ public final class Domain implements IDomain
 	}
 	
 	@Override
-	public void connectorRequestReceived( NetworkConnector<?, ?> connector,
+	public void connectorRequestReceived( NetworkConnector connector,
 		RequestEvent<?, ?> event ) throws BindletException, IOException
 	{
 		serversLock.readLock();

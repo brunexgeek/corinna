@@ -1,8 +1,5 @@
 package corinna.network.web;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import javax.bindlet.http.IWebBindletRequest;
 import javax.bindlet.http.IWebBindletResponse;
 
@@ -14,12 +11,15 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
 import corinna.network.IProtocol;
+import corinna.network.NetworkConfig;
 import corinna.network.NetworkConnector;
 import corinna.network.http.HttpStreamHandler;
+import corinna.util.StateModel;
 import corinna.util.Stateless;
+import corinna.util.StateModel.Model;
 
 
-public class WebNetworkConnector extends NetworkConnector<IWebBindletRequest, IWebBindletResponse>
+public class WebNetworkConnector extends NetworkConnector
 {
 
 	private HttpRequestDecoder decoder;
@@ -32,14 +32,9 @@ public class WebNetworkConnector extends NetworkConnector<IWebBindletRequest, IW
 
 	private WebStreamHandler channelHandler;
 	
-	public WebNetworkConnector( String name, String url, int workers ) throws MalformedURLException
+	public WebNetworkConnector( NetworkConfig config )
 	{
-		this( name, new URL(url), workers );
-	}
-	
-	public WebNetworkConnector( String name, URL address, int workers )
-	{
-		super(name, address, workers);
+		super(config);
 		
 		this.decoder = new HttpRequestDecoder(1024, 4096, 8192);
 		this.encoder = new HttpResponseEncoder();
@@ -69,7 +64,7 @@ public class WebNetworkConnector extends NetworkConnector<IWebBindletRequest, IW
 	}
 	
 	@Override
-	public IProtocol<IWebBindletRequest, IWebBindletResponse> getProtocol()
+	public IProtocol<?, ?> getProtocol()
 	{
 		return WebProtocol.getInstance();
 	}

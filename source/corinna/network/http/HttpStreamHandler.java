@@ -29,10 +29,11 @@ import corinna.bindlet.http.HttpBindletRequest;
 import corinna.bindlet.http.HttpBindletResponse;
 import corinna.network.RequestEvent;
 import corinna.network.StreamHandler;
-import corinna.util.Stateless;
+import corinna.util.StateModel;
+import corinna.util.StateModel.Model;
 
 
-@Stateless
+@StateModel(Model.STATELESS)
 public class HttpStreamHandler extends StreamHandler
 {
 

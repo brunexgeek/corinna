@@ -31,14 +31,14 @@ import corinna.core.ILifecycle;
  * @since 1.0
  * @version 1.0
  */
-public interface INetworkConnector<R, P> extends ILifecycle
+public interface INetworkConnector extends ILifecycle
 {
 
 	public IDomain getDomain();
 
 	public boolean setDomain( IDomain domain );
 
-	public IProtocol<R, P> getProtocol();
+	public IProtocol<?, ?> getProtocol();
 
 	public String getName();
 

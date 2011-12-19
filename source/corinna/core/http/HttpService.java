@@ -9,9 +9,9 @@ import corinna.core.Service;
 public abstract class HttpService extends Service
 {
 
-	public HttpService( String name, IServer server )
+	public HttpService( String name )
 	{
-		super(name, server);
+		super(name);
 		// TODO Auto-generated constructor stub
 	}
 

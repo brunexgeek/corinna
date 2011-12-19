@@ -34,7 +34,7 @@ import corinna.exception.BindletException;
 public interface INetworkConnectorListener extends EventListener
 {
 
-	public void connectorRequestReceived( NetworkConnector<?,?> connection, 
+	public void connectorRequestReceived( NetworkConnector connection, 
 		RequestEvent<?,?> event ) throws BindletException, IOException;
 	
 }

@@ -9,7 +9,9 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpVersion;
 
+import corinna.bindlet.http.HttpBindletResponse;
 import corinna.network.RequestEvent;
 import corinna.network.StreamHandler;
 
@@ -39,23 +41,31 @@ public abstract class BasicStreamHandler extends StreamHandler
 		IWebBindletRequest req = createRequest(event);
 		IWebBindletResponse res = createResponse(event);
 
-		// dispatch the request event to network connector
-		RequestEvent<IWebBindletRequest, IWebBindletResponse> e = new WebRequestEvent(req, res);
-		try
+		if (req != null && res != null)
 		{
-			connector.handlerRequestReceived(this, e);
-		} catch (Exception ex)
-		{
-			ex.printStackTrace();
+			// dispatch the request event to network connector
+			RequestEvent<IWebBindletRequest, IWebBindletResponse> e = new WebRequestEvent(req, res);
+			try
+			{
+				connector.handlerRequestReceived(this, e);
+			} catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+	
+			// check if no bindlets handle this request
+			if (!e.isHandled())
+				// send 'HTTP 404' to client
+				res.sendError(HttpStatus.NOT_FOUND);
+			else
+				// flush the HTTP response content
+				res.close();
 		}
-
-		// check if no bindlets handle this request
-		if (!e.isHandled())
-			// send 'HTTP 404' to client
-			res.sendError(HttpStatus.NOT_FOUND);
 		else
-			// flush the HTTP response content
-			res.close();
+		{
+			res = new HttpBindletResponse(event.getChannel(), HttpVersion.HTTP_1_1);
+			res.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		// close the connection, if necessary
 		if (!HttpHeaders.isKeepAlive(request)) event.getChannel().close();
 	}
