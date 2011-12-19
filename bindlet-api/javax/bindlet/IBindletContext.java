@@ -117,10 +117,6 @@ public interface IBindletContext extends IObjectSharing
 	
 	public ILogger getLogger();
 	
-	public void init();
-	
-	public void destroy();
-	
 	//public void addListener( IBindletContextListener<?,?> listener );
 	
 	//public void removeListener( IBindletContextListener<?,?> listener );

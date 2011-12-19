@@ -15,6 +15,7 @@ import corinna.bindlet.soap.SoapBindletRequest;
 import corinna.core.Context;
 import corinna.core.IBindletRegistration;
 import corinna.core.IService;
+import corinna.util.IComponentInformation;
 
 
 // TODO: esta classe é similar à 'corinna.core.http'
@@ -85,6 +86,13 @@ public class RestContext extends Context<IRestBindletRequest, IRestBindletRespon
 		}
 		
 		return false;
+	}
+
+	@Override
+	public IComponentInformation getContextInfo()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

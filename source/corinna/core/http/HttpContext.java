@@ -10,6 +10,7 @@ import corinna.bindlet.http.HttpBindletContext;
 import corinna.bindlet.http.HttpBindletRequest;
 import corinna.core.Context;
 import corinna.core.IBindletRegistration;
+import corinna.util.IComponentInformation;
 
 
 public class HttpContext extends Context<IHttpBindletRequest, IHttpBindletResponse> implements
@@ -90,4 +91,33 @@ public class HttpContext extends Context<IHttpBindletRequest, IHttpBindletRespon
 		return true;
 	}
 
+	@Override
+	public IComponentInformation getContextInfo()
+	{
+		return new HttpContextInfo();
+	}
+
+	public class HttpContextInfo  implements IComponentInformation
+	{
+
+		@Override
+		public String getComponentName()
+		{
+			return "HTTP Context";
+		}
+
+		@Override
+		public String getComponentVersion()
+		{
+			return "1.0";
+		}
+
+		@Override
+		public String getComponentImplementor()
+		{
+			return "Bruno Ribeiro";
+		}
+		
+	}
+	
 }

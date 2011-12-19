@@ -36,15 +36,4 @@ public class RestBindletContext extends BindletContext<IRestBindletRequest, IRes
 		return null;
 	}
 
-	@Override
-	public void init()
-	{
-	}
-
-	@Override
-	public void destroy()
-	{
-	}
-
-
 }

@@ -38,16 +38,5 @@ public class SoapBindletContext extends BindletContext<ISoapBindletRequest,ISoap
 		return IHttpBindletResponse.class;
 	}
 
-	@Override
-	public void init()
-	{
-
-	}
-
-	@Override
-	public void destroy()
-	{
-
-	}
 
 }

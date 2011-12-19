@@ -19,6 +19,8 @@ package corinna.core;
 
 import javax.bindlet.IBindletService;
 
+import corinna.util.IComponentInformation;
+
 
 /**
  * Um serviço é uma abstração de uma funcionalidade que o servidor deve prover. Serviços típicos são
@@ -49,6 +51,8 @@ public interface IService extends IServerRequestListener
 	public IContext<?,?> getContext( String name );
 		
 	public void addContext( IContext<?,?> context );
+	
+	public IComponentInformation getServiceInfo();
 	
 	public void init();
 	

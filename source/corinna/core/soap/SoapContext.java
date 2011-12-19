@@ -10,6 +10,7 @@ import corinna.core.Context;
 import corinna.core.IBindletRegistration;
 import corinna.core.IService;
 import corinna.core.http.HttpUtils;
+import corinna.util.IComponentInformation;
 
 
 public class SoapContext extends Context<ISoapBindletRequest, ISoapBindletResponse> implements ISoapContext
@@ -81,6 +82,35 @@ public class SoapContext extends Context<ISoapBindletRequest, ISoapBindletRespon
 		}
 		
 		return true;
+	}
+
+	@Override
+	public IComponentInformation getContextInfo()
+	{
+		return new SoapContextInfo();
+	}
+	
+	public class SoapContextInfo  implements IComponentInformation
+	{
+
+		@Override
+		public String getComponentName()
+		{
+			return "SOAP Context";
+		}
+
+		@Override
+		public String getComponentVersion()
+		{
+			return "1.0";
+		}
+
+		@Override
+		public String getComponentImplementor()
+		{
+			return "Bruno Ribeiro";
+		}
+		
 	}
 
 }

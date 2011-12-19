@@ -1,11 +1,7 @@
 package corinna.test;
 
-import javax.bindlet.IBindletService;
-
-import corinna.core.IServer;
 import corinna.core.Service;
-import corinna.exception.LifecycleException;
-import corinna.network.INetworkConnector;
+import corinna.util.IComponentInformation;
 
 
 public class MyService extends Service
@@ -17,13 +13,10 @@ public class MyService extends Service
 	}
 
 	@Override
-	public IBindletService getBindletService()
+	public IComponentInformation getServiceInfo()
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-
-
 
 }

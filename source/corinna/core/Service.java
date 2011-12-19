@@ -20,8 +20,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.bindlet.IBindletService;
+
 import org.apache.log4j.Logger;
 
+import corinna.bindlet.BindletService;
 import corinna.exception.BindletException;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
@@ -220,6 +223,12 @@ public abstract class Service implements IService
 	public void destroy()
 	{
 		// does nothing
+	}
+	
+	@Override
+	public IBindletService getBindletService()
+	{
+		return new BindletService(this);
 	}
 	
 }

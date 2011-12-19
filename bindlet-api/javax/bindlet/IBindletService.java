@@ -31,6 +31,6 @@ public interface IBindletService extends IObjectSharing
 	 */
 	public String getServiceName();
 	
-	public IBindletContext getContext( String name );
+	//public IBindletContext getContext( String name );
 	
 }

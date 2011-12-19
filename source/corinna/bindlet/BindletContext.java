@@ -16,26 +16,17 @@
 
 package corinna.bindlet;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.bindlet.IBindletContext;
 import javax.bindlet.ILogger;
-import javax.bindlet.http.IHttpBindletRequest;
-import javax.bindlet.http.IHttpBindletResponse;
 
 import corinna.core.IContext;
-import corinna.thread.ObjectLocker;
 import corinna.util.ApacheLogger;
+import corinna.util.IComponentInformation;
 
 
-public abstract class BindletContext<R,P> implements IBindletContext
+public abstract class BindletContext<R,P> extends ObjectSharing implements IBindletContext
 {
-	
-	private Map<String,Object> shared;
-	
-	private ObjectLocker sharedLock;
-	
+		
 	private IContext<R,P> context;
 
 	private ILogger logger = null;
@@ -46,8 +37,6 @@ public abstract class BindletContext<R,P> implements IBindletContext
 			throw new NullPointerException("The context object can not be null");
 		
 		this.context = context;
-		this.shared = new HashMap<String, Object>();
-		this.sharedLock = new ObjectLocker();
 	}
 	
 	@Override
@@ -60,66 +49,6 @@ public abstract class BindletContext<R,P> implements IBindletContext
 	public String[] getContextParameterNames()
 	{
 		return context.getParameterNames();
-	}
-
-	@Override
-	public Object getSharedObject( String name )
-	{
-		if (name == null) return null;
-		
-		sharedLock.readLock();
-		try
-		{
-			return shared.get(name);		
-		} finally
-		{
-			sharedLock.readUnlock();
-		}
-	}
-
-	@Override
-	public String[] getSharedObjectNames()
-	{
-		sharedLock.readLock();
-		try
-		{
-			if (shared.isEmpty()) return null;
-			return (String[])shared.keySet().toArray();		
-		} finally
-		{
-			sharedLock.readUnlock();
-		}
-	}
-
-	@Override
-	public void setSharedObject( String name, Object value )
-	{
-		if (name == null)
-			throw new NullPointerException("The shared object name can not be null");
-		
-		sharedLock.writeLock();
-		try
-		{
-			shared.put(name, value);			
-		} finally
-		{
-			sharedLock.writeUnlock();
-		}
-	}
-
-	@Override
-	public Object removeSharedObject( String name )
-	{
-		if (name == null) return null;
-		
-		sharedLock.writeLock();
-		try
-		{
-			return shared.remove(name);			
-		} finally
-		{
-			sharedLock.writeUnlock();
-		}
 	}
 
 	@Override
@@ -146,6 +75,17 @@ public abstract class BindletContext<R,P> implements IBindletContext
 	public Class<?> getContextResponseType()
 	{
 		return context.getResponseType();
+	}
+	
+	protected IContext<?,?> getContext()
+	{
+		return context;
+	}
+	
+	@Override
+	public IComponentInformation getContextInfo()
+	{
+		return context.getContextInfo();
 	}
 	
 }

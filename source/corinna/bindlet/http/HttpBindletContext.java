@@ -31,25 +31,5 @@ public class HttpBindletContext extends BindletContext<IHttpBindletRequest,IHttp
 	{
 		super(context);
 	}
-
-	@Override
-	public IComponentInformation getContextInfo()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void init()
-	{
-
-	}
-
-	@Override
-	public void destroy()
-	{
-
-	}
-
 	
 }

@@ -21,6 +21,7 @@ import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletContext;
 
 import corinna.exception.BindletException;
+import corinna.util.IComponentInformation;
 
 // TODO: mover para 'corinna.service'
 public interface IContext<R, P> extends IServiceRequestListener
@@ -59,5 +60,7 @@ public interface IContext<R, P> extends IServiceRequestListener
 	public IBindletRegistration[] getBindletRegistrations( );
 	
 	public IBindletRegistration getBindletRegistration( R request );
+	
+	public IComponentInformation getContextInfo();
 	
 }
