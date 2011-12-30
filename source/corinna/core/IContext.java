@@ -24,7 +24,7 @@ import corinna.exception.BindletException;
 import corinna.util.IComponentInformation;
 
 // TODO: mover para 'corinna.service'
-public interface IContext<R, P> extends IServiceRequestListener
+public interface IContext<R,P> extends IServiceRequestListener
 {
 
 	Class<?>[] CONSTRUCTOR_ARGS = { String.class, IService.class };

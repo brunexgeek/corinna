@@ -16,18 +16,22 @@
 
 package corinna.bindlet.http;
 
+import java.security.NoSuchAlgorithmException;
+
+import javax.bindlet.http.IAuthToken;
+import javax.bindlet.http.IHttpBindletContext;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 
 import corinna.bindlet.BindletContext;
-import corinna.core.http.IHttpContext;
-import corinna.util.IComponentInformation;
+import corinna.core.http.HttpContext;
 
 
-public class HttpBindletContext extends BindletContext<IHttpBindletRequest,IHttpBindletResponse>
+public class HttpBindletContext extends BindletContext<IHttpBindletRequest, IHttpBindletResponse> 
+	implements IHttpBindletContext
 {
 	
-	public HttpBindletContext( IHttpContext context )
+	public HttpBindletContext( HttpContext context )
 	{
 		super(context);
 	}

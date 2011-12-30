@@ -5,21 +5,15 @@ import javax.bindlet.soap.ISoapBindletRequest;
 import javax.bindlet.soap.ISoapBindletResponse;
 
 import corinna.bindlet.soap.SoapBindletContext;
-import corinna.bindlet.soap.SoapBindletRequest;
-import corinna.core.Context;
 import corinna.core.IBindletRegistration;
-import corinna.core.IService;
-import corinna.core.http.HttpUtils;
+import corinna.core.web.WebContext;
 import corinna.util.IComponentInformation;
 
 
-public class SoapContext extends Context<ISoapBindletRequest, ISoapBindletResponse> implements ISoapContext
+public class SoapContext extends WebContext<ISoapBindletRequest,ISoapBindletResponse>
 {
-
-	private static final String BINDLET_URL_MAPPING = "urlMapping";
 	
-	private static final String CONTEXT_URL_MAPPING = "urlMapping";
-
+	private SoapBindletContext bindletContext = null;
 	
 	public SoapContext( String name )
 	{
@@ -29,88 +23,39 @@ public class SoapContext extends Context<ISoapBindletRequest, ISoapBindletRespon
 	@Override
 	protected IBindletContext createBindletContext()
 	{
-		return new SoapBindletContext(this);
-	}
-
-	@Override
-	public IBindletRegistration getBindletRegistration( ISoapBindletRequest request )
-	{
-		IBindletRegistration[] regs = getBindletRegistrations();
-
-		for (IBindletRegistration current : regs)
-		{
-			String pattern = current.getBindletParameter(BINDLET_URL_MAPPING);
-			String path = request.getResourcePath();
-			if (pattern == null || path == null) continue;
-
-			try
-			{
-				String value = HttpUtils.matchURI(pattern, path);
-				if (value == null) continue;
-				
-				if (request instanceof SoapBindletRequest)
-					((SoapBindletRequest)request).setBindletPath(value);
-			} catch (Exception e)
-			{
-				continue;
-			}
-
-			return current;
-		}
-		
-		return null;
-	}
-
-	@Override
-	protected boolean acceptRequest( ISoapBindletRequest request )
-	{
-		// check if the URL of the request match with the current context path
-		String pattern = getParameter(CONTEXT_URL_MAPPING);
-		String path = request.getResourcePath();
-		if (pattern == null || path == null) return false;
-
-		try
-		{
-			String value = HttpUtils.matchURI(pattern, path);
-			if (value == null) return false;
-			
-			if (request instanceof SoapBindletRequest)
-				((SoapBindletRequest)request).setContextPath(value);
-		} catch (Exception e)
-		{
-			return false;
-		}
-		
-		return true;
+		if (bindletContext == null)
+			bindletContext = new SoapBindletContext(this);
+		return bindletContext;
 	}
 
 	@Override
 	public IComponentInformation getContextInfo()
 	{
-		return new SoapContextInfo();
+		return SoapContextInfo.getInstance();
+	}
+
+	@Override
+	public Class<?> getRequestType()
+	{
+		return ISoapBindletRequest.class;
 	}
 	
-	public class SoapContextInfo  implements IComponentInformation
+	@Override
+	public Class<?> getResponseType()
 	{
-
-		@Override
-		public String getComponentName()
-		{
-			return "SOAP Context";
-		}
-
-		@Override
-		public String getComponentVersion()
-		{
-			return "1.0";
-		}
-
-		@Override
-		public String getComponentImplementor()
-		{
-			return "Bruno Ribeiro";
-		}
-		
+		return ISoapBindletResponse.class;
 	}
 
+	@Override
+	public IBindletRegistration getBindletRegistration( ISoapBindletRequest request )
+	{
+		return findRegistration(request);
+	}
+
+	@Override
+	protected boolean acceptRequest( ISoapBindletRequest request )
+	{
+		return matchContextPath(request);
+	}
+	
 }

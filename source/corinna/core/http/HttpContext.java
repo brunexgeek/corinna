@@ -1,123 +1,63 @@
 package corinna.core.http;
 
 
-import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletContext;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 
 import corinna.bindlet.http.HttpBindletContext;
-import corinna.bindlet.http.HttpBindletRequest;
-import corinna.core.Context;
 import corinna.core.IBindletRegistration;
+import corinna.core.web.WebContext;
 import corinna.util.IComponentInformation;
 
 
-public class HttpContext extends Context<IHttpBindletRequest, IHttpBindletResponse> implements
-	IHttpContext
+public class HttpContext extends WebContext<IHttpBindletRequest,IHttpBindletResponse>
 {
-
-	private static final String BINDLET_URL_MAPPING = "urlMapping";
 	
-	private static final String CONTEXT_URL_MAPPING = "urlMapping";
-
+	private HttpBindletContext bindletContext = null;
+	
 	public HttpContext( String name)
 	{
 		super(name);
 	}
 
 	@Override
-	public IBindlet<IHttpBindletRequest, IHttpBindletResponse> createHttpBindlet(
-		String bindletMapping )
+	public IComponentInformation getContextInfo()
 	{
-		return null;
+		return HttpContextInfo.getInstance();
 	}
+
 
 	@Override
 	protected IBindletContext createBindletContext()
 	{
-		return new HttpBindletContext(this);
+		if (bindletContext == null)
+			bindletContext = new HttpBindletContext(this);
+		return bindletContext;
+	}
+	
+	@Override
+	public Class<?> getRequestType()
+	{
+		return IHttpBindletRequest.class;
+	}
+	
+	@Override
+	public Class<?> getResponseType()
+	{
+		return IHttpBindletResponse.class;
 	}
 
 	@Override
 	public IBindletRegistration getBindletRegistration( IHttpBindletRequest request )
 	{
-		IBindletRegistration[] regs = getBindletRegistrations();
-
-		for (IBindletRegistration current : regs)
-		{
-			String pattern = current.getBindletParameter(BINDLET_URL_MAPPING);
-			String path = request.getResourcePath();
-			if (pattern == null || path == null) continue;
-
-			try
-			{
-				String value = HttpUtils.matchURI(pattern, path);
-				if (value == null) continue;
-				
-				if (request instanceof HttpBindletRequest)
-					((HttpBindletRequest)request).setBindletPath(value);
-			} catch (Exception e)
-			{
-				continue;
-			}
-
-			return current;
-		}
-		
-		return null;
+		return findRegistration(request);
 	}
 
 	@Override
 	protected boolean acceptRequest( IHttpBindletRequest request )
 	{
-		// check if the URL of the request match with the current context path
-		String pattern = getParameter(CONTEXT_URL_MAPPING);
-		String path = request.getResourcePath();
-		if (pattern == null || path == null) return false;
-
-		try
-		{
-			String value = HttpUtils.matchURI(pattern, path);
-			if (value == null) return false;
-			
-			if (request instanceof HttpBindletRequest)
-				((HttpBindletRequest)request).setContextPath(value);
-		} catch (Exception e)
-		{
-			return false;
-		}
-		
-		return true;
-	}
-
-	@Override
-	public IComponentInformation getContextInfo()
-	{
-		return new HttpContextInfo();
-	}
-
-	public class HttpContextInfo  implements IComponentInformation
-	{
-
-		@Override
-		public String getComponentName()
-		{
-			return "HTTP Context";
-		}
-
-		@Override
-		public String getComponentVersion()
-		{
-			return "1.0";
-		}
-
-		@Override
-		public String getComponentImplementor()
-		{
-			return "Bruno Ribeiro";
-		}
-		
+		return matchContextPath(request);
 	}
 	
 }

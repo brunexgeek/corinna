@@ -12,7 +12,10 @@ import javax.bindlet.http.IHttpBindletResponse;
 
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 
+import corinna.core.http.auth.AuthenticateResponse;
+import corinna.core.http.auth.AuthorizationRequest;
 import corinna.exception.BindletException;
+import corinna.exception.ParseException;
 
 @BindletModel(Model.STATELESS)
 public class MyHttpBindlet extends HttpBindlet
@@ -30,14 +33,7 @@ public class MyHttpBindlet extends HttpBindlet
 	protected void doGet( IHttpBindletRequest req, IHttpBindletResponse resp )
 	throws BindletException, IOException
 	{
-		String header = "Digest realm=\"testrealm@host.com\",\r\n\tqop=\"auth,auth-int\",\r\n\tnonce=\"dcd98b7102dd2f0e8b11d0f600bfb0c093\",\r\n\topaque=\"5ccc069c403ebaf9f0171e9517f40e41\"";
-		
-		resp.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, header);
-		resp.setStatus(HttpStatus.UNAUTHORIZED);
-		
-		resp.close();
-		
-		/*resp.setContentLength(10);
+		resp.setContentLength(10);
 		BindletOutputStream out = resp.getOutputStream();
 		out.write("<html><body><h1>Teste de envio de texto</h1>");
 		out.write("Context Path: " + req.getContextPath());
@@ -48,7 +44,7 @@ public class MyHttpBindlet extends HttpBindlet
 		out.write("<br/>Request Length: " + req.getContentLength());
 		out.write("<br/>Shared value: " + getNextValue());
 		out.write("</body></html>");
-		out.close();*/
+		out.close();
 	}
 
 	private int getNextValue()
@@ -67,9 +63,49 @@ public class MyHttpBindlet extends HttpBindlet
 	}
 
 	@Override
+	protected boolean doAuthentication( IHttpBindletRequest req, IHttpBindletResponse resp )
+	throws BindletException, IOException
+	{
+		String value = req.getHeader(HttpHeaders.Names.AUTHORIZATION);
+		if (value != null)
+		{
+			AuthorizationRequest auth;
+			try
+			{
+				auth = new AuthorizationRequest(value);
+			} catch (Exception e)
+			{
+				resp.sendError(HttpStatus.UNAUTHORIZED);
+				return false;
+			}
+			if (auth.getUserName().equals("admin")) return true;
+		}
+	
+		AuthenticateResponse auth;
+		try
+		{
+			auth = new AuthenticateResponse("Digest nonce=\"555\", realm=\"teste@fuck\"");
+		} catch (Exception e)
+		{
+			resp.sendError(HttpStatus.UNAUTHORIZED);
+			return false;
+		}
+		value = auth.toString();
+		resp.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, value);
+		resp.setStatus(HttpStatus.UNAUTHORIZED);
+		return false;
+	}
+	
+	@Override
 	public void init() throws BindletException
 	{
 
+	}
+
+	@Override
+	public boolean isRestricted()
+	{
+		return true;
 	}
 
 }

@@ -165,8 +165,8 @@ public abstract class Service implements IService
 			{
 				// get the request and response types accepted by the current context
 				IContext<?, ?> context = entry.getValue();
-				Class<?> contextRequest = Reflection.getGenericParameter(context, IContext.class, 0);
-				Class<?> contextResponse = Reflection.getGenericParameter(context, IContext.class, 1);
+				Class<?> contextRequest = context.getRequestType();//Reflection.getGenericParameter(context, IContext.class, 0);
+				Class<?> contextResponse = context.getResponseType();//Reflection.getGenericParameter(context, IContext.class, 1);
 				// get the request and response types of the current event
 				Class<?> requestType = null;
 				Class<?> responseType = null;

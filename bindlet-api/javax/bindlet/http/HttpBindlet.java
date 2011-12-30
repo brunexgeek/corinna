@@ -20,7 +20,6 @@ package javax.bindlet.http;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
-import java.util.Date;
 
 import javax.bindlet.Bindlet;
 import javax.bindlet.IBindletRequest;
@@ -96,10 +95,10 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	private static final String COMPONENT_VERSION = "1.0";
 
 	private static final String COMPONENT_IMPLEMENTOR = "Bruno Ribeiro";
-	
-	private static IComponentInformation COMPONENT_INFO = new ContextInfo(COMPONENT_NAME, 
+
+	private static IComponentInformation COMPONENT_INFO = new ContextInfo(COMPONENT_NAME,
 		COMPONENT_VERSION, COMPONENT_IMPLEMENTOR);
-	
+
 	/**
 	 * Does nothing, because this is an abstract class.
 	 * 
@@ -107,7 +106,7 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	 * 
 	 */
 
-	public HttpBindlet( ) throws BindletException
+	public HttpBindlet() throws BindletException
 	{
 		super();
 	}
@@ -575,7 +574,8 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		int responseLength;
 
 		String CRLF = "\r\n";
-		String responseString = "TRACE " + /*request.getRequestURI()*/request.getRequestURI() + " " + request.getProtocol();
+		String responseString = "TRACE " + /* request.getRequestURI() */request.getRequestURI()
+			+ " " + request.getProtocol();
 
 		// String[] reqHeaderEnum = request.getHeaderNames();
 
@@ -630,6 +630,8 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		throws BindletException, IOException
 	{
 		String method = request.getHttpMethod();
+
+		if (isRestricted()) if (!doAuthentication(request, response)) return;
 
 		if (method.equals(METHOD_GET))
 		{
@@ -712,16 +714,17 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 								}
 	}
 
-	/*
+	public abstract boolean isRestricted();
+
+	/**
 	 * Sets the Last-Modified entity header field, if it has not already been set and if the value
 	 * is meaningful. Called before doGet, to ensure that headers are set before response data is
 	 * written. A subclass might have set this header already, so we check.
 	 */
-
 	private void maybeSetLastModified( IHttpBindletResponse response, long lastModified )
 	{
-		//if (response.containsHeader(HEADER_LASTMOD)) return;
-		//if (lastModified >= 0) response.setDateHeader(HEADER_LASTMOD, lastModified);
+		// if (response.containsHeader(HEADER_LASTMOD)) return;
+		// if (lastModified >= 0) response.setDateHeader(HEADER_LASTMOD, lastModified);
 	}
 
 	/**
@@ -752,22 +755,14 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	 * 
 	 */
 
-	public void process( IBindletRequest request, IBindletResponse response ) throws BindletException,
-		IOException
-	{
-		IHttpBindletRequest req;
-		IHttpBindletResponse res;
-
-		try
-		{
-			req = (IHttpBindletRequest) request;
-			res = (IHttpBindletResponse) response;
-		} catch (ClassCastException e)
-		{
-			throw new BindletException("non-HTTP request or response");
-		}
-		service(req, res);
-	}
+	/*
+	 * public void process( IBindletRequest request, IBindletResponse response ) throws
+	 * BindletException, IOException { IHttpBindletRequest req; IHttpBindletResponse res;
+	 * 
+	 * try { req = (IHttpBindletRequest) request; res = (IHttpBindletResponse) response; } catch
+	 * (ClassCastException e) { throw new BindletException("non-HTTP request or response"); }
+	 * service(req, res); }
+	 */
 
 	@Override
 	public void process( IHttpBindletRequest request, IHttpBindletResponse res )
@@ -776,11 +771,16 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		service(request, res);
 	}
 
-	
 	@Override
 	public IComponentInformation getBindletInfo()
 	{
 		return COMPONENT_INFO;
+	}
+
+	protected boolean doAuthentication( IHttpBindletRequest request, IHttpBindletResponse response )
+		throws BindletException, IOException
+	{
+		return true;
 	}
 
 }

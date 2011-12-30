@@ -1,9 +1,15 @@
 package corinna.bindlet.soap;
 
+import javax.bindlet.http.IHttpBindletRequest;
+import javax.bindlet.http.IHttpBindletResponse;
+import javax.bindlet.http.IWebBindletRequest;
+import javax.bindlet.http.IWebBindletResponse;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+
+import corinna.network.RequestEvent;
 
 
 public class SoapUtils

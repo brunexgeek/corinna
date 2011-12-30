@@ -38,17 +38,17 @@ public abstract class Context<R, P> implements IContext<R, P>
 	protected Map<String, IBindletRegistration> repos;
 
 	protected ObjectLocker reposLock;
-	
-	private Class<?> currentRequestType = null;
-	
-	private Class<?> currentResponseType = null;
-	
+
+	//private Class<?> currentRequestType = null;
+
+	//private Class<?> currentResponseType = null;
+
 	private IService service = null;
-	
+
 	private String name;
 
 	private Map<String, String> params;
-	
+
 	private Boolean isModified = false;
 
 	private Boolean updateReposArray = false;
@@ -56,43 +56,42 @@ public abstract class Context<R, P> implements IContext<R, P>
 	private IBindletRegistration[] reposArray = null;
 
 	private String[] paramsArray = null;
-	
+
 	public Context( String name )
 	{
 		if (name == null || name.isEmpty())
 			throw new IllegalArgumentException("The context name can not be null or empty");
-		
+
 		this.name = name;
 		bindletContext = createBindletContext();
 		repos = new HashMap<String, IBindletRegistration>();
 		reposLock = new ObjectLocker();
-		params = new HashMap<String,String>();
-		
-		currentRequestType = Reflection.getGenericParameter(this, Context.class, 0);
-		currentResponseType = Reflection.getGenericParameter(this, Context.class, 1);
+		params = new HashMap<String, String>();
+
+		//currentRequestType = Reflection.getGenericParameter(this, Context.class, 0);
+		//currentResponseType = Reflection.getGenericParameter(this, Context.class, 1);
 	}
 
 	protected final void setService( IService service )
 	{
-		if (service == null)
-			throw new NullPointerException("The service object can not be null");
+		if (service == null) throw new NullPointerException("The service object can not be null");
 		this.service = service;
 	}
-	
+
 	protected abstract IBindletContext createBindletContext();
-	
+
 	@Override
 	public String getName()
 	{
 		return name;
 	}
-	
+
 	@Override
 	public IService getService()
 	{
 		return service;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void serviceRequestReceived( IService service, RequestEvent<?, ?> event )
@@ -110,7 +109,7 @@ public abstract class Context<R, P> implements IContext<R, P>
 		{
 			throw new BindletException("Incompatible bindlet request for this context", e);
 		}
-		
+
 		if (acceptRequest(request))
 		{
 			boolean result = dispatchEventToBindlet(request, response);
@@ -119,16 +118,19 @@ public abstract class Context<R, P> implements IContext<R, P>
 	}
 
 	protected abstract boolean acceptRequest( R request );
-	
+
 	@SuppressWarnings("unchecked")
-	protected boolean dispatchEventToBindlet( R request, P response ) throws BindletException, IOException
+	protected boolean dispatchEventToBindlet( R request, P response ) throws BindletException,
+		IOException
 	{
 		// find the registration of the bindlet that must process this request
 		IBindletRegistration reg = getBindletRegistration(request);
 		if (reg == null) return false;
-			/*throw new BindletException("There are no registred bindlet compatible with a request '"
-				+ request.getClass() + "'");*/
-		//IBindlet<R, P> bindlet = createBindlet(reg.getBindletName());
+		/*
+		 * throw new BindletException("There are no registred bindlet compatible with a request '" +
+		 * request.getClass() + "'");
+		 */
+		// IBindlet<R, P> bindlet = createBindlet(reg.getBindletName());
 		IBindlet<R, P> bindlet = (IBindlet<R, P>) reg.createBindlet();
 		// process the request event
 		bindlet.init(reg.getBindletConfig());
@@ -208,18 +210,17 @@ public abstract class Context<R, P> implements IContext<R, P>
 		}
 	}
 
-	
-	@Override
+	/*@Override
 	public Class<?> getRequestType()
 	{
 		return currentRequestType;
 	}
-	
+
 	@Override
 	public Class<?> getResponseType()
 	{
 		return currentResponseType;
-	}
+	}*/
 
 	@Override
 	public String getParameter( String name )
@@ -241,7 +242,7 @@ public abstract class Context<R, P> implements IContext<R, P>
 			return isModified;
 		}
 	}
-	
+
 	protected void setModified( boolean value )
 	{
 		synchronized (isModified)
@@ -249,30 +250,30 @@ public abstract class Context<R, P> implements IContext<R, P>
 			isModified = value;
 		}
 	}
-	
+
 	@Override
 	public IBindletRegistration getBindletRegistration( String name )
 	{
 		IBindletRegistration result;
-		
+
 		reposLock.readLock();
 		result = repos.get(name);
 		reposLock.readUnlock();
-		
+
 		return result;
 	}
-	
+
 	@Override
-	public IBindletRegistration[] getBindletRegistrations( )
+	public IBindletRegistration[] getBindletRegistrations()
 	{
 		IBindletRegistration[] result = null;
-		
+
 		reposLock.readLock();
-		if (reposArray  == null || updateReposArray)
+		if (reposArray == null || updateReposArray)
 		{
 			reposLock.readUnlock();
 			reposLock.writeLock();
-			reposArray = repos.values().toArray( new IBindletRegistration[0] );
+			reposArray = repos.values().toArray(new IBindletRegistration[0]);
 			result = reposArray;
 			updateReposArray = false;
 			reposLock.writeUnlock();
@@ -282,15 +283,14 @@ public abstract class Context<R, P> implements IContext<R, P>
 			result = reposArray;
 			reposLock.readUnlock();
 		}
-		
+
 		return result;
 	}
-	
+
 	@Override
 	public String[] getParameterNames()
 	{
-		if (paramsArray == null)
-			paramsArray = params.keySet().toArray( new String[0]);
+		if (paramsArray == null) paramsArray = params.keySet().toArray(new String[0]);
 		return paramsArray;
 	}
 }

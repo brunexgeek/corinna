@@ -76,7 +76,7 @@ public class Reflection
 					superType = (ParameterizedType) current;
 					break;
 				}
-				next = (Class<?>) current;
+				next = (Class<?>) next.getSuperclass();
 			}
 		}
 
