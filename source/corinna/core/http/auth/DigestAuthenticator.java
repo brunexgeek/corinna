@@ -2,7 +2,6 @@ package corinna.core.http.auth;
 
 
 import java.nio.charset.Charset;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +13,6 @@ import corinna.thread.ObjectLocker;
 
 
 // TODO: create a array based pool of 'NonceInfo'
-// TODO: make this class thread-safe
 public class DigestAuthenticator implements IHttpAuthenticator
 {
 
@@ -23,8 +21,6 @@ public class DigestAuthenticator implements IHttpAuthenticator
 	private Map<String, NonceInfo> nonces;
 
 	private ObjectLocker noncesLock;
-
-	private static int counter = 0;
 
 	private IUserDatabase database;
 
@@ -113,7 +109,7 @@ public class DigestAuthenticator implements IHttpAuthenticator
 			try
 			{
 				AuthorizationRequest auth = new AuthorizationRequest(value);
-				return authenticate(auth);
+				return authenticate(request.getHttpMethod(), auth);
 			} catch (Exception e)
 			{
 				return false;
@@ -122,7 +118,7 @@ public class DigestAuthenticator implements IHttpAuthenticator
 		return false;
 	}
 
-	public boolean authenticate( AuthorizationRequest request )
+	public boolean authenticate( String method, AuthorizationRequest request )
 	{
 		if (request == null) return false;
 		String nonce = request.getNonce();
@@ -133,7 +129,7 @@ public class DigestAuthenticator implements IHttpAuthenticator
 			NonceInfo info = getNonceInfo(nonce);
 			if (info == null) return false;
 			info.incCount();
-			// check if the current nonce expired and have a valid count
+			// check if the current nonce expired or have an inconsistent count
 			if (info.isExpired() || !info.checkCount(request.getNonceCount()))
 			{
 				releaseNonce(nonce);
@@ -155,14 +151,18 @@ public class DigestAuthenticator implements IHttpAuthenticator
 			//       password
 			String hashA1 = user.getPassword();
 
-			// calculate the hash for A2
-			digest.update("GET:" + request.getUri(), CHARSET);
+			// calculate the hash for 'A2'
+			StringBuffer sb = new StringBuffer();
+			sb.append(method);
+			sb.append(":");
+			sb.append(request.getDigestUri());
+			digest.update(sb.toString(), CHARSET);
 			String hashA2 = digest.getHashString();
 
 			// TODO: implement the 'nonce-counter' in server-side instead use the client value
 			
 			// calculate the hash for the response
-			StringBuffer sb = new StringBuffer();
+			sb.delete(0, sb.length());
 			sb.append(hashA1);
 			sb.append(":");
 			sb.append(request.getNonce());

@@ -30,15 +30,21 @@ public abstract class SoapBindlet extends Bindlet<ISoapBindletRequest, ISoapBind
 		super();
 	}
 	
-	public void doWsdl( ISoapBindletRequest req, ISoapBindletResponse response ) throws BindletException, IOException
+	protected void doWsdl( ISoapBindletRequest req, ISoapBindletResponse response ) throws BindletException, IOException
 	{
 	}
 	
-	public void doPost( ISoapBindletRequest req, ISoapBindletResponse res )  throws BindletException,
+	protected void doPost( ISoapBindletRequest req, ISoapBindletResponse res )  throws BindletException,
 		IOException
 	{
 	}
 
+	protected boolean doAuthentication( ISoapBindletRequest request, ISoapBindletResponse response )
+		throws BindletException, IOException
+	{
+		return true;
+	}
+	
 	@Override
 	public final void process( ISoapBindletRequest req, ISoapBindletResponse res )
 		throws BindletException, IOException
@@ -49,9 +55,14 @@ public abstract class SoapBindlet extends Bindlet<ISoapBindletRequest, ISoapBind
 		if (req == null || req.getMessage() == null)
 			res.sendError(HttpStatus.BAD_REQUEST);
 		else
+		{
+			if (isRestricted() && !doAuthentication(req, res)) return;
 			doPost(req, res);
+		}
 	}
 
+	public abstract boolean isRestricted();
+	
 	@Override
 	public IComponentInformation getBindletInfo()
 	{

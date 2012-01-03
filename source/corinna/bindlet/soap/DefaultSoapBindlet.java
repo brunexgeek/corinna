@@ -17,14 +17,19 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.Text;
 
 import org.apache.log4j.Logger;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 
+import corinna.core.http.auth.AuthenticateResponse;
+import corinna.core.http.auth.DigestAuthenticator;
+import corinna.core.http.auth.IHttpAuthenticator;
+import corinna.core.http.auth.SimpleUserDatabase;
+import corinna.core.http.auth.User;
 import corinna.exception.BindletException;
 import corinna.service.rpc.ClassDescriptor;
 import corinna.service.rpc.IPrototypeFilter;
 import corinna.service.rpc.MethodRunner;
 import corinna.service.rpc.ProcedureCall;
 import corinna.thread.ObjectLocker;
-import corinna.util.IComponentInformation;
 
 
 public class DefaultSoapBindlet extends SoapBindlet
@@ -47,9 +52,17 @@ public class DefaultSoapBindlet extends SoapBindlet
 	private String wsdl = null;
 	
 	private ObjectLocker wsdlLock = new ObjectLocker();
-		
+	
+	private DigestAuthenticator authenticator = null;
+	
 	public DefaultSoapBindlet( ) throws BindletException
 	{
+		authenticator = new DigestAuthenticator( new SimpleUserDatabase("test.txt") );
+		
+		User user = new User("admin", "test@realm");
+		user.setPassword("98d2042f25e3372e6c5aae3a125fd7f4");
+		
+		((SimpleUserDatabase)authenticator.getDatabase()).addUser(user);
 	}
 
 	@Override
@@ -82,7 +95,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	}
 
 	@Override
-	public void doWsdl( ISoapBindletRequest req, ISoapBindletResponse response ) throws BindletException, IOException
+	protected void doWsdl( ISoapBindletRequest req, ISoapBindletResponse response ) throws BindletException, IOException
 	{
 		String resource = req.getResourcePath();
 		if (!resource.isEmpty())
@@ -99,7 +112,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	}
 
 	@Override
-	public void doPost( ISoapBindletRequest req, ISoapBindletResponse res ) throws BindletException, 
+	protected void doPost( ISoapBindletRequest req, ISoapBindletResponse res ) throws BindletException, 
 		IOException
 	{
 		ProcedureCall procedure = parseSoapMessage( req.getMessage() );
@@ -244,6 +257,35 @@ public class DefaultSoapBindlet extends SoapBindlet
 			return text;
 		else
 			return generateWsdl(req);
+	}
+	
+	@Override
+	protected boolean doAuthentication( ISoapBindletRequest request, ISoapBindletResponse response )
+		throws BindletException, IOException
+	{
+		String value = request.getHeader(HttpHeaders.Names.AUTHORIZATION);
+		if (value != null && authenticator.authenticate(request)) return true;
+	
+		AuthenticateResponse auth;
+		try
+		{
+			auth = authenticator.createAuthenticateResponse("test@realm", 10);
+			
+		} catch (Exception e)
+		{
+			response.sendError(HttpStatus.UNAUTHORIZED);
+			return false;
+		}
+		value = auth.toString();
+		response.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, value);
+		response.setStatus(HttpStatus.UNAUTHORIZED);
+		return false;
+	}
+
+	@Override
+	public boolean isRestricted()
+	{
+		return true;
 	}
 	
 }
