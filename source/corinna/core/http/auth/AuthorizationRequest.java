@@ -7,7 +7,7 @@ import corinna.exception.ParseException;
 import corinna.util.KeyValueParser;
 import corinna.util.KeyValueParserConfig;
 
-
+// TODO: many methods in common with 'AuthenticateResponse'
 public class AuthorizationRequest
 {
 
@@ -61,12 +61,37 @@ public class AuthorizationRequest
 	 * this count - if the same nc-value is seen twice, then the request is a replay. See the
 	 * description below of the construction of the request-digest value.
 	 */
-	private static final String NONCE_COUNT = "nonce-count";
+	private static final String NONCE_COUNT = "nc";
 
 	/**
 	 * This directive allows for future extensions. Any unrecognized directive MUST be ignored.
 	 */
 	private static final String AUTH_PARAM = "auth-param";
+	
+	/**
+	 * A server-specified data string which should be uniquely generated each time a 401 response is
+	 * made. It is recommended that this string be base64 or hexadecimal data. Specifically, since
+	 * the string is passed in the header lines as a quoted string, the double-quote character is
+	 * not allowed.
+	 */
+	private static final String NONCE = "nonce";
+
+	/**
+	 * A string of data, specified by the server, which should be returned by the client unchanged
+	 * in the Authorization header of subsequent requests with URIs in the same protection space. It
+	 * is recommended that this string be base64 or hexadecimal data.
+	 */
+	private static final String OPAQUE = "opaque";
+	
+	/**
+	 * A string to be displayed to users so they know which username and password to use. This
+	 * string should contain at least the name of the host performing the authentication and might
+	 * additionally indicate the collection of users who might have access. An example might be
+	 * "registered_users@gotham.news.com".
+	 */
+	private static final String REALM = "realm";
+	
+	private static final String URI = "uri";
 	
 	private static KeyValueParserConfig config = null;
 	
@@ -135,6 +160,39 @@ public class AuthorizationRequest
 	public String getResponse()
 	{
 		return fields.get(RESPONSE);
+	}
+	
+	public String getNonce()
+	{
+		return fields.get(NONCE);
+	}
+	
+	public String getRealm()
+	{
+		return fields.get(REALM);
+	}
+
+
+	public String getUri()
+	{
+		return fields.get(URI);
+	}
+
+	public String getCNonce()
+	{
+		return fields.get(CNONCE);
+	}
+
+
+	public String getNonceCount()
+	{
+		return fields.get(NONCE_COUNT);
+	}
+
+
+	public String getQopOptions()
+	{
+		return fields.get(QOP);
 	}
 	
 }

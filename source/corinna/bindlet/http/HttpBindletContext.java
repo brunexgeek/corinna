@@ -16,9 +16,6 @@
 
 package corinna.bindlet.http;
 
-import java.security.NoSuchAlgorithmException;
-
-import javax.bindlet.http.IAuthToken;
 import javax.bindlet.http.IHttpBindletContext;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;

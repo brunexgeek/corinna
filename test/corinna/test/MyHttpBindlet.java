@@ -14,6 +14,9 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 
 import corinna.core.http.auth.AuthenticateResponse;
 import corinna.core.http.auth.AuthorizationRequest;
+import corinna.core.http.auth.DigestAuthenticator;
+import corinna.core.http.auth.SimpleUserDatabase;
+import corinna.core.http.auth.User;
 import corinna.exception.BindletException;
 import corinna.exception.ParseException;
 
@@ -25,8 +28,16 @@ public class MyHttpBindlet extends HttpBindlet
 	
 	private Integer value = 0;
 	
+	private DigestAuthenticator authenticator = null;
+	
 	public MyHttpBindlet( ) throws BindletException
 	{
+		authenticator = new DigestAuthenticator( new SimpleUserDatabase("test.txt") );
+		
+		User user = new User("admin", "test@realm");
+		user.setPassword("98d2042f25e3372e6c5aae3a125fd7f4");
+		
+		((SimpleUserDatabase)authenticator.getDatabase()).addUser(user);
 	}
 
 	@Override
@@ -67,24 +78,13 @@ public class MyHttpBindlet extends HttpBindlet
 	throws BindletException, IOException
 	{
 		String value = req.getHeader(HttpHeaders.Names.AUTHORIZATION);
-		if (value != null)
-		{
-			AuthorizationRequest auth;
-			try
-			{
-				auth = new AuthorizationRequest(value);
-			} catch (Exception e)
-			{
-				resp.sendError(HttpStatus.UNAUTHORIZED);
-				return false;
-			}
-			if (auth.getUserName().equals("admin")) return true;
-		}
+		if (value != null && authenticator.authenticate(req)) return true;
 	
 		AuthenticateResponse auth;
 		try
 		{
-			auth = new AuthenticateResponse("Digest nonce=\"555\", realm=\"teste@fuck\"");
+			auth = authenticator.createAuthenticateResponse("test@realm");
+			
 		} catch (Exception e)
 		{
 			resp.sendError(HttpStatus.UNAUTHORIZED);

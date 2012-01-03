@@ -1,18 +1,13 @@
 package corinna.core.web;
 
 
-import java.security.NoSuchAlgorithmException;
-
-import javax.bindlet.http.IAuthToken;
 import javax.bindlet.http.IWebBindletRequest;
 import javax.bindlet.http.IWebBindletResponse;
 
-import corinna.bindlet.http.DigestAuthToken;
 import corinna.bindlet.http.WebBindletRequest;
 import corinna.core.Context;
 import corinna.core.IBindletRegistration;
 import corinna.core.http.HttpUtils;
-import corinna.core.http.IHttpAuthenticator;
 import corinna.thread.ObjectLocker;
 
 
@@ -26,12 +21,12 @@ public abstract class WebContext<R extends IWebBindletRequest, P extends IWebBin
 
 	private ObjectLocker authenticatorLock;
 
-	private IHttpAuthenticator authenticator;
+	//private IHttpAuthenticator authenticator;
 
 	public WebContext( String name )
 	{
 		super(name);
-		authenticator = null;
+	//	authenticator = null;
 		authenticatorLock = new ObjectLocker();
 	}
 
@@ -86,7 +81,7 @@ public abstract class WebContext<R extends IWebBindletRequest, P extends IWebBin
 		return true;
 	}
 
-	@Override
+	/*@Override
 	public void setAuthenticator( IHttpAuthenticator auth )
 	{
 		authenticatorLock.writeLock();
@@ -109,17 +104,6 @@ public abstract class WebContext<R extends IWebBindletRequest, P extends IWebBin
 		authenticatorLock.readUnlock();
 
 		return auth;
-	}
-
-	protected void authenticate()
-	{
-
-	}
-
-	@Override
-	public IAuthToken createAuthToken( R request ) throws NoSuchAlgorithmException
-	{
-		return new DigestAuthToken(request);
-	}
+	}*/
 
 }

@@ -3,14 +3,19 @@ package corinna.core.http.auth;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.bindlet.http.IWebBindletRequest;
+
+import org.jboss.netty.handler.codec.http.HttpHeaders;
+
 import corinna.exception.ParseException;
 import corinna.util.KeyValueParser;
 import corinna.util.KeyValueParserConfig;
 
 
+//TODO: many methods in common with 'AuthorizationRequest'
 public class AuthenticateResponse
 {
-
+	
 	protected static final String METHOD = "Digest";
 
 	/**
@@ -76,7 +81,7 @@ public class AuthenticateResponse
 	 * calculating the response directive value for the application of this choice. Unrecognized
 	 * options MUST be ignored.
 	 */
-	private static final String QOP_OPTIONS = "qop-options";
+	private static final String QOP_OPTIONS = "qop";
 
 	/**
 	 * This directive allows for future extensions. Any unrecognized directive MUST be ignored.
@@ -93,6 +98,21 @@ public class AuthenticateResponse
 		config.setPairSeparator(",");
 		config.setKeyValueSeparator("=");
 		config.setQuotedValues(true);
+	}
+	
+	public AuthenticateResponse( String realm, String nonce )
+	{
+		if (realm == null || realm.isEmpty())
+			throw new NullPointerException("The realm can not be null or empty");
+		if (nonce == null || nonce.isEmpty())
+			throw new NullPointerException("The nonce can not be null or empty");
+		
+		fields = new HashMap<String,String>();
+		
+		// set the initial parameters
+		setRealm(realm);
+		setNonce(nonce);
+		setQopOptions("auth");
 	}
 	
 	public AuthenticateResponse( String data ) throws ParseException
@@ -139,6 +159,64 @@ public class AuthenticateResponse
 		sb.append("\"");
 		
 		return false;
+	}
+	
+	public String getRealm()
+	{
+		return fields.get(REALM);
+	}
+	
+	public String getNonce()
+	{
+		return fields.get(NONCE);
+	}
+	
+	public String getQopOptions()
+	{
+		return fields.get(QOP_OPTIONS);
+	}
+	
+	public boolean isStale()
+	{
+		String value = fields.get(STALE);
+		return (value != null && value.equalsIgnoreCase("true"));
+	}
+	
+	public String getDomain()
+	{
+		return fields.get(DOMAIN);
+	}
+	
+	public void setRealm( String realm )
+	{
+		if (realm == null || realm.isEmpty()) fields.remove(REALM);
+		fields.put(REALM, realm);
+	}
+	
+	public void setNonce( String nonce )
+	{
+		if (nonce == null || nonce.isEmpty()) fields.remove(NONCE);
+		fields.put(NONCE, nonce);
+	}
+	
+	public void setQopOptions( String qop )
+	{
+		if (qop == null || qop.isEmpty()) fields.remove(QOP_OPTIONS);
+		fields.put(QOP_OPTIONS, qop);
+	}
+	
+	public void setDomain( String domain )
+	{
+		if (domain == null || domain.isEmpty()) fields.remove(DOMAIN);
+		fields.put(DOMAIN, domain);
+	}
+	
+	public void setStale( boolean stale )
+	{
+		if (!stale)
+			fields.remove(STALE);
+		else
+			fields.put(STALE, "TRUE");
 	}
 	
 }
