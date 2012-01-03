@@ -83,7 +83,7 @@ public class MyHttpBindlet extends HttpBindlet
 		AuthenticateResponse auth;
 		try
 		{
-			auth = authenticator.createAuthenticateResponse("test@realm");
+			auth = authenticator.createAuthenticateResponse("test@realm", 10);
 			
 		} catch (Exception e)
 		{

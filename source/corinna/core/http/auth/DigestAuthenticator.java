@@ -41,6 +41,11 @@ public class DigestAuthenticator implements IHttpAuthenticator
 
 	public AuthenticateResponse createAuthenticateResponse( String realm )
 	{
+		return createAuthenticateResponse(realm, NonceInfo.DEFAULT_NONCE_LIFETIME);
+	}
+	
+	public AuthenticateResponse createAuthenticateResponse( String realm, long lifeTime )
+	{
 		String nonce;
 
 		while (true)
@@ -49,13 +54,14 @@ public class DigestAuthenticator implements IHttpAuthenticator
 			if (!nonces.containsKey(nonce)) break;
 		}
 
+		// TODO: we need avoid create new instances here for each request (create a pool?)
 		AuthenticateResponse resp = new AuthenticateResponse(realm, nonce);
-		NonceInfo info = new NonceInfo(resp, NonceInfo.DEFAULT_NONCE_LIFETIME);
+		NonceInfo info = new NonceInfo(resp, lifeTime);
 
 		noncesLock.writeLock();
 		nonces.put(nonce, info);
 		noncesLock.writeUnlock();
-
+		
 		return resp;
 	}
 
@@ -89,6 +95,15 @@ public class DigestAuthenticator implements IHttpAuthenticator
 		}
 	}
 
+	public void releaseNonce( String nonce )
+	{
+		noncesLock.writeLock();
+		NonceInfo info = nonces.remove(nonce);
+		noncesLock.writeUnlock();
+		
+		info.invalidate();
+	}
+	
 	@Override
 	public boolean authenticate( IWebBindletRequest request )
 	{
@@ -110,29 +125,35 @@ public class DigestAuthenticator implements IHttpAuthenticator
 	public boolean authenticate( AuthorizationRequest request )
 	{
 		if (request == null) return false;
-		
+		String nonce = request.getNonce();
+
 		try
 		{
 			// get the server nonce information
-			NonceInfo info = getNonceInfo( request.getNonce() );
-			if (info == null || info.isExpired()) return false;
+			NonceInfo info = getNonceInfo(nonce);
+			if (info == null) return false;
+			info.incCount();
+			// check if the current nonce expired and have a valid count
+			if (info.isExpired() || !info.checkCount(request.getNonceCount()))
+			{
+				releaseNonce(nonce);
+				// TODO: throw an exception?
+				return false;
+			}
 			
 			// retrieve the user information from database
 			IUser user = database.getUser(request.getUserName());
-			if (user == null) return false;
+			if (user == null) 
+			{
+				releaseNonce(nonce);
+				return false;
+			}
 			
 			MessageDigest digest = new MessageDigest("MD5");
 			
 			// Note: for digest authentication, the password is the 'A1' value instead the plain
 			//       password
 			String hashA1 = user.getPassword();
-			/*StringBuffer sb = new StringBuffer();
-			sb.append(request.getUserName());
-			sb.append(":");
-			sb.append(request.getRealm());
-			sb.append(":michelle");
-			digest.update(sb.toString(), CHARSET);
-			String hashA1 = digest.getHashString();*/
 
 			// calculate the hash for A2
 			digest.update("GET:" + request.getUri(), CHARSET);
@@ -148,7 +169,7 @@ public class DigestAuthenticator implements IHttpAuthenticator
 			sb.append(":");
 			sb.append(request.getNonceCount());
 			sb.append(":");
-			sb.append(request.getCNonce());
+			sb.append(request.getClientNonce());
 			sb.append(":");
 			sb.append(request.getQopOptions());
 			sb.append(":");
@@ -156,7 +177,9 @@ public class DigestAuthenticator implements IHttpAuthenticator
 			digest.update(sb.toString() , CHARSET);
 			String response = digest.getHashString();
 			
-			return (response.equalsIgnoreCase(request.getResponse()));
+			boolean result = (response.equalsIgnoreCase(request.getResponse()));
+			if (!result) releaseNonce(nonce);
+			return result;
 		} catch (Exception e)
 		{
 			return false;
@@ -180,9 +203,13 @@ public class DigestAuthenticator implements IHttpAuthenticator
 		 */
 		private static final int DEFAULT_NONCE_LIFETIME = 900;
 
-		private Long expireTime;
+		private Long expireTime = 0L;
+		
+		private Long count = 0L;
 
 		private AuthenticateResponse resp;
+		
+		private long lifeTime = DEFAULT_NONCE_LIFETIME;
 
 		public NonceInfo( AuthenticateResponse resp, long lifeTime )
 		{
@@ -190,16 +217,26 @@ public class DigestAuthenticator implements IHttpAuthenticator
 				throw new NullPointerException("The authenticate response object can not be null");
 
 			this.resp = resp;
-			// set the initial lifetime
-			if (lifeTime <= 0) lifeTime = DEFAULT_NONCE_LIFETIME;
-			expireTime = System.currentTimeMillis() + (lifeTime * 1000);
+			update(lifeTime);
+		}
+
+		/**
+		 * Check if the server nonce counter value match with the specified value.
+		 * 
+		 * @param nonceCount Nonce count as a <code>String</code>
+		 * @return
+		 */
+		public boolean checkCount( String nonceCount )
+		{
+			String value = String.format("%08x", getCount());
+			return value.equalsIgnoreCase(nonceCount);
 		}
 
 		public boolean isExpired()
 		{
 			synchronized (expireTime)
 			{
-				return (System.currentTimeMillis() > expireTime);
+				return (expireTime > 0 && System.currentTimeMillis() > expireTime);
 			}
 		}
 
@@ -207,7 +244,46 @@ public class DigestAuthenticator implements IHttpAuthenticator
 		{
 			return resp;
 		}
-
+		
+		public long getCount()
+		{
+			synchronized (count)
+			{
+				return count;
+			}
+		}
+		
+		public long incCount()
+		{
+			synchronized (count)
+			{
+				return ++count;
+			}
+		}
+		
+		public void update(  )
+		{
+			update(lifeTime);
+		}
+		
+		public void update( long lifeTime )
+		{
+			if (lifeTime <= 0) lifeTime = DEFAULT_NONCE_LIFETIME;
+			
+			synchronized (expireTime)
+			{
+				expireTime = System.currentTimeMillis() + (lifeTime * 1000);
+			}
+		}
+		
+		public void invalidate()
+		{
+			synchronized (expireTime)
+			{
+				expireTime = -1L;
+			}
+		}
+		
 	}
 
 	@Override

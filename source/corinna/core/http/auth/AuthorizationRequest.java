@@ -178,7 +178,7 @@ public class AuthorizationRequest
 		return fields.get(URI);
 	}
 
-	public String getCNonce()
+	public String getClientNonce()
 	{
 		return fields.get(CNONCE);
 	}
