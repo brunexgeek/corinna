@@ -285,7 +285,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	@Override
 	public boolean isRestricted()
 	{
-		return true;
+		return false;
 	}
 	
 }

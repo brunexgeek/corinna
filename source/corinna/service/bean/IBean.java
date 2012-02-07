@@ -30,4 +30,6 @@ public interface IBean
 	
 	public String getName();
 	
+	public IBeanConfig getConfig();
+	
 }

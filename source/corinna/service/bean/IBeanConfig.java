@@ -22,10 +22,6 @@ public interface IBeanConfig
 
 	public String getBeanName();
 	
-	public void setBeanParameter( String name, String value );
-	
-	public String removeBeanParameter( String name );
-	
 	public String getBeanParameter( String name );
 	
 	public String[] getBeanParameterNames();
