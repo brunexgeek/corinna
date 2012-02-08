@@ -1,7 +1,7 @@
 package corinna.service.bean;
 
 
-public abstract class ServiceBean implements IBean
+public abstract class ServiceBean implements IServiceBean
 {
 	
 	private IBeanConfig config;

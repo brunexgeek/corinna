@@ -19,6 +19,7 @@ package corinna.core;
 
 import javax.bindlet.IBindletService;
 
+import corinna.service.bean.IServiceBean;
 import corinna.util.IComponentInformation;
 
 

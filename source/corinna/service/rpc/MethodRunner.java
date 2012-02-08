@@ -264,7 +264,7 @@ public class MethodRunner implements IMethodRunner
 		} catch (java.lang.reflect.InvocationTargetException e)
 		{
 			throw new InvocationTargetException("The method '" + methodRef.getName()
-				+ "' throw an exception", e.getCause());
+				+ "' throw an exception", e.getTargetException());
 		} catch (Exception e)
 		{
 			throw new InternalException("Internal error while invoking method'" + methodRef.getName(),

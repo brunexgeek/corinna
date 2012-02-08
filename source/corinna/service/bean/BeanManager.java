@@ -16,10 +16,67 @@
 
 package corinna.service.bean;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import corinna.thread.ObjectLocker;
+
 
 public class BeanManager
 {
 
+	private Map<String,IServiceBean> beans;
 	
+	private ObjectLocker beanLock;
+	
+	private static Boolean instanceLock = false;
+	
+	private static BeanManager instance = null;
+	
+	private BeanManager()
+	{
+		beanLock = new ObjectLocker();
+		beans = new HashMap<String,IServiceBean>();
+	}
+	
+	public static BeanManager getInstance()
+	{
+		synchronized (instanceLock)
+		{
+			if (instance == null) instance = new BeanManager();
+			return instance;
+		}
+	}
+	
+	public IServiceBean getBean( String name )
+	{
+		if (name == null || name.isEmpty()) return null;
+		
+		beanLock.readLock();
+		IServiceBean bean = beans.get(name);
+		beanLock.readUnlock();
+		
+		return bean;
+	}
+
+	public IServiceBean removeBean( String name )
+	{
+		if (name == null || name.isEmpty()) return null;
+			
+		beanLock.writeLock();
+		IServiceBean bean = beans.remove(name);
+		beanLock.writeUnlock();
+		
+		return bean;
+	}
+	
+	public void addBean( IServiceBean bean )
+	{
+		if (bean == null) return;
+		
+		beanLock.writeLock();
+		beans.put(bean.getName(), bean);
+		beanLock.writeUnlock();
+	}
 	
 }

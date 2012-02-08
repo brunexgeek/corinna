@@ -132,6 +132,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 		} catch (Exception e)
 		{
 			res.sendError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+			log.error(e);
 		}
 		log.warn("Received method call for '" + procedure + "'");
 	}
