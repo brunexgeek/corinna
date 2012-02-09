@@ -17,6 +17,7 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import corinna.core.http.HttpUtils;
+import corinna.thread.ObjectLocker;
 
 
 public abstract class WebBindletResponse implements IWebBindletResponse
@@ -44,30 +45,26 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 
 	private BindletOutputStream outputStream = null;
 	
-	private Boolean isClosed = false;
+	private ObjectLocker outputLocker = null;
+	
+	//private Boolean isClosed = false;
 	
 	public WebBindletResponse( Channel channel, HttpResponse response )
 	{
 		this.response = response;
 		this.channel = channel;
+		this.outputLocker = new ObjectLocker();
 		init();
 	}
 	
 	@Override
 	public boolean isClosed()
 	{
-		synchronized (isClosed )
-		{
-			return isClosed;
-		}
-	}
-
-	protected void setClosed( boolean value )
-	{
-		synchronized (isClosed)
-		{
-			isClosed = value;
-		}
+		outputLocker.readLock();
+		boolean result = (outputStream != null && outputStream.isClosed());
+		outputLocker.readUnlock();
+		
+		return result;
 	}
 	
 	protected void init()
@@ -126,23 +123,27 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	@Override
 	public BindletOutputStream getOutputStream() throws IOException
 	{
-		if (outputStream  != null)
-		{
-			if (outputStream.isClosed())
-				throw new IllegalStateException("The bindlet output stream has been closed");
-			return outputStream;
-		}
-
-		if (isClosed())
-			throw new IllegalStateException("The bindlet has been closed");
+		BindletOutputStream out = null;
 		
-		if (!isChunked())
-			outputStream = new BufferedHttpOutputStream(this);
-		else
-			outputStream = new ChunkedHttpOutputStream(this);
-
-		setCommited(true);
-		return outputStream;
+		outputLocker.writeLock();
+		try
+		{
+			if (outputStream  == null)
+			{
+				if (!isChunked())
+					outputStream = new BufferedHttpOutputStream(this);
+				else
+					outputStream = new ChunkedHttpOutputStream(this);
+		
+				setCommited(true);
+			}
+			out = outputStream;
+		} finally
+		{
+			outputLocker.writeUnlock();
+		}
+		
+		return out;
 	}
 	
 	@Override
@@ -341,9 +342,8 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	{
 		if (isClosed()) return;
 
-		if (outputStream == null) getOutputStream();
-		setClosed(true);
-		if (outputStream != null && !outputStream.isClosed()) outputStream.close();
+		BindletOutputStream out = getOutputStream();
+		if (out != null && !out.isClosed()) out.close();
 	}
 	
 }

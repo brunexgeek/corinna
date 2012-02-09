@@ -198,4 +198,5 @@ public abstract class BindletOutputStream extends OutputStream implements IClose
 		writeBytes(value);
 	}
 	
+	public abstract long writtenBytes();
 }

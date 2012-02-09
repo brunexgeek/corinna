@@ -1,7 +1,12 @@
 package corinna.bindlet.soap;
 
+import java.io.IOException;
+
+import javax.bindlet.BindletOutputStream;
 import javax.bindlet.soap.ISoapBindletResponse;
+import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
 
 import org.jboss.netty.channel.Channel;
@@ -67,6 +72,31 @@ public class SoapBindletResponse extends WebBindletResponse implements ISoapBind
 	public void setWsdl( String wsdl )
 	{
 		this.wsdl = wsdl;
+	}
+	
+	@Override
+	public void close() throws IOException
+	{
+		if (isClosed()) return;
+
+		BindletOutputStream out = getOutputStream();
+		try
+		{
+			if (!out.isClosed() && out.writtenBytes() == 0)
+			{
+				if (exception != null)
+				{
+					SOAPFault fault = message.getSOAPBody().addFault();
+					fault.setFaultCode("SOAP-ENV:Client");
+					fault.setFaultString(exception.getMessage());
+				}
+				out.write( getMarshaller().marshall(message) );
+			}
+		} catch (Exception e)
+		{
+			// suprime os erros
+		}
+		if (out != null && !out.isClosed()) out.close();
 	}
 	
 }

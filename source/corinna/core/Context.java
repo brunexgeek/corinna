@@ -112,6 +112,7 @@ public abstract class Context<R, P> implements IContext<R, P>
 
 		if (acceptRequest(request))
 		{
+			event.setHandled(true);
 			boolean result = dispatchEventToBindlet(request, response);
 			event.setHandled(result);
 		}

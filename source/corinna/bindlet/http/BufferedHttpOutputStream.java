@@ -209,5 +209,11 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream
 		if (isClosed())
 			throw new IllegalStateException("The output stream has been closed");
 	}
+
+	@Override
+	public long writtenBytes()
+	{
+		return buffer.writerIndex();
+	}
 	
 }

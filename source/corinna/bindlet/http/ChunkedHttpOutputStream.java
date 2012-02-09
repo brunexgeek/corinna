@@ -70,6 +70,8 @@ public class ChunkedHttpOutputStream extends HttpBindletOutputStream
 
 	private Boolean isCommited = false;
 
+	private long writtenBytes = 0;
+
 	public ChunkedHttpOutputStream( WebBindletResponse resp, int bufferSize )
 	{
 		if (resp == null)
@@ -181,6 +183,7 @@ public class ChunkedHttpOutputStream extends HttpBindletOutputStream
 		 */
 		chunk.setContent(buffer);
 		channel.write(chunk);
+		writtenBytes  = buffer.writerIndex();
 		buffer.clear();
 	}
 
@@ -271,4 +274,11 @@ public class ChunkedHttpOutputStream extends HttpBindletOutputStream
 		if (isClosed()) throw new IllegalStateException("The output stream has been closed");
 	}
 
+
+	@Override
+	public long writtenBytes()
+	{
+		return writtenBytes;
+	}
+	
 }

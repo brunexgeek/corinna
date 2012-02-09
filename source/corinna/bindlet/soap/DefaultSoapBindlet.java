@@ -125,14 +125,12 @@ public class DefaultSoapBindlet extends SoapBindlet
 			
 			res.setChunked(false);
 			res.setContentType("application/soap+xml");
-			
-			BindletOutputStream output = res.getOutputStream();
-			output.write( res.getMarshaller().marshall(response) );
-			output.close();
+			res.setMessage(response);
 		} catch (Exception e)
 		{
-			res.sendError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+			//res.sendError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
 			log.error(e);
+			throw new IOException(e.getMessage());
 		}
 		log.warn("Received method call for '" + procedure + "'");
 	}
