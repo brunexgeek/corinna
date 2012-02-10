@@ -277,7 +277,6 @@ public class MethodRunner implements IMethodRunner
 		throws IncompleteImplementationException, InvocationTargetException,
 		MethodNotFoundException, IncompleteInterfaceException, InternalException
 	{
-
 		// obtém o método de implementação
 		Method methodRef = getMethod(request.getMethodPrototype());
 		if (methodRef == null)

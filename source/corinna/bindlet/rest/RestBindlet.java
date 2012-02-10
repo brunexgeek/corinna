@@ -18,25 +18,50 @@ package corinna.bindlet.rest;
 
 import javax.bindlet.Bindlet;
 
+import corinna.core.ContextInfo;
 import corinna.exception.BindletException;
 import corinna.service.rpc.IProcedureCall;
+import corinna.util.IComponentInformation;
 
 
 @SuppressWarnings("serial")
 public abstract class RestBindlet extends Bindlet<IRestBindletRequest, IRestBindletResponse>
 {
+	
+	private static final String COMPONENT_NAME = "REST Bindlet";
 
+	private static final String COMPONENT_VERSION = "1.0";
+
+	private static final String COMPONENT_IMPLEMENTOR = "Bruno Ribeiro";
+	
+	private static IComponentInformation COMPONENT_INFO = new ContextInfo(COMPONENT_NAME, 
+		COMPONENT_VERSION, COMPONENT_IMPLEMENTOR);
+	
 	public RestBindlet( ) throws BindletException
 	{
 		super();
 	}
 	
-	protected abstract Object doCall( IProcedureCall request );
+	protected abstract Object doCall( IProcedureCall request ) throws BindletException;
 	
 	@Override
-	public void process( IRestBindletRequest request, IRestBindletResponse response )
+	public void process( IRestBindletRequest request, IRestBindletResponse response ) 
+		throws BindletException
 	{
-		
+		try
+		{
+			response.setReturnValue( doCall( request.getProcedureCall() ) );
+		} catch (Exception e)
+		{
+			response.setReturnValue(null);
+			response.setException(e);
+		}		
+	}
+	
+	@Override
+	public IComponentInformation getBindletInfo()
+	{
+		return COMPONENT_INFO;
 	}
 	
 }

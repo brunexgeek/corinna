@@ -65,10 +65,13 @@ public class SoapStreamHandler extends StreamHandler
 		throws Exception
 	{
 		HttpRequest request = (HttpRequest) event.getMessage();
-
+log.trace(request.toString());
 		ISoapBindletRequest req = new SoapBindletRequest(request, unmarshaller);
 		ISoapBindletResponse res = new SoapBindletResponse( event.getChannel(), marshaller, request.getProtocolVersion() );
 
+		res.setChunked(false);
+		res.setContentType("text/xml");
+		
 		SoapRequestEvent e = new SoapRequestEvent(req, res);
 		try
 		{

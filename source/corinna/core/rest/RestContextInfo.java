@@ -1,9 +1,10 @@
-package corinna.core.http;
+package corinna.core.rest;
 
+import corinna.core.http.HttpContextInfo;
 import corinna.util.IComponentInformation;
 
 
-public class HttpContextInfo implements IComponentInformation
+public class RestContextInfo implements IComponentInformation
 {
 
 	private static IComponentInformation instance = null;
@@ -17,7 +18,7 @@ public class HttpContextInfo implements IComponentInformation
 	@Override
 	public String getComponentName()
 	{
-		return "HTTP Context";
+		return "REST Context";
 	}
 
 	@Override
@@ -31,5 +32,5 @@ public class HttpContextInfo implements IComponentInformation
 	{
 		return "Bruno Ribeiro";
 	}
-	
+		
 }

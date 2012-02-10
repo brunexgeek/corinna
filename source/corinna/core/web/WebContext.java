@@ -11,6 +11,7 @@ import corinna.core.http.HttpUtils;
 import corinna.thread.ObjectLocker;
 
 
+//TODO: move to "corinna.core.http"
 public abstract class WebContext<R extends IWebBindletRequest, P extends IWebBindletResponse>
 	extends Context<R, P> implements IWebContext<R, P>
 {

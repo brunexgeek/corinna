@@ -22,8 +22,6 @@ import java.util.Map;
 
 import javax.bindlet.IBindletService;
 
-import org.apache.log4j.Logger;
-
 import corinna.bindlet.BindletService;
 import corinna.exception.BindletException;
 import corinna.network.RequestEvent;
@@ -33,8 +31,6 @@ import corinna.util.Reflection;
 
 public abstract class Service implements IService
 {
-
-	private Logger log = Logger.getLogger(Service.class);
 	
 	private Map<String, IContext<?,?>> contexts;
 
@@ -154,9 +150,6 @@ public abstract class Service implements IService
 	 */
 	protected void dispatchEventToContexts( RequestEvent<?,?> event ) throws BindletException, IOException
 	{
-		if (log.isDebugEnabled())
-			log.debug("Dispatching event " + event.toString());
-		
 		contextsLock.readLock();
 		try
 		{

@@ -18,11 +18,9 @@ package corinna.bindlet.rest;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.Locale;
 
 import javax.bindlet.BindletOutputStream;
-import javax.bindlet.http.HttpStatus;
+import javax.xml.soap.SOAPFault;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -44,17 +42,12 @@ public class RestBindletResponse extends WebBindletResponse implements IRestBind
 	private Exception exception = null;
 	
 	private Object returnValue = null;
-
-	private HttpResponse response = null;
-	
-	private String encoding = Charset.defaultCharset().displayName();
-	
+		
 	public RestBindletResponse( Channel channel, HttpResponse response )
 	{
 		super(channel, response);
-		this.response = response;
-		String value = this.response.getHeader( HttpHeaders.Names.CONTENT_ENCODING);
-		if (value != null) encoding = value;			
+		setCharacterEncoding(Charset.defaultCharset());
+		setContentType("text/plain");
 	}
 
 	public RestBindletResponse( Channel channel, HttpVersion version )
@@ -93,28 +86,43 @@ public class RestBindletResponse extends WebBindletResponse implements IRestBind
 		else
 			status = RestStatus.ERROR;
 	}
-	
-	public HttpResponse getResponse()
-	{
-		Charset charset = Charset.forName(encoding);
-		ParameterList buffer = new ParameterList(charset);
-		
-		buffer.setValue("result", status.name());
-		
-		if (exception != null)
-			buffer.setValue("message", exception.getMessage());
-		else
-		if (returnValue != null)
-			buffer.setValue("return", returnValue);
 
-		byte[] output = buffer.toString().getBytes(Charset.forName(encoding));
-		ChannelBuffer content = ChannelBuffers.copiedBuffer(output);
-		
-		response.setContent(content);
-		response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=" + encoding);
-		HttpHeaders.setContentLength( response, content.capacity() );
-		
-		return response;
+	@Override
+	public void close() throws IOException
+	{
+		if (isClosed()) return;
+
+		BindletOutputStream out = getOutputStream();
+		try
+		{
+			if (!out.isClosed() && out.writtenBytes() == 0)
+			{
+				// TODO: use one of client acceptable charsets 
+				Charset charset = Charset.defaultCharset();
+				ParameterList buffer = new ParameterList(charset);
+				
+				buffer.setValue("result", status.name());
+				
+				if (exception != null)
+					buffer.setValue("message", exception.getMessage());
+				else
+				if (returnValue != null)
+					buffer.setValue("return", returnValue);
+
+				byte[] output = buffer.toString().getBytes(charset);
+				out.write(output);
+			}
+		} catch (Exception e)
+		{
+			// suprime os erros
+		}
+		if (out != null && !out.isClosed()) out.close();
+	}
+	
+	@Override
+	public void setStatus( RestStatus status )
+	{
+		this.status = status;
 	}
 	
 }

@@ -124,7 +124,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 			SOAPMessage response = createSoapResponse(DEFAULT_NAMESPACE, procedure.getMethodPrototype(), result);
 			
 			res.setChunked(false);
-			res.setContentType("application/soap+xml");
+			res.setContentType("text/xml");
 			res.setMessage(response);
 		} catch (Exception e)
 		{
@@ -215,10 +215,10 @@ public class DefaultSoapBindlet extends SoapBindlet
 		
 		// create the SOAP method response element
 		SOAPBody body = message.getSOAPBody();
-		QName qname = new QName(namespace, prototype + WsdlGenerator.METHOD_RESPONSE_SUFFIX, "q0");
+		QName qname = new QName(namespace, prototype + WsdlGenerator.METHOD_RESPONSE_SUFFIX, "");
 		SOAPElement element = body.addChildElement(qname);
 		// create the return value element
-		qname = new QName(namespace, WsdlGenerator.PARAMETER_RESULT, "q0");
+		qname = new QName(namespace, WsdlGenerator.PARAMETER_RESULT, "");
 		SOAPElement carrier = element.addChildElement(qname);
 		carrier.setValue( result.toString() );
 		

@@ -27,7 +27,6 @@ import javax.bindlet.IBindletContext;
 import corinna.exception.BindletException;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
-import corinna.util.Reflection;
 
 
 public abstract class Context<R, P> implements IContext<R, P>

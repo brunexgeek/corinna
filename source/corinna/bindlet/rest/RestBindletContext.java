@@ -17,23 +17,15 @@
 package corinna.bindlet.rest;
 
 import corinna.bindlet.BindletContext;
-import corinna.core.IContext;
-import corinna.util.IComponentInformation;
+import corinna.core.rest.RestContext;
 
 
 public class RestBindletContext extends BindletContext<IRestBindletRequest, IRestBindletResponse>
 {
 
-	public RestBindletContext( IContext<IRestBindletRequest, IRestBindletResponse> context )
+	public RestBindletContext( RestContext context )
 	{
 		super(context);
-	}
-
-	@Override
-	public IComponentInformation getContextInfo()
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

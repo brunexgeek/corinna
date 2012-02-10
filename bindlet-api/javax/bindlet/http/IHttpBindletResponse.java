@@ -36,7 +36,6 @@ import javax.bindlet.IBindletResponse;
  * @see corinna.service.bindlet.IBindletResponse
  * 
  */
-// TODO: mover para 'javax.bindlet.http'
 public interface IHttpBindletResponse extends IWebBindletResponse
 {
 

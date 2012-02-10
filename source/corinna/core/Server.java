@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import corinna.core.LifecycleManager.StateTransition;
 import corinna.exception.BindletException;
 import corinna.exception.LifecycleException;
@@ -33,8 +31,6 @@ import corinna.thread.ObjectLocker;
 
 public class Server implements IServer
 {
-
-	private Logger log = Logger.getLogger(Server.class);
 	
 	private LifecycleManager lifecycle;
 
@@ -321,19 +317,14 @@ public class Server implements IServer
 	 */
 	protected void dispatchEventToServices( RequestEvent<?,?> event ) throws BindletException, IOException
 	{
-		//if (log.isDebugEnabled())
-			log.debug("Dispatching event " + event.toString());
-		
 		servicesLock.readLock();
 		try
 		{
-			//RequestEvent<R,P> e = new RequestEvent<R,P>(this, event.getRequest(), event.getResponse());
 			for (Map.Entry<String,IService> entry : services.entrySet())
 			{
 				entry.getValue().serverRequestReceived(this, event);
 				if ( event.isHandled() ) break;
 			}
-			//event.setHandled( e.isHandled() );
 		} finally
 		{
 			servicesLock.readUnlock();

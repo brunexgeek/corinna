@@ -22,8 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import corinna.exception.BindletException;
 import corinna.exception.ConnectorInUseException;
 import corinna.exception.ServerInUseException;
@@ -36,8 +34,6 @@ import corinna.thread.ObjectLocker;
 
 public final class Domain implements IDomain
 {
-
-	private static final Logger log = Logger.getLogger(Domain.class);
 	
 	private String name;
 	
@@ -256,9 +252,6 @@ public final class Domain implements IDomain
 			{
 				IServer server = entry.getValue();
 				if (server == null) continue;
-				
-				if (log.isDebugEnabled())
-					log.debug("Dispatching event to server " + server.getName());
 				
 				server.domainRequestReceived(this, event);
 				if ( event.isHandled() ) break;

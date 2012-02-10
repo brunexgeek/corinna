@@ -39,13 +39,13 @@ import corinna.util.Stateless;
 public class HttpNetworkConnector extends NetworkConnector
 {
 
-	private HttpRequestDecoder decoder;
+	/*rivate HttpRequestDecoder decoder;
 
 	private HttpChunkAggregator aggregator;
 
 	private HttpResponseEncoder encoder;
 
-	private ChunkedWriteHandler chunkedWriter;
+	private ChunkedWriteHandler chunkedWriter;*/
 
 	private HttpStreamHandler channelHandler;
 	
@@ -53,10 +53,11 @@ public class HttpNetworkConnector extends NetworkConnector
 	{
 		super(config);
 		
-		this.decoder = new HttpRequestDecoder(1024, 4096, 8192);
+		// TODO: create stateless (or pooled) decoders and encoders 
+		/*this.decoder = new HttpRequestDecoder(1024, 4096, 8192);
 		this.encoder = new HttpResponseEncoder();
 		this.aggregator = new HttpChunkAggregator(1024 * 1024);
-		this.chunkedWriter = new ChunkedWriteHandler();
+		this.chunkedWriter = new ChunkedWriteHandler();*/
 		
 		StateModel state = HttpStreamHandler.class.getAnnotation(StateModel.class);
 		if (state != null && state.value() == Model.STATELESS)
@@ -70,10 +71,10 @@ public class HttpNetworkConnector extends NetworkConnector
 	{
 		// create the default stateless pipeline for all channels
 		ChannelPipeline pipeline = Channels.pipeline();
-		pipeline.addLast("decoder", decoder);
-		pipeline.addLast("aggregator", aggregator);
-		pipeline.addLast("encoder", encoder);
-		pipeline.addLast("chunkedWriter", chunkedWriter);
+		pipeline.addLast("decoder", new HttpRequestDecoder(1024, 4096, 8192));
+		pipeline.addLast("aggregator", new HttpChunkAggregator(1024 * 1024));
+		pipeline.addLast("encoder", new HttpResponseEncoder());
+		pipeline.addLast("chunkedWriter", new ChunkedWriteHandler());
 
 		HttpStreamHandler handler = channelHandler;
 		if (handler == null) handler = new HttpStreamHandler(this);

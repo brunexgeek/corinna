@@ -131,13 +131,15 @@ public class BindletRegistration implements IBindletRegistration
 		if (bindletModel == Model.STATELESS) 
 		{
 			instance = getBindletInstance();
-			log.debug("Using a shared instance of the stateless bindlet");
+			if (log.isTraceEnabled())
+			log.trace("Using a shared instance of the stateless bindlet");
 		}
 		else
 		//if (bindletModel == Model.STATEFULL)
 		{
 			instance = createBindletInstance();
-			log.debug("Create a instance of the statefull bindlet");
+			if (log.isTraceEnabled()) 
+				log.trace("Create a instance of the statefull bindlet");
 		}
 		
 		return instance;

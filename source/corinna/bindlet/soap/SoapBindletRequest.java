@@ -9,15 +9,19 @@ import javax.bindlet.soap.ISoapBindletRequest;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
+import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import corinna.bindlet.http.WebBindletRequest;
 import corinna.exception.BindletException;
+import corinna.network.soap.SoapStreamHandler;
 import corinna.network.soap.SoapUnmarshaller;
 
 
 public class SoapBindletRequest extends WebBindletRequest implements ISoapBindletRequest
 {
+	
+	private static Logger log = Logger.getLogger(SoapBindletRequest.class);
 	
 	private Charset charset = null;
 	
@@ -34,6 +38,7 @@ public class SoapBindletRequest extends WebBindletRequest implements ISoapBindle
 		this.request = request;
 
 		String encoding = getCharacterEncoding(); 
+log.warn("### charset = " + charset);
 		if (encoding != null && !encoding.isEmpty()) charset = Charset.forName(encoding);
 		
 		// get the content

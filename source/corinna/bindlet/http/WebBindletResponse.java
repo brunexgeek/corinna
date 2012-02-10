@@ -125,6 +125,8 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	{
 		BindletOutputStream out = null;
 		
+		update();
+		
 		outputLocker.writeLock();
 		try
 		{

@@ -45,7 +45,7 @@ public class RestBindletRequest extends WebBindletRequest implements IRestBindle
 		if (path == null || path.isEmpty()) return null;
 		
 		int start = path.lastIndexOf("/");
-		if (path.length() < start+1)
+		if (start+1 < path.length())
 			return path.substring(start+1);
 		else
 			return null;

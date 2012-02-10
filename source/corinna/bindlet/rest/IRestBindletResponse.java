@@ -19,14 +19,21 @@ package corinna.bindlet.rest;
 import javax.bindlet.http.IWebBindletResponse;
 
 
+// TODO: move to "javax.bindlet.rest"
 public interface IRestBindletResponse extends IWebBindletResponse
 {
 	
 	public Object getReturnValue();
 	
+	public void setReturnValue( Object value );
+	
 	public RestStatus getStatus();
+	
+	public void setStatus( RestStatus status );
 
 	public Exception getException();
+	
+	public void setException( Exception exception );
 
 	public enum RestStatus
 	{

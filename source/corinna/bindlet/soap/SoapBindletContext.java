@@ -1,16 +1,18 @@
 package corinna.bindlet.soap;
 
 
-import corinna.bindlet.BindletContext;
-import corinna.core.IContext;
+import javax.bindlet.soap.ISoapBindletRequest;
+import javax.bindlet.soap.ISoapBindletResponse;
 
-public class SoapBindletContext extends BindletContext
+import corinna.bindlet.BindletContext;
+import corinna.core.soap.SoapContext;
+
+public class SoapBindletContext extends BindletContext<ISoapBindletRequest, ISoapBindletResponse>
 {
 
-	public SoapBindletContext( IContext<?,?> context )
+	public SoapBindletContext( SoapContext context )
 	{
-		super(context);
-		
+		super(context);		
 	}
 
 }
