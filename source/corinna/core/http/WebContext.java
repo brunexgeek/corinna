@@ -20,15 +20,9 @@ public abstract class WebContext<R extends IWebBindletRequest, P extends IWebBin
 
 	private static final String CONTEXT_URL_MAPPING = "urlMapping";
 
-	private ObjectLocker authenticatorLock;
-
-	//private IHttpAuthenticator authenticator;
-
 	public WebContext( String name )
 	{
 		super(name);
-	//	authenticator = null;
-		authenticatorLock = new ObjectLocker();
 	}
 
 	protected IBindletRegistration findRegistration( IWebBindletRequest request )
@@ -81,30 +75,5 @@ public abstract class WebContext<R extends IWebBindletRequest, P extends IWebBin
 
 		return true;
 	}
-
-	/*@Override
-	public void setAuthenticator( IHttpAuthenticator auth )
-	{
-		authenticatorLock.writeLock();
-		try
-		{
-			authenticator = auth;
-		} finally
-		{
-			authenticatorLock.writeUnlock();
-		}
-	}
-
-	@Override
-	public IHttpAuthenticator getAuthenticator()
-	{
-		IHttpAuthenticator auth;
-
-		authenticatorLock.readLock();
-		auth = authenticator;
-		authenticatorLock.readUnlock();
-
-		return auth;
-	}*/
 
 }

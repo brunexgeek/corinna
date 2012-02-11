@@ -25,6 +25,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.handler.codec.http.DefaultHttpChunk;
+import org.jboss.netty.handler.codec.http.HttpChunk;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 
@@ -43,67 +45,64 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream
 	public static final int MIN_BUFFER_SIZE = 1024;
 	
 	/**
-	 * Maximum buffer size (20 MiB).
+	 * Maximum buffer size (10 MiB).
 	 */
-	public static final int MAX_BUFFER_SIZE = 1024 * 1024 * 20;
+	public static final int MAX_BUFFER_SIZE = 1024 * 1024 * 10;
+	
+	protected ChannelBuffer buffer = null;
 
-	private HttpResponse response = null;
+	protected WebBindletResponse response;
 
-	private WebBindletResponse bindlet = null;
+	protected Channel channel = null;
 
-	private ChannelBuffer buffer = null;
+	protected String charset = null;
 
-	private Channel channel = null;
+	protected Boolean isClosed = false;
 
-	private Boolean isClosed = false;
+	protected Boolean isCommited = false;
 
-	private String charset = null;
+	private Long writtenBytes = 0L;
+
+	public BufferedHttpOutputStream( WebBindletResponse resp, int bufferSize )
+	{
+		if (resp == null)
+			throw new NullPointerException("The HTTP response object can not be null");
+		
+		// limits the buffer size in a valid range
+		if (bufferSize < MIN_BUFFER_SIZE)
+			bufferSize = MIN_BUFFER_SIZE;
+		else
+		if (bufferSize > MAX_BUFFER_SIZE)
+			bufferSize = MAX_BUFFER_SIZE;
+
+		response = resp;
+		channel = response.getChannel();
+		response.getResponse().setContent(null);
+		charset = response.getCharacterEncoding();
+		// TODO: criar um pool de "ChannelBuffer"
+		buffer = ChannelBuffers.buffer(bufferSize);
+	}
 
 	public BufferedHttpOutputStream( WebBindletResponse resp )
 	{
 		this(resp, DEFAULT_BUFFER_SIZE);
 	}
 
-	public BufferedHttpOutputStream( WebBindletResponse resp, int estimatedLength )
-	{
-		if (resp == null)
-			throw new NullPointerException("The bindlet response object can not be null");
-
-		bindlet = resp;
-		response = resp.getResponse();
-		channel = resp.getChannel();
-		buffer = response.getContent();
-		charset = resp.getCharacterEncoding();
-
-		// limits the buffer size in a valid range
-		if (estimatedLength < MIN_BUFFER_SIZE)
-			estimatedLength = MIN_BUFFER_SIZE;
-		else
-		if (estimatedLength > MAX_BUFFER_SIZE)
-			estimatedLength = MAX_BUFFER_SIZE;
-
-		if (buffer == null || buffer == ChannelBuffers.EMPTY_BUFFER
-			|| !(buffer instanceof DynamicChannelBuffer))
-		{
-			// TODO: criar um pool de "ChannelBuffer"
-			buffer = ChannelBuffers.dynamicBuffer(estimatedLength);
-			response.setContent(buffer);
-		}
-	}
-
 	@Override
 	public void writeString( String value ) throws IOException
 	{
 		checkClosed();
-		if (value == null) value = "null";
-		byte[] bytes = value.getBytes(charset);
-		writeBytes(bytes);
+		if (value == null || value.isEmpty()) return;
+
+		byte[] data = value.getBytes(charset);
+		writeBytes(data);
 	}
 
 	@Override
 	public void writeChar( char value ) throws IOException
 	{
 		checkClosed();
+		flushIfNeeded(2);
 		buffer.writeChar(value);
 	}
 
@@ -111,6 +110,7 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream
 	public void writeInt( int value ) throws IOException
 	{
 		checkClosed();
+		flushIfNeeded(4);
 		buffer.writeByte(value);
 	}
 
@@ -118,6 +118,7 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream
 	public void writeLong( long value ) throws IOException
 	{
 		checkClosed();
+		flushIfNeeded(8);
 		buffer.writeLong(value);
 	}
 
@@ -125,6 +126,7 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream
 	public void writeFloat( float value ) throws IOException
 	{
 		checkClosed();
+		flushIfNeeded(4);
 		buffer.writeFloat(value);
 	}
 
@@ -132,33 +134,49 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream
 	public void writeDouble( double value ) throws IOException
 	{
 		checkClosed();
+		flushIfNeeded(8);
 		buffer.writeDouble(value);
+	}
+
+	@Override
+	public void write( Object object ) throws IOException
+	{
+		if (object == null) return;
+		writeString(object.toString());
+	}
+
+	public void flushIfNeeded( int bytes ) throws IOException
+	{
+		if (bytes > buffer.writableBytes()) flush();
 	}
 
 	@Override
 	public void flush() throws IOException
 	{
+		checkClosed();
+
+		if (!isCommited())
+		{
+			response.sendHeaders();
+			setCommited(true);
+		}
+
+		// ignore if the buffer has no data to flush (the last chunk will be sent by 'close' method)
+		if (!buffer.readable()) return;
+		
+		channel.write(buffer);
+		incWrittenBytes(buffer.writerIndex());
+		buffer.clear();
 	}
 
 	@Override
 	public void close() throws IOException
 	{
-		checkClosed();
-		setClosed(true);
+		flush();
 
-		// update the content length
-		//bindlet.setContentLength(buffer.writerIndex());
-		bindlet.update();
-		response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, buffer.writerIndex());
-		// write the bindlet content to the output channel
-		channel.write(response);
-	}
-
-	private void setClosed( boolean value )
-	{
 		synchronized (isClosed)
 		{
-			isClosed = value;
+			isClosed = true;
 		}
 	}
 
@@ -175,6 +193,7 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream
 	public void writeByte( byte value ) throws IOException
 	{
 		checkClosed();
+		flushIfNeeded(1);
 		buffer.writeByte(value);
 	}
 
@@ -192,28 +211,60 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream
 			throw new IndexOutOfBoundsException("Invalid length");
 		if (len == 0) return;
 
-		buffer.writeBytes(value, off, len);
+		int remaining = len;
+		int cursor = off;
+
+		while (remaining > 0)
+		{
+			int length = remaining;
+
+			if (length > buffer.writableBytes()) length = buffer.writableBytes();
+			buffer.writeBytes(value, cursor, length);
+			// check if need flush
+			if (buffer.writableBytes() == 0) flush();
+
+			cursor += length;
+			remaining -= length;
+		}
 	}
 
-	@Override
-	public void write( Object object ) throws IOException
+	protected void setCommited( Boolean isCommited )
 	{
-		if (object == null)
-			writeString(null);
-		else
-			writeString(object.toString());
+		synchronized (isCommited)
+		{
+			this.isCommited = isCommited;
+		}
 	}
 
-	private void checkClosed()
+	protected Boolean isCommited()
 	{
-		if (isClosed())
-			throw new IllegalStateException("The output stream has been closed");
+		synchronized (isCommited)
+		{
+			return isCommited;
+		}
 	}
+
+	protected void checkClosed()
+	{
+		if (isClosed()) throw new IllegalStateException("The output stream has been closed");
+	}
+
 
 	@Override
 	public long writtenBytes()
 	{
-		return buffer.writerIndex();
+		synchronized (writtenBytes)
+		{
+			return writtenBytes;
+		}
+	}
+
+	protected void incWrittenBytes( long amount )
+	{
+		synchronized (writtenBytes)
+		{
+			writtenBytes += amount;
+		}
 	}
 	
 }

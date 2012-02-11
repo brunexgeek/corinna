@@ -328,7 +328,7 @@ public class WebBindletRequest implements IWebBindletRequest
 		if (path.length() < resourcePath.length())
 			resourcePath = resourcePath.substring(path.length());
 		else
-			resourcePath = "";
+			resourcePath = "/";
 	}
 
 	/**

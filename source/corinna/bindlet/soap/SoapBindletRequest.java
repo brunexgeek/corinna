@@ -37,8 +37,7 @@ public class SoapBindletRequest extends WebBindletRequest implements ISoapBindle
 		super(request);
 		this.request = request;
 
-		String encoding = getCharacterEncoding(); 
-log.warn("### charset = " + charset);
+		String encoding = getCharacterEncoding();
 		if (encoding != null && !encoding.isEmpty()) charset = Charset.forName(encoding);
 		
 		// get the content

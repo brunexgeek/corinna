@@ -37,7 +37,7 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 
 	private Boolean isCommited = false;
 
-	private long contentLength = 0;
+	private long contentLength = -1;
 
 	private Locale locale = null;
 
@@ -71,7 +71,7 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	{
 		contentType = "text/html";
 		charset = Charset.defaultCharset().displayName();
-		contentLength = 0;
+		contentLength = -1;
 		locale = Locale.ENGLISH;
 		response.setStatus(HttpResponseStatus.OK);
 		response.setContent(null);
@@ -83,27 +83,31 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	{
 		String now = HttpUtils.formatDate( calendar.getTime() );
 		
-		response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, contentLength);
 		// update the response date and last modification date
 		response.setHeader(HttpHeaders.Names.DATE, now );
 		if (!containsHeader(HttpHeaders.Names.LAST_MODIFIED))
 			response.setHeader(HttpHeaders.Names.LAST_MODIFIED, now );
+		
 		// update the response content informations
 		if (charset == null)
 			response.setHeader( HttpHeaders.Names.CONTENT_TYPE, contentType );
 		else
 			response.setHeader( HttpHeaders.Names.CONTENT_TYPE, contentType + "; charset=" + charset );
 		response.setHeader(HttpHeaders.Names.CONTENT_LANGUAGE, Locale.ENGLISH.getLanguage());
+		
 		// update the response extra fields
 		response.setHeader(HttpHeaders.Names.SERVER, HEADER_SERVER);
-		if (isChunked())
+		if (isChunked() && getContentLength() < 0)
 		{
 			response.setHeader(HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);
 			response.removeHeader(HttpHeaders.Names.CONTENT_LENGTH);
 		}
 		else
+		{
+			response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, contentLength);
 			// TODO: it will cause problems with others transfer encodings (gzip, deflate, etc.).
 			response.removeHeader(HttpHeaders.Names.TRANSFER_ENCODING);
+		}
 	}
 	
 	protected boolean isCommited()
@@ -132,7 +136,7 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 		{
 			if (outputStream  == null)
 			{
-				if (!isChunked())
+				if (!isChunked() || getContentLength() >= 0)
 					outputStream = new BufferedHttpOutputStream(this);
 				else
 					outputStream = new ChunkedHttpOutputStream(this);
@@ -346,6 +350,12 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 
 		BindletOutputStream out = getOutputStream();
 		if (out != null && !out.isClosed()) out.close();
+	}
+
+	protected void sendHeaders()
+	{
+		update();
+		channel.write(getResponse());
 	}
 	
 }

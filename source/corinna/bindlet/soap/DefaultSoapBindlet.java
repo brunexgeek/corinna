@@ -35,13 +35,13 @@ import corinna.thread.ObjectLocker;
 public class DefaultSoapBindlet extends SoapBindlet
 {
 	
-	protected static final String DEFAULT_ENDPOINT = "http://localhost:8080";
-	
-	protected static final String DEFAULT_NAMESPACE = DEFAULT_ENDPOINT + "/" + WsdlGenerator.DEFAULT_SCHEMA;
-	
 	private static Logger log = Logger.getLogger(DefaultSoapBindlet.class);
 	
 	private static final long serialVersionUID = -5420790590792120345L;
+	
+	protected static final String DEFAULT_ENDPOINT = "http://localhost:8080";
+	
+	protected static final String DEFAULT_NAMESPACE = DEFAULT_ENDPOINT + "/" + WsdlGenerator.DEFAULT_SCHEMA;
 	
 	private static final String PARAMETER_INTERFACE = "interfaceClass";
 	
@@ -98,16 +98,18 @@ public class DefaultSoapBindlet extends SoapBindlet
 	protected void doWsdl( ISoapBindletRequest req, ISoapBindletResponse response ) throws BindletException, IOException
 	{
 		String resource = req.getResourcePath();
-		if (!resource.isEmpty())
+		if (!resource.equals("/"))
 		{
 			response.sendError(HttpStatus.NOT_FOUND);
 			return;
 		}
+		
+		String wsdl = getWsdl(req);
 		response.setContentType("text/xml");
-		response.setChunked(true);
+		response.setContentLength(wsdl.length());
 		
 		BindletOutputStream output = response.getOutputStream();
-		output.write( getWsdl(req) );
+		output.write(wsdl);
 		output.close();
 	}
 
@@ -284,7 +286,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	@Override
 	public boolean isRestricted()
 	{
-		return false;
+		return true;
 	}
 	
 }
