@@ -21,6 +21,7 @@ import javax.bindlet.IBindletService;
 
 import corinna.service.bean.IServiceBean;
 import corinna.util.IComponentInformation;
+import corinna.util.conf.ISection;
 
 
 /**
@@ -36,8 +37,10 @@ import corinna.util.IComponentInformation;
  * @version 2.0
  * @see IServiceHandler
  */
-public interface IService extends IServerRequestListener
+public interface IService extends IServerRequestListener, ILifecycle
 {
+
+	Class<?>[] CONSTRUCTOR_ARGS = { String.class, IServer.class, ISection.class };
 
 	public String getName();
 	
@@ -54,13 +57,11 @@ public interface IService extends IServerRequestListener
 	public void addContext( IContext<?,?> context );
 	
 	public IComponentInformation getServiceInfo();
-	
-	public void init();
-	
-	public void start();
-	
-	public void stop();
-	
-	public void destroy();
+
+	public String getParameter( String name );
+
+	public void setParameter( String name, String value );
+
+	public String[] getParameterNames();
 	
 }

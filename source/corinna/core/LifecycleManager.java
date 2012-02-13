@@ -158,7 +158,7 @@ public class LifecycleManager implements ILifecycleBase
 		return getLifecycleState().name();
 	}
 
-	public static StateTransition canChangeState( LifecycleState fromState, LifecycleState toState )
+	protected static StateTransition canChangeState( LifecycleState fromState, LifecycleState toState )
 	{
 		int value = transitionTable[fromState.ordinal()][toState.ordinal()];
 		switch (value)

@@ -56,6 +56,10 @@ public enum XMLDomainTags
 	
 	PARAMETER("parameter"),
 	
+	PARAMETER_NAME("parameter-name"),
+	
+	PARAMETER_VALUE("parameter-value"),
+	
 	CONTEXTS("contexts"),
 	
 	CONTEXT_NAME("context-name"),
@@ -76,7 +80,7 @@ public enum XMLDomainTags
 	
 	ADD_SERVICE("add-service"),
 	
-	UNKNOW(null), ;
+	UNKNOW(null);
 	
 	private String tag;
 	

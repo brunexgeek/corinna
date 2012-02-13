@@ -1,4 +1,4 @@
-package corinna.network.web;
+package corinna.network.http;
 
 import javax.bindlet.http.IWebBindletRequest;
 import javax.bindlet.http.IWebBindletResponse;
@@ -22,13 +22,13 @@ import corinna.util.StateModel.Model;
 public class WebNetworkConnector extends NetworkConnector
 {
 
-	private HttpRequestDecoder decoder;
+	/*private HttpRequestDecoder decoder;
 
 	private HttpChunkAggregator aggregator;
 
 	private HttpResponseEncoder encoder;
 
-	private ChunkedWriteHandler chunkedWriter;
+	private ChunkedWriteHandler chunkedWriter;*/
 
 	private WebStreamHandler channelHandler;
 	
@@ -36,10 +36,10 @@ public class WebNetworkConnector extends NetworkConnector
 	{
 		super(config);
 		
-		this.decoder = new HttpRequestDecoder(1024, 4096, 8192);
+		/*this.decoder = new HttpRequestDecoder(1024, 4096, 8192);
 		this.encoder = new HttpResponseEncoder();
 		this.aggregator = new HttpChunkAggregator(1024 * 1024);
-		this.chunkedWriter = new ChunkedWriteHandler();
+		this.chunkedWriter = new ChunkedWriteHandler();*/
 		if (HttpStreamHandler.class.isAnnotationPresent(Stateless.class))
 			this.channelHandler = new WebStreamHandler(this);
 		else
@@ -51,10 +51,10 @@ public class WebNetworkConnector extends NetworkConnector
 	{
 		// create the default stateless pipeline for all channels
 		ChannelPipeline pipeline = Channels.pipeline();
-		pipeline.addLast("decoder", decoder);
-		pipeline.addLast("aggregator", aggregator);
-		pipeline.addLast("encoder", encoder);
-		pipeline.addLast("chunkedWriter", chunkedWriter);
+		pipeline.addLast("decoder", new HttpRequestDecoder(1024, 4096, 8192));
+		pipeline.addLast("aggregator", new HttpChunkAggregator(1024 * 1024));
+		pipeline.addLast("encoder", new HttpResponseEncoder());
+		pipeline.addLast("chunkedWriter", new ChunkedWriteHandler());
 
 		WebStreamHandler handler = channelHandler;
 		if (handler == null) handler = new WebStreamHandler(this);

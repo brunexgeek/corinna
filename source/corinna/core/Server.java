@@ -27,12 +27,12 @@ import corinna.exception.BindletException;
 import corinna.exception.LifecycleException;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
+import corinna.util.conf.ISection;
+import corinna.util.conf.Section;
 
 
-public class Server implements IServer
+public class Server extends Lifecycle implements IServer
 {
-	
-	private LifecycleManager lifecycle;
 
 	private Map<String, IService> services;
 
@@ -42,15 +42,18 @@ public class Server implements IServer
 	
 	private IDomain domain = null;
 
-	public Server( String name )
+	private ISection config;
+
+	public Server( String name, ISection config )
 	{
 		if (name == null)
 			throw new IllegalArgumentException("The server name can not be null or empty");
+
 		this.name = name;
-		
-		lifecycle = new LifecycleManager();
-		services = new HashMap<String, IService>();
-		servicesLock = new ObjectLocker();
+		this.lifecycle = new LifecycleManager();
+		this.services = new HashMap<String, IService>();
+		this.servicesLock = new ObjectLocker();
+		this.config  = (config == null) ? new Section("Parameters") : config;
 	}
 
 	@Override
@@ -67,30 +70,6 @@ public class Server implements IServer
 		return name;
 	}
 	
-	@Override
-	public void addLifecycleListener( ILifecycleListener listener )
-	{
-		lifecycle.addLifecycleListener(listener);
-	}
-
-	@Override
-	public void removeLifecycleListener( ILifecycleListener listener )
-	{
-		lifecycle.removeLifecycleListener(listener);
-	}
-
-	@Override
-	public LifecycleState getLifecycleState()
-	{
-		return lifecycle.getLifecycleState();
-	}
-
-	@Override
-	public String getLifecycleStateName()
-	{
-		return lifecycle.getLifecycleStateName();
-	}
-
 	@Override
 	public List<IService> getServices()
 	{
@@ -119,11 +98,11 @@ public class Server implements IServer
 	@Override
 	public void addService( IService service )
 	{
+		if (service == null || service.getServer() != this) return;
+
 		servicesLock.writeLock();
 		try
 		{
-			if (service instanceof Service)
-				((Service)service).setServer(this);
 			services.put(service.getName(), service);
 		} finally
 		{
@@ -158,7 +137,7 @@ public class Server implements IServer
 		return value;
 	}
 	
-	public void initServices() throws LifecycleException
+	protected void initServices() throws LifecycleException
 	{
 		servicesLock.readLock();
 		try
@@ -170,8 +149,14 @@ public class Server implements IServer
 			servicesLock.readUnlock();
 		}
 	}
+	
+	@Override	
+	public void onInit() throws LifecycleException
+	{
+		initServices();
+	}
 
-	public void startServices() throws LifecycleException
+	protected void startServices() throws LifecycleException
 	{
 		servicesLock.readLock();
 		try
@@ -183,8 +168,14 @@ public class Server implements IServer
 			servicesLock.readUnlock();
 		}
 	}
+	
+	@Override
+	public void onStart() throws LifecycleException
+	{
+		startServices();
+	}
 
-	public void stopServices() throws LifecycleException
+	protected void stopServices() throws LifecycleException
 	{
 		servicesLock.readLock();
 		try
@@ -196,8 +187,14 @@ public class Server implements IServer
 			servicesLock.readUnlock();
 		}
 	}
+	
+	@Override
+	public void onStop() throws LifecycleException
+	{
+		stopServices();
+	}
 
-	public void destroyServices() throws LifecycleException
+	protected void destroyServices() throws LifecycleException
 	{
 		servicesLock.readLock();
 		try
@@ -209,93 +206,11 @@ public class Server implements IServer
 			servicesLock.readUnlock();
 		}
 	}
-
-	protected void initInternal() throws LifecycleException
-	{
-		// does nothing
-	}
-
+	
 	@Override
-	public void init() throws LifecycleException
+	public void onDestroy() throws LifecycleException
 	{
-		StateTransition trans = lifecycle.changeLifecycleState(LifecycleState.INITIALIZING);
-		if (trans == StateTransition.IGNORE) return;
-
-		try
-		{
-			initInternal();
-			initServices();
-			lifecycle.changeLifecycleState(LifecycleState.INITIALIZED);
-		} catch (Exception e)
-		{
-			lifecycle.setLifecycleState(LifecycleState.FAILED);
-		}
-	}
-
-	protected void startInternal() throws LifecycleException
-	{
-		// does nothing
-	}
-
-	@Override
-	public void start() throws LifecycleException
-	{
-		StateTransition trans = lifecycle.changeLifecycleState(LifecycleState.STARTING);
-		if (trans == StateTransition.IGNORE) return;
-
-		try
-		{
-			startInternal();
-			startServices();
-			lifecycle.changeLifecycleState(LifecycleState.STARTED);
-		} catch (Exception e)
-		{
-			lifecycle.setLifecycleState(LifecycleState.FAILED);
-		}
-	}
-
-	protected void stopInternal() throws LifecycleException
-	{
-		// does nothing
-	}
-
-	@Override
-	public void stop() throws LifecycleException
-	{
-		StateTransition trans = lifecycle.changeLifecycleState(LifecycleState.STOPPING);
-		if (trans == StateTransition.IGNORE) return;
-
-		try
-		{
-			stopInternal();
-			stopServices();
-			lifecycle.changeLifecycleState(LifecycleState.STOPPED);
-		} catch (Exception e)
-		{
-			lifecycle.setLifecycleState(LifecycleState.FAILED);
-		}
-	}
-
-	protected void destroyInternal() throws LifecycleException
-	{
-		// does nothing
-	}
-
-	@Override
-	public void destroy() throws LifecycleException
-	{
-		StateTransition trans = lifecycle.changeLifecycleState(LifecycleState.DESTROYING);
-		if (trans == StateTransition.IGNORE) return;
-
-		try
-		{
-			destroyInternal();
-			destroyServices();
-			lifecycle.changeLifecycleState(LifecycleState.DESTROYED);
-		} catch (Exception e)
-		{
-			lifecycle.setLifecycleState(LifecycleState.FAILED);
-		}
+		destroyServices();
 	}
 
 	@Override
@@ -342,6 +257,43 @@ public class Server implements IServer
 	public IDomain getDomain()
 	{
 		return domain;
+	}
+	
+	@Override
+	public String getParameter( String name )
+	{
+		return config.getValue(name, null);
+	}
+
+	@Override
+	public void setParameter( String name, String value )
+	{
+		config.setValue(name, value);
+	}
+
+	@Override
+	public String[] getParameterNames()
+	{
+		return config.getKeys();
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuffer sb = new StringBuffer();
+		sb.append("  Server '" + getName() + "'\n");
+		
+		servicesLock.readLock();
+		try
+		{
+			for (Map.Entry<String,IService> entry : services.entrySet())
+				sb.append( entry.getValue() );
+		} finally
+		{
+			servicesLock.readUnlock();
+		}
+		
+		return sb.toString();
 	}
 	
 }

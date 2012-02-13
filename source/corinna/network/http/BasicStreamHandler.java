@@ -1,4 +1,4 @@
-package corinna.network.web;
+package corinna.network.http;
 
 
 import javax.bindlet.http.HttpStatus;

@@ -1,16 +1,16 @@
 package corinna.core.rest;
 
 import javax.bindlet.IBindletContext;
-import javax.bindlet.http.IHttpBindletRequest;
-import javax.bindlet.http.IHttpBindletResponse;
 
 import corinna.bindlet.rest.IRestBindletRequest;
 import corinna.bindlet.rest.IRestBindletResponse;
 import corinna.bindlet.rest.RestBindletContext;
 import corinna.core.IBindletRegistration;
+import corinna.core.IService;
 import corinna.core.http.HttpContextInfo;
-import corinna.core.web.WebContext;
+import corinna.core.http.WebContext;
 import corinna.util.IComponentInformation;
+import corinna.util.conf.ISection;
 
 
 public class RestContext extends WebContext<IRestBindletRequest, IRestBindletResponse>
@@ -18,9 +18,9 @@ public class RestContext extends WebContext<IRestBindletRequest, IRestBindletRes
 
 	private RestBindletContext bindletContext = null;
 	
-	public RestContext( String name)
+	public RestContext( String name, IService service, ISection config )
 	{
-		super(name);
+		super(name, service, config);
 	}
 
 	@Override

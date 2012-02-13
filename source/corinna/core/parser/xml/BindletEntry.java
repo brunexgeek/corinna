@@ -1,34 +1,24 @@
 package corinna.core.parser.xml;
 
-import java.util.HashMap;
-import java.util.Map;
+import corinna.util.conf.ISection;
+import corinna.util.conf.Section;
 
 
 public class BindletEntry extends BasicEntry
 {
 
-	private Map<String,String> params;
+	private ISection config;
 	
-	public BindletEntry( String name, String className )
+	public BindletEntry( String name, String className, ISection config )
 	{
 		super(name, className);
-		params = new HashMap<String,String>();
+		if (config == null) config = new Section("Parameters");
+		this.config = config;
 	}
 
-	public void setParameter( String name, String value )
+	public ISection getConfig()
 	{
-		params.put(name, value);
-	}
-	
-	public String getParameter( String name )
-	{
-		if (name == null) return null;
-		return params.get(name);
-	}
-	
-	public String[] getParameterNames()
-	{
-		return params.keySet().toArray(new String[0]);
+		return config;
 	}
 	
 }

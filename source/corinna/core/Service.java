@@ -24,12 +24,15 @@ import javax.bindlet.IBindletService;
 
 import corinna.bindlet.BindletService;
 import corinna.exception.BindletException;
+import corinna.exception.LifecycleException;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
 import corinna.util.Reflection;
+import corinna.util.conf.ISection;
+import corinna.util.conf.Section;
 
 
-public abstract class Service implements IService
+public abstract class Service extends Lifecycle implements IService
 {
 	
 	private Map<String, IContext<?,?>> contexts;
@@ -39,23 +42,21 @@ public abstract class Service implements IService
 	private String name;
 
 	private IServer server = null;
+
+	private ISection config = null;
 	
-	public Service( String name )
+	public Service( String name, IServer server, ISection config )
 	{
 		if (name == null)
-			throw new NullPointerException("A service name must be specified");
+			throw new IllegalArgumentException("A service name must be specified");
+		if (server == null)
+			throw new IllegalArgumentException("The server instance can not be null");
 		
 		this.name = name;
 		this.contexts = new HashMap<String, IContext<?,?>>();
 		this.contextsLock = new ObjectLocker();
-		this.server = null;
-	}
-	
-	protected void setServer( IServer server )
-	{
-		if (server == null)
-			throw new NullPointerException("The server object can not be null");
 		this.server = server;
+		this.config  = (config == null) ? new Section("Parameters") : config;
 	}
 	
 	@Override
@@ -108,13 +109,11 @@ public abstract class Service implements IService
 	@Override
 	public void addContext( IContext<?,?> context )
 	{
-		if (context == null) return;
+		if (context == null || context.getService() != this) return;
 		
 		contextsLock.writeLock();
 		try
 		{
-			if (context instanceof Context)
-				((Context<?,?>)context).setService(this);
 			contexts.put(context.getName(), context);
 		} finally
 		{
@@ -195,33 +194,106 @@ public abstract class Service implements IService
 	}
 
 	@Override
-	public void init()
-	{
-		// does nothing		
-	}
-
-	@Override
-	public void start()
-	{
-		// does nothing
-	}
-
-	@Override
-	public void stop()
-	{
-		// does nothing
-	}
-
-	@Override
-	public void destroy()
-	{
-		// does nothing
-	}
-	
-	@Override
 	public IBindletService getBindletService()
 	{
 		return new BindletService(this);
+	}
+	
+	@Override
+	public String getParameter( String name )
+	{
+		return config.getValue(name, null);
+	}
+
+	@Override
+	public void setParameter( String name, String value )
+	{
+		config.setValue(name, value);
+	}
+
+	@Override
+	public String[] getParameterNames()
+	{
+		return config.getKeys();
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuffer sb = new StringBuffer();
+		sb.append("    Service '" + getName() + "'\n");
+		
+		contextsLock.readLock();
+		try
+		{
+			for (Map.Entry<String,IContext<?,?>> entry : contexts.entrySet())
+				sb.append( entry.getValue() );
+		} finally
+		{
+			contextsLock.readUnlock();
+		}
+		
+		return sb.toString();
+	}
+
+	@Override
+	public void onStart() throws LifecycleException
+	{
+		contextsLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String,IContext<?,?>> entry : contexts.entrySet())
+				entry.getValue().start();
+		} finally
+		{
+			contextsLock.readUnlock();
+		}
+	}
+
+	@Override
+	public void onStop() throws LifecycleException
+	{
+		contextsLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String,IContext<?,?>> entry : contexts.entrySet())
+				entry.getValue().stop();
+		} finally
+		{
+			contextsLock.readUnlock();
+		}
+	}
+	
+	@Override
+	public void onInit() throws LifecycleException
+	{
+		contextsLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String,IContext<?,?>> entry : contexts.entrySet())
+				entry.getValue().init();
+		} finally
+		{
+			contextsLock.readUnlock();
+		}
+	}
+
+	@Override
+	public void onDestroy() throws LifecycleException
+	{
+		contextsLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String,IContext<?,?>> entry : contexts.entrySet())
+				entry.getValue().destroy();
+		} finally
+		{
+			contextsLock.readUnlock();
+		}
 	}
 	
 }

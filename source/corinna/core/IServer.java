@@ -18,6 +18,8 @@ package corinna.core;
 
 import java.util.List;
 
+import corinna.util.conf.ISection;
+
 
 
 /**
@@ -30,7 +32,7 @@ import java.util.List;
 public interface IServer extends ILifecycle, IServiceEventListener, IDomainListener
 {
 
-	public static final Class<?>[] CONSTRUCTOR_ARGS = { String.class };
+	public static final Class<?>[] CONSTRUCTOR_ARGS = { String.class, ISection.class };
 
 	public String getName();
 	
@@ -52,5 +54,11 @@ public interface IServer extends ILifecycle, IServiceEventListener, IDomainListe
 	public IDomain getDomain();
 	
 	public boolean setDomain( IDomain domain );
+
+	public String getParameter( String name );
+
+	public void setParameter( String name, String value );
+
+	public String[] getParameterNames();
 	
 }

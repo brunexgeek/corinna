@@ -21,6 +21,7 @@ import java.net.SocketAddress;
 
 import corinna.core.IDomain;
 import corinna.core.ILifecycle;
+import corinna.util.conf.ISection;
 
 
 /**
@@ -33,6 +34,8 @@ import corinna.core.ILifecycle;
  */
 public interface INetworkConnector extends ILifecycle
 {
+
+	public Class<?>[] CONSTRUCTOR_ARGS = { String.class, ISection.class };
 
 	public IDomain getDomain();
 

@@ -25,13 +25,25 @@ public abstract class Lifecycle implements ILifecycle
 
 	protected LifecycleManager lifecycle;
 	
-	protected abstract void initInternal() throws LifecycleException;
+	protected void onInit() throws LifecycleException
+	{
+		// nothing to do
+	}
 
-	protected abstract void startInternal() throws LifecycleException;	
+	protected void onStart() throws LifecycleException
+	{
+		// nothing to do
+	}
 
-	protected abstract void stopInternal() throws LifecycleException;
+	protected void onStop() throws LifecycleException
+	{
+		// nothing to do
+	}
 	
-	protected abstract void destroyInternal() throws LifecycleException;
+	protected void onDestroy() throws LifecycleException
+	{
+		// nothing to do
+	}
 	
 	public Lifecycle()
 	{
@@ -46,7 +58,7 @@ public abstract class Lifecycle implements ILifecycle
 
 		try
 		{
-			initInternal();
+			onInit();
 			lifecycle.changeLifecycleState(LifecycleState.INITIALIZED);
 		} catch (Exception e)
 		{
@@ -63,7 +75,7 @@ public abstract class Lifecycle implements ILifecycle
 
 		try
 		{
-			startInternal();
+			onStart();
 			lifecycle.changeLifecycleState(LifecycleState.STARTED);
 		} catch (Exception e)
 		{
@@ -80,7 +92,7 @@ public abstract class Lifecycle implements ILifecycle
 
 		try
 		{
-			stopInternal();
+			onStop();
 			lifecycle.changeLifecycleState(LifecycleState.STOPPED);
 		} catch (Exception e)
 		{
@@ -97,7 +109,7 @@ public abstract class Lifecycle implements ILifecycle
 
 		try
 		{
-			destroyInternal();
+			onDestroy();
 			lifecycle.changeLifecycleState(LifecycleState.DESTROYED);
 		} catch (Exception e)
 		{

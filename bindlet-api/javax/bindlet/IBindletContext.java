@@ -44,7 +44,7 @@ import corinna.util.IComponentInformation;
  * @version 1.0
  * @since 1.0
  * 
- * @see IBindlet#getConfiguration()
+ * @see IBindlet#getConfig()
  * 
  * 
  * @param R

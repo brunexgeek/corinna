@@ -27,9 +27,11 @@ import javax.bindlet.IBindletContext;
 import corinna.exception.BindletException;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
+import corinna.util.conf.ISection;
+import corinna.util.conf.Section;
 
 
-public abstract class Context<R, P> implements IContext<R, P>
+public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 {
 
 	private IBindletContext bindletContext;
@@ -38,42 +40,28 @@ public abstract class Context<R, P> implements IContext<R, P>
 
 	protected ObjectLocker reposLock;
 
-	//private Class<?> currentRequestType = null;
-
-	//private Class<?> currentResponseType = null;
-
 	private IService service = null;
 
 	private String name;
-
-	private Map<String, String> params;
-
-	private Boolean isModified = false;
 
 	private Boolean updateReposArray = false;
 
 	private IBindletRegistration[] reposArray = null;
 
-	private String[] paramsArray = null;
+	private ISection config = null;
 
-	public Context( String name )
+	public Context( String name, IService service, ISection config )
 	{
 		if (name == null || name.isEmpty())
 			throw new IllegalArgumentException("The context name can not be null or empty");
-
+		if (service == null) 
+			throw new IllegalArgumentException("The service object can not be null");
+		
 		this.name = name;
-		bindletContext = createBindletContext();
-		repos = new HashMap<String, IBindletRegistration>();
-		reposLock = new ObjectLocker();
-		params = new HashMap<String, String>();
-
-		//currentRequestType = Reflection.getGenericParameter(this, Context.class, 0);
-		//currentResponseType = Reflection.getGenericParameter(this, Context.class, 1);
-	}
-
-	protected final void setService( IService service )
-	{
-		if (service == null) throw new NullPointerException("The service object can not be null");
+		this.bindletContext = createBindletContext();
+		this.repos = new HashMap<String, IBindletRegistration>();
+		this.reposLock = new ObjectLocker();
+		this.config = (config == null) ? new Section("Parameters") : config;
 		this.service = service;
 	}
 
@@ -96,6 +84,8 @@ public abstract class Context<R, P> implements IContext<R, P>
 	public void serviceRequestReceived( IService service, RequestEvent<?, ?> event )
 		throws BindletException, IOException
 	{
+		if (getLifecycleState() != LifecycleState.STARTED) return;
+		
 		R request = null;
 		P response = null;
 
@@ -210,32 +200,25 @@ public abstract class Context<R, P> implements IContext<R, P>
 		}
 	}
 
-	/*@Override
-	public Class<?> getRequestType()
-	{
-		return currentRequestType;
-	}
-
-	@Override
-	public Class<?> getResponseType()
-	{
-		return currentResponseType;
-	}*/
-
 	@Override
 	public String getParameter( String name )
 	{
-		return params.get(name);
+		return config.getValue(name, null);
 	}
 
 	@Override
 	public void setParameter( String name, String value )
 	{
-		params.put(name, value);
-		setModified(true);
+		config.setValue(name, value);
 	}
 
-	protected boolean isModified()
+	@Override
+	public String[] getParameterNames()
+	{
+		return config.getKeys();
+	}
+	
+	/*protected boolean isModified()
 	{
 		synchronized (isModified)
 		{
@@ -249,7 +232,7 @@ public abstract class Context<R, P> implements IContext<R, P>
 		{
 			isModified = value;
 		}
-	}
+	}*/
 
 	@Override
 	public IBindletRegistration getBindletRegistration( String name )
@@ -286,11 +269,24 @@ public abstract class Context<R, P> implements IContext<R, P>
 
 		return result;
 	}
-
+	
 	@Override
-	public String[] getParameterNames()
+	public String toString()
 	{
-		if (paramsArray == null) paramsArray = params.keySet().toArray(new String[0]);
-		return paramsArray;
+		StringBuffer sb = new StringBuffer();
+		sb.append("      Context '" + getName() + "'\n");
+		
+		reposLock.readLock();
+		try
+		{
+			for (Map.Entry<String,IBindletRegistration> entry : repos.entrySet())
+				sb.append( entry.getValue() );
+		} finally
+		{
+			reposLock.readUnlock();
+		}
+		
+		return sb.toString();
 	}
+	
 }

@@ -17,13 +17,14 @@
 package corinna.core;
 
 import corinna.exception.ConnectorInUseException;
+import corinna.exception.LifecycleException;
 import corinna.exception.ServerInUseException;
 import corinna.network.INetworkConnector;
 import corinna.network.INetworkConnectorListener;
 import corinna.network.IProtocol;
 
 
-public interface IDomain extends INetworkConnectorListener
+public interface IDomain extends INetworkConnectorListener, ILifecycle
 {
 
 	public String getName();

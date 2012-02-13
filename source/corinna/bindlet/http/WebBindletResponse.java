@@ -104,7 +104,8 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 		}
 		else
 		{
-			response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, contentLength);
+			long value = (contentLength >= 0) ? contentLength : 0L;
+			response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, value);
 			// TODO: it will cause problems with others transfer encodings (gzip, deflate, etc.).
 			response.removeHeader(HttpHeaders.Names.TRANSFER_ENCODING);
 		}

@@ -1,14 +1,16 @@
 package corinna.core.parser.xml;
 
+import corinna.util.conf.ISection;
 
-public class ConnectorEntry extends BasicEntry
+
+public class ConnectorEntry extends BindletEntry
 {
 
 	private String address;
 
-	public ConnectorEntry( String name, String className, String address )
+	public ConnectorEntry( String name, String className, String address, ISection config )
 	{
-		super(name, className);
+		super(name, className, config);
 		this.address = address;
 	}
 

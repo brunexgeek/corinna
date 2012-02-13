@@ -22,12 +22,12 @@ import javax.bindlet.IBindletContext;
 
 import corinna.exception.BindletException;
 import corinna.util.IComponentInformation;
+import corinna.util.conf.ISection;
 
-// TODO: mover para 'corinna.service'
-public interface IContext<R,P> extends IServiceRequestListener
+public interface IContext<R,P> extends IServiceRequestListener, ILifecycle
 {
 
-	Class<?>[] CONSTRUCTOR_ARGS = { String.class, IService.class };
+	public Class<?>[] CONSTRUCTOR_ARGS = { String.class, IService.class, ISection.class };
 
 	public IService getService();
 	

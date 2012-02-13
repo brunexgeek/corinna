@@ -7,8 +7,9 @@ import javax.bindlet.http.IHttpBindletResponse;
 
 import corinna.bindlet.http.HttpBindletContext;
 import corinna.core.IBindletRegistration;
-import corinna.core.web.WebContext;
+import corinna.core.IService;
 import corinna.util.IComponentInformation;
+import corinna.util.conf.ISection;
 
 
 public class HttpContext extends WebContext<IHttpBindletRequest,IHttpBindletResponse>
@@ -16,9 +17,9 @@ public class HttpContext extends WebContext<IHttpBindletRequest,IHttpBindletResp
 	
 	private HttpBindletContext bindletContext = null;
 	
-	public HttpContext( String name)
+	public HttpContext( String name, IService service, ISection config )
 	{
-		super(name);
+		super(name, service, config);
 	}
 
 	@Override

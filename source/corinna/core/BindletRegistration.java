@@ -242,4 +242,11 @@ public class BindletRegistration implements IBindletRegistration
 		return bindletName;
 	}
 
+	@Override
+	public String toString()
+	{
+		return "        Bindlet '" + getBindletName() + "' [" + 
+			getBindletClass().getCanonicalName() + "]\n";
+	}
+	
 }

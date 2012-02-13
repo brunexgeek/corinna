@@ -29,7 +29,6 @@ import corinna.exception.ConfigurationNotFoundException;
 public interface ISection
 {
 	
-	
 	/**
 	 * Retorna o valor de uma entrada a partir de uma chave.
 	 * 

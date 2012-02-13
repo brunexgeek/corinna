@@ -1,4 +1,4 @@
-package corinna.core.web;
+package corinna.core.http;
 
 
 import javax.bindlet.http.IWebBindletRequest;
@@ -7,8 +7,10 @@ import javax.bindlet.http.IWebBindletResponse;
 import corinna.bindlet.http.WebBindletRequest;
 import corinna.core.Context;
 import corinna.core.IBindletRegistration;
+import corinna.core.IService;
 import corinna.core.http.HttpUtils;
 import corinna.thread.ObjectLocker;
+import corinna.util.conf.ISection;
 
 
 //TODO: move to "corinna.core.http"
@@ -20,9 +22,9 @@ public abstract class WebContext<R extends IWebBindletRequest, P extends IWebBin
 
 	private static final String CONTEXT_URL_MAPPING = "urlMapping";
 
-	public WebContext( String name )
+	public WebContext( String name, IService service, ISection config )
 	{
-		super(name);
+		super(name, service, config);
 	}
 
 	protected IBindletRegistration findRegistration( IWebBindletRequest request )

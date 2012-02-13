@@ -18,11 +18,9 @@ package corinna.util.conf;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import corinna.exception.ConfigurationNotFoundException;
+import corinna.thread.ObjectLocker;
 
 
 /**
@@ -56,9 +54,7 @@ public class Section implements ISection
 	 */
 	private Boolean isReadOnly;
 	
-	private ReadLock readLock;
-	
-	private WriteLock writeLock;
+	private ObjectLocker lock;
 
 	
 	/**
@@ -68,26 +64,23 @@ public class Section implements ISection
 	 */
 	public Section( String name )
 	{
-		if (name == null) 
-			this.name = "(null)";
-		else
-			this.name = name;
+		if (name == null || name.isEmpty()) 
+			throw new IllegalArgumentException("The section name can not be null or empty");
 
-		items = new LinkedHashMap<String, String>();
-		sections = new LinkedHashMap<String,ISection>();
-		
-		ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-		readLock = lock.readLock();
-		writeLock = lock.writeLock();
+		this.name = name;
+		this.items = new LinkedHashMap<String, String>();
+		this.sections = new LinkedHashMap<String,ISection>();
+		this.lock = new ObjectLocker();
 	}
 
 	@Override
 	public String getName() 
 	{
-		synchronized (name)
-		{
-			return name;
-		}
+		lock.readLock();
+		String result = name;
+		lock.readUnlock();
+		
+		return result;
 	}
 
 	@Override
@@ -102,9 +95,9 @@ public class Section implements ISection
 	@Override
 	public boolean containsKey( String key )
 	{
-		readLock.lock();
+		lock.readLock();
 		boolean status = items.containsKey(key);
-		readLock.unlock();
+		lock.readUnlock();
 		
 		return status;
 	}
@@ -112,9 +105,9 @@ public class Section implements ISection
 	@Override
 	public void setValue( String key, String value )
 	{
-		writeLock.lock();
+		lock.writeLock();
 		items.put(key, value);
-		writeLock.unlock();
+		lock.writeUnlock();
 	}
 
 	@Override
@@ -122,14 +115,14 @@ public class Section implements ISection
 	{
 		String[] keys;
 		
-		readLock.lock();
+		lock.readLock();
 		try
 		{
 			keys = items.keySet().toArray(new String[0]);
 		}
 		finally
 		{
-			readLock.unlock();
+			lock.readUnlock();
 		}
 		
 		return keys;
@@ -138,61 +131,74 @@ public class Section implements ISection
 	@Override
 	public boolean isReadOnly()
 	{
-		synchronized (isReadOnly)
-		{
-			return isReadOnly;
-		}
+		lock.readLock();
+		boolean result = isReadOnly;
+		lock.readUnlock();
+		
+		return result;
 	}
 
 	@Override
-	public void setReadOnly(boolean readOnly, boolean recursive) 
+	public void setReadOnly(boolean state, boolean recursive) 
 	{
-		synchronized (isReadOnly)
+		lock.writeLock();
+		try
 		{
-			isReadOnly = readOnly;
+			isReadOnly = state;
+			// define a propriedade nas sub-seções
+			if (recursive)
+				for (ISection section : sections.values())
+					section.setReadOnly(state,true);
+		} finally
+		{
+			lock.writeUnlock();
 		}
-		// define a propriedade nas sub-seções
-		if (recursive)
-			for (ISection section : sections.values()) section.setReadOnly(readOnly,true);
 	}
 
 	@Override
 	public void clear( boolean recursive ) 
 	{
-		writeLock.lock();
-		
-		// remove as entradas da seção atual
-		items.clear();
-		// remove as entradas das sub-seções recursivamente
-		if (recursive)
-			for (ISection section : sections.values()) section.clear(true);
-		
-		writeLock.unlock();
+		lock.writeLock();
+		try
+		{
+			// remove as entradas da seção atual
+			items.clear();
+			// remove as entradas das sub-seções recursivamente
+			if (recursive)
+				for (ISection section : sections.values())
+					section.clear(true);
+		} finally
+		{
+			lock.writeUnlock();
+		}
 	}
 
 	@Override
 	public void clearAll() 
 	{
-		writeLock.lock();
-		
-		// remove as entradas da seção atual
-		items.clear();
-		// remove as entradas das sub-seções recursivamente
-		for (ISection section : sections.values()) section.clearAll();
-		// remove as sub-seções
-		sections.clear();
-		
-		writeLock.unlock();
+		lock.writeLock();
+		try
+		{
+			// remove as entradas da seção atual
+			items.clear();
+			// remove as entradas das sub-seções recursivamente
+			for (ISection section : sections.values()) section.clearAll();
+			// remove as sub-seções
+			sections.clear();
+		} finally
+		{
+			lock.writeUnlock();
+		}
 	}
 
 	@Override
 	public boolean containsSection( String section ) 
 	{
-		readLock.lock();
-		boolean output = sections.containsKey(section);
-		readLock.unlock();
+		lock.readLock();
+		boolean result = sections.containsKey(section);
+		lock.readUnlock();
 		
-		return output;
+		return result;
 	}
 
 	@Override
@@ -207,73 +213,79 @@ public class Section implements ISection
 	@Override
 	public ISection getSection( String section, ISection defaultSection ) 
 	{
-		readLock.lock();
-		ISection output = sections.get(section);
-		readLock.unlock();
+		lock.readLock();
+		ISection result = sections.get(section);
+		lock.readUnlock();
 		
-		if (output == null) return defaultSection;
-		return output;
+		if (result == null) return defaultSection;
+		return result;
 	}
 
 	@Override
 	public ISection addSection( String section ) 
 	{
-		readLock.lock();
-		ISection output = sections.get(section);
-		readLock.unlock();
-		
-		if (output != null) return output;
-		
-		writeLock.lock();
-		sections.put( section, output = new Section(section) );
-		writeLock.unlock();
-		
-		return output;
+		lock.writeLock();
+		try
+		{
+			ISection result = sections.get(section);
+			if (result == null)
+				sections.put( section, result = new Section(section) );
+			return result;
+		} finally
+		{
+			lock.writeUnlock();			
+		}
 	}
 
 	@Override
 	public void removeSection( ISection section ) 
 	{
-		writeLock.lock();
+		if (section == null) return;
+		
+		lock.writeLock();
 		sections.remove( section.getName() );
-		writeLock.unlock();
+		lock.writeUnlock();	
 	}
 
 	@Override
 	public void removeSection( String section ) 
 	{
-		writeLock.lock();
+		if (section == null) return;
+		
+		lock.writeLock();
 		sections.remove(section);
-		writeLock.unlock();
+		lock.writeUnlock();	
 	}
 
 	@Override
 	public ISection[] getSections() 
 	{
-		ISection[] output = null;
+		ISection[] result = null;
 		
-		writeLock.lock();
+		lock.readLock();
 		try
 		{
-			output = sections.values().toArray(new ISection[0]);
+			result = sections.values().toArray(new ISection[0]);
 		}
 		finally
 		{
-			writeLock.unlock();
+			lock.readUnlock();
 		}
 		
-		return output;
+		return result;
 	}
 
 	@Override
 	public String getValue( String key, String defaultValue ) 
 	{
-		readLock.lock();
-		String output = items.get(key);
-		readLock.unlock();
+		if (key == null) return null;
+		
+		lock.readLock();
+		String result = items.get(key);
+		lock.readUnlock();
 
-		if (output == null) return defaultValue;
-		return output;
+		if (result == null) return defaultValue;
+		return result;
 	}
 
 	

@@ -24,6 +24,7 @@ import java.util.Map;
 
 import corinna.exception.BindletException;
 import corinna.exception.ConnectorInUseException;
+import corinna.exception.LifecycleException;
 import corinna.exception.ServerInUseException;
 import corinna.network.INetworkConnector;
 import corinna.network.IProtocol;
@@ -32,7 +33,7 @@ import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
 
 
-public final class Domain implements IDomain
+public final class Domain extends Lifecycle implements IDomain
 {
 	
 	private String name;
@@ -256,6 +257,88 @@ public final class Domain implements IDomain
 				server.domainRequestReceived(this, event);
 				if ( event.isHandled() ) break;
 			}
+		} finally
+		{
+			serversLock.readUnlock();
+		}
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuffer sb = new StringBuffer();
+		sb.append("Domain '" + getName() + "'\n");
+		serversLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String, IServer> entry : servers.entrySet())
+			{
+				IServer server = entry.getValue();
+				sb.append( server.toString() );
+			}
+		} finally
+		{
+			serversLock.readUnlock();
+		}
+		
+		return sb.toString();
+	}
+
+	@Override
+	public void onStart() throws LifecycleException
+	{
+		serversLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String, IServer> entry : servers.entrySet())
+				entry.getValue().start();
+		} finally
+		{
+			serversLock.readUnlock();
+		}
+	}
+
+	@Override
+	public void onStop() throws LifecycleException
+	{
+		serversLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String, IServer> entry : servers.entrySet())
+				entry.getValue().stop();
+		} finally
+		{
+			serversLock.readUnlock();
+		}
+	}
+	
+	@Override
+	public void onInit() throws LifecycleException
+	{
+		serversLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String, IServer> entry : servers.entrySet())
+				entry.getValue().init();
+		} finally
+		{
+			serversLock.readUnlock();
+		}
+	}
+
+	@Override
+	public void onDestroy() throws LifecycleException
+	{
+		serversLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String, IServer> entry : servers.entrySet())
+				entry.getValue().destroy();
 		} finally
 		{
 			serversLock.readUnlock();

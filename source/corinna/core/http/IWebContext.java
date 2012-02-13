@@ -1,4 +1,4 @@
-package corinna.core.web;
+package corinna.core.http;
 
 
 import javax.bindlet.http.IWebBindletRequest;
