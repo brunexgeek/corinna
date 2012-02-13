@@ -25,10 +25,9 @@ import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletContext;
 
 import corinna.exception.BindletException;
+import corinna.exception.ConfigurationNotFoundException;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
-import corinna.util.conf.ISection;
-import corinna.util.conf.Section;
 
 
 public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
@@ -42,26 +41,23 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 
 	private IService service = null;
 
-	private String name;
-
 	private Boolean updateReposArray = false;
 
 	private IBindletRegistration[] reposArray = null;
 
-	private ISection config = null;
+	private IContextConfig config = null;
 
-	public Context( String name, IService service, ISection config )
+	public Context( IContextConfig config, IService service )
 	{
-		if (name == null || name.isEmpty())
-			throw new IllegalArgumentException("The context name can not be null or empty");
+		if (config == null)
+			throw new IllegalArgumentException("The context configuration can not be null");
 		if (service == null) 
-			throw new IllegalArgumentException("The service object can not be null");
-		
-		this.name = name;
+			throw new IllegalArgumentException("The service instance can not be null");
+
 		this.bindletContext = createBindletContext();
 		this.repos = new HashMap<String, IBindletRegistration>();
 		this.reposLock = new ObjectLocker();
-		this.config = (config == null) ? new Section("Parameters") : config;
+		this.config = config;
 		this.service = service;
 	}
 
@@ -70,7 +66,7 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 	@Override
 	public String getName()
 	{
-		return name;
+		return config.getContextName();
 	}
 
 	@Override
@@ -116,11 +112,6 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 		// find the registration of the bindlet that must process this request
 		IBindletRegistration reg = getBindletRegistration(request);
 		if (reg == null) return false;
-		/*
-		 * throw new BindletException("There are no registred bindlet compatible with a request '" +
-		 * request.getClass() + "'");
-		 */
-		// IBindlet<R, P> bindlet = createBindlet(reg.getBindletName());
 		IBindlet<R, P> bindlet = (IBindlet<R, P>) reg.createBindlet();
 		// process the request event
 		bindlet.init(reg.getBindletConfig());
@@ -201,21 +192,9 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 	}
 
 	@Override
-	public String getParameter( String name )
+	public IContextConfig getConfig()
 	{
-		return config.getValue(name, null);
-	}
-
-	@Override
-	public void setParameter( String name, String value )
-	{
-		config.setValue(name, value);
-	}
-
-	@Override
-	public String[] getParameterNames()
-	{
-		return config.getKeys();
+		return config;
 	}
 	
 	/*protected boolean isModified()

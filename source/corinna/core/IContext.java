@@ -21,13 +21,14 @@ import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletContext;
 
 import corinna.exception.BindletException;
+import corinna.exception.ConfigurationNotFoundException;
 import corinna.util.IComponentInformation;
 import corinna.util.conf.ISection;
 
 public interface IContext<R,P> extends IServiceRequestListener, ILifecycle
 {
 
-	public Class<?>[] CONSTRUCTOR_ARGS = { String.class, IService.class, ISection.class };
+	public Class<?>[] CONSTRUCTOR_ARGS = { IContextConfig.class, IService.class };
 
 	public IService getService();
 	
@@ -35,12 +36,6 @@ public interface IContext<R,P> extends IServiceRequestListener, ILifecycle
 	
 	public String getName();
 	
-	public String getParameter( String name );
-	
-	public String[] getParameterNames();
-	
-	public void setParameter( String name, String value );
-
 	public IBindletRegistration addBindlet( String bindletName, String bindletClassName )
 		throws BindletException, ClassNotFoundException;
 
@@ -62,5 +57,7 @@ public interface IContext<R,P> extends IServiceRequestListener, ILifecycle
 	public IBindletRegistration getBindletRegistration( R request );
 	
 	public IComponentInformation getContextInfo();
+
+	public IContextConfig getConfig();
 	
 }

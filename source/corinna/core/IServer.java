@@ -32,16 +32,11 @@ import corinna.util.conf.ISection;
 public interface IServer extends ILifecycle, IServiceEventListener, IDomainListener
 {
 
-	public static final Class<?>[] CONSTRUCTOR_ARGS = { String.class, ISection.class };
+	public static final Class<?>[] CONSTRUCTOR_ARGS = { IServerConfig.class };
 
 	public String getName();
-	
-	/**
-	 * Returns a list containing all registered services on the server.
-	 * 
-	 * @return {@link List}&lt;{@link IService}&gt; instance containing the registred services.
-	 */
-	public List<IService> getServices();
+
+	public String[] getServiceNames();
 	
 	public IService getService( String name );
 	
@@ -55,10 +50,6 @@ public interface IServer extends ILifecycle, IServiceEventListener, IDomainListe
 	
 	public boolean setDomain( IDomain domain );
 
-	public String getParameter( String name );
-
-	public void setParameter( String name, String value );
-
-	public String[] getParameterNames();
+	public IServerConfig getConfig();
 	
 }

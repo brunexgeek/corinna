@@ -4,17 +4,17 @@ package corinna.core.parser.xml;
 import java.util.LinkedList;
 import java.util.List;
 
-import corinna.util.conf.ISection;
+import corinna.core.IBasicConfig;
 
 
-public class ServerEntry extends BindletEntry
+public class ServerEntry extends BasicEntry
 {
 
 	private List<String> services;
 
-	public ServerEntry( String name, String className, ISection config )
+	public ServerEntry( String className, IBasicConfig config )
 	{
-		super(name, className, config);
+		super(className, config);
 		services = new LinkedList<String>();
 	}
 

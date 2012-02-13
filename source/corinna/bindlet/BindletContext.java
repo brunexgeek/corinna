@@ -42,13 +42,13 @@ public abstract class BindletContext<R,P> extends ObjectSharing implements IBind
 	@Override
 	public String getContextParameter( String name )
 	{
-		return context.getParameter(name);
+		return context.getConfig().getParameter(name, null);
 	}
 
 	@Override
 	public String[] getContextParameterNames()
 	{
-		return context.getParameterNames();
+		return context.getConfig().getParameterNames();
 	}
 
 	@Override

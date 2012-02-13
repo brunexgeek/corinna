@@ -40,7 +40,7 @@ import corinna.util.conf.ISection;
 public interface IService extends IServerRequestListener, ILifecycle
 {
 
-	Class<?>[] CONSTRUCTOR_ARGS = { String.class, IServer.class, ISection.class };
+	Class<?>[] CONSTRUCTOR_ARGS = { IServiceConfig.class, IServer.class };
 
 	public String getName();
 	
@@ -57,11 +57,5 @@ public interface IService extends IServerRequestListener, ILifecycle
 	public void addContext( IContext<?,?> context );
 	
 	public IComponentInformation getServiceInfo();
-
-	public String getParameter( String name );
-
-	public void setParameter( String name, String value );
-
-	public String[] getParameterNames();
 	
 }

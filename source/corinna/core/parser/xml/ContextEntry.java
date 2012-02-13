@@ -3,17 +3,17 @@ package corinna.core.parser.xml;
 import java.util.LinkedList;
 import java.util.List;
 
-import corinna.util.conf.ISection;
+import corinna.core.IContextConfig;
 
 
-public class ContextEntry extends BindletEntry
+public class ContextEntry extends BasicEntry
 {
 
 	private List<String> bindlets;
 	
-	public ContextEntry( String name, String className, ISection config )
+	public ContextEntry( String className, IContextConfig config )
 	{
-		super(name, className, config);
+		super(className, config);
 		bindlets = new LinkedList<String>();
 	}
 

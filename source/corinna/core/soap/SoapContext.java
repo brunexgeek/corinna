@@ -6,6 +6,7 @@ import javax.bindlet.soap.ISoapBindletResponse;
 
 import corinna.bindlet.soap.SoapBindletContext;
 import corinna.core.IBindletRegistration;
+import corinna.core.IContextConfig;
 import corinna.core.IService;
 import corinna.core.http.WebContext;
 import corinna.util.IComponentInformation;
@@ -17,9 +18,9 @@ public class SoapContext extends WebContext<ISoapBindletRequest,ISoapBindletResp
 	
 	private SoapBindletContext bindletContext = null;
 	
-	public SoapContext( String name, IService service, ISection config )
+	public SoapContext( IContextConfig config, IService service )
 	{
-		super(name, service, config);
+		super(config, service);
 	}
 
 	@Override

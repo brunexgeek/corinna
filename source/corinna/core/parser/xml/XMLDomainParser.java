@@ -25,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.bindlet.IBindlet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -36,16 +35,22 @@ import org.w3c.dom.NodeList;
 
 import com.sun.corba.se.spi.activation.Server;
 
+import corinna.core.ContextConfig;
 import corinna.core.Domain;
+import corinna.core.IBasicConfig;
 import corinna.core.IBindletRegistration;
 import corinna.core.IContext;
+import corinna.core.IContextConfig;
 import corinna.core.IDomain;
 import corinna.core.IServer;
+import corinna.core.IServerConfig;
 import corinna.core.IService;
+import corinna.core.IServiceConfig;
+import corinna.core.NetworkConnectorConfig;
+import corinna.core.ServerConfig;
+import corinna.core.ServiceConfig;
 import corinna.core.XMLDomainTags;
 import corinna.core.parser.IDomainParser;
-import corinna.core.parser.IParameter;
-import corinna.core.parser.Parameter;
 import corinna.exception.ParseException;
 import corinna.network.INetworkConnector;
 import corinna.util.ResourceLoader;
@@ -140,6 +145,7 @@ public class XMLDomainParser implements IDomainParser
 
 		IDomain domain = new Domain(domainName);
 		createServers(domain);
+		createNetworkConnectors(domain);
 
 		return domain;
 	}
@@ -153,8 +159,7 @@ public class XMLDomainParser implements IDomainParser
 				// create the current server
 				Class<?> classRef = Class.forName(entry.getClassName());
 				Constructor<?> ctor = classRef.getConstructor(INetworkConnector.CONSTRUCTOR_ARGS);
-				INetworkConnector connector = (INetworkConnector)ctor.newInstance(entry.getName(), 
-					entry.getConfig());
+				INetworkConnector connector = (INetworkConnector)ctor.newInstance( entry.getConfig() );
 				// insert the server in domain
 				domain.addConnector(connector);
 			}
@@ -173,7 +178,7 @@ public class XMLDomainParser implements IDomainParser
 				// create the current server
 				Class<?> classRef = Class.forName(entry.getClassName());
 				Constructor<?> ctor = classRef.getConstructor(IServer.CONSTRUCTOR_ARGS);
-				IServer server = (IServer)ctor.newInstance(entry.getName(), entry.getConfig());
+				IServer server = (IServer)ctor.newInstance( entry.getConfig() );
 				// insert the server in domain
 				domain.addServer(server);
 				// create the associated services
@@ -196,7 +201,7 @@ public class XMLDomainParser implements IDomainParser
 				throw new ParseException("Service '" + serviceName + "' not found.");
 			Class<?> classRef = Class.forName(entry.getClassName());
 			Constructor<?> ctor = classRef.getConstructor(IService.CONSTRUCTOR_ARGS);
-			IService service = (IService)ctor.newInstance(entry.getName(), server, entry.getConfig());
+			IService service = (IService)ctor.newInstance( entry.getConfig(), server );
 			// insert the service in server
 			server.addService(service);
 			// create the associated contexts
@@ -218,7 +223,7 @@ public class XMLDomainParser implements IDomainParser
 				throw new ParseException("Context '" + contextName + "' not found.");
 			Class<?> classRef = Class.forName(entry.getClassName());
 			Constructor<?> ctor = classRef.getConstructor(IContext.CONSTRUCTOR_ARGS);
-			IContext<?,?> context = (IContext<?,?>)ctor.newInstance(entry.getName(), service, entry.getConfig());
+			IContext<?,?> context = (IContext<?,?>)ctor.newInstance( entry.getConfig(), service );
 			// insert the context in service
 			service.addContext(context);
 			// create the associated contexts
@@ -264,14 +269,16 @@ public class XMLDomainParser implements IDomainParser
 			// get the connector class name
 			String connectorClassName = getTagContent(element, XMLDomainTags.CONNECTOR_CLASS);
 			// get the connector address
-			String connectorAddress = getTagContent(element, XMLDomainTags.CONNECTOR_ADDRESS);
-			// get the server parameters
-			ISection config = parseParameters(element, XMLDomainTags.INIT_PARAMETERS);
+			String connectorHostName = getTagContent(element, XMLDomainTags.CONNECTOR_HOST_NAME);
+			String connectorPort = getTagContent(element, XMLDomainTags.CONNECTOR_HOST_NAME);
+			int port = stringToInt(connectorPort, 10, -1);
+			// create the configuration object and get the connector parameters
+			NetworkConnectorConfig config = new NetworkConnectorConfig(connectorName, connectorHostName, port);
+			parseParameters(element, XMLDomainTags.INIT_PARAMETERS, config);
 
 			try
 			{
-				ConnectorEntry entry = new ConnectorEntry(connectorName, connectorClassName,
-					connectorAddress, config);
+				ConnectorEntry entry = new ConnectorEntry(connectorClassName, config);
 				// add the current connector in output list
 				output.add(entry);
 			} catch (Exception e)
@@ -300,12 +307,13 @@ public class XMLDomainParser implements IDomainParser
 			// get the server class name
 			String serverClassName = getTagContent(element, XMLDomainTags.SERVER_CLASS, 
 				Server.class.getName());
-			// get the server parameters
-			ISection config = parseParameters(element, XMLDomainTags.INIT_PARAMETERS);
+			// create the configuration object and get the server parameters
+			IServerConfig config = new ServerConfig(serverName);
+			parseParameters(element, XMLDomainTags.INIT_PARAMETERS, config);
 
 			try
 			{
-				ServerEntry entry = new ServerEntry(serverName, serverClassName, config);
+				ServerEntry entry = new ServerEntry(serverClassName, config);
 
 				// found the associated contexts
 				temp = getElementByTag(element, XMLDomainTags.SERVICES);
@@ -359,11 +367,18 @@ public class XMLDomainParser implements IDomainParser
 		return value;
 	}
 	
-	private ISection parseParameters( Element parent, XMLDomainTags tag ) throws ParseException
+	private void parseParameters( Element parent, XMLDomainTags tag, ISection config ) throws ParseException
 	{
 		Element temp = getElementByTag(parent, tag);
-		if (temp == null) return new Section("Empty");
-		return parseParameters(temp);
+		if (temp == null) return;
+		parseParameters(temp, config);
+	}
+	
+	private void parseParameters( Element parent, XMLDomainTags tag, IBasicConfig config ) throws ParseException
+	{
+		Element temp = getElementByTag(parent, tag);
+		if (temp == null) return;
+		parseParameters(temp, config.getSection());
 	}
 	
 	private Map<String, ServiceEntry> parseServices( Element parent ) throws ParseException
@@ -382,12 +397,13 @@ public class XMLDomainParser implements IDomainParser
 			String serviceName = getElementAttribute(element, "name");
 			// get the service class name
 			String serviceClassName = getTagContent(element, XMLDomainTags.SERVICE_CLASS);
-			// create the registred init parameters for this bindlet
-			ISection config = parseParameters(element, XMLDomainTags.INIT_PARAMETERS);
+			// create the configuration object and get the service parameters
+			IServiceConfig config = new ServiceConfig(serviceName);
+			parseParameters(element, XMLDomainTags.INIT_PARAMETERS, config);
 			
 			try
 			{
-				ServiceEntry entry = new ServiceEntry(serviceName, serviceClassName, config);
+				ServiceEntry entry = new ServiceEntry(serviceClassName, config);
 
 				// found the associated contexts
 				temp = getElementByTag(element, XMLDomainTags.CONTEXTS);
@@ -430,7 +446,8 @@ public class XMLDomainParser implements IDomainParser
 			// get the bindlet class name
 			String bindletClassName = getTagContent(element, XMLDomainTags.BINDLET_CLASS);
 			// create the registred init parameters for this bindlet
-			ISection config = parseParameters(element, XMLDomainTags.INIT_PARAMETERS);
+			ISection config = new Section("Parameters");
+			parseParameters(element, XMLDomainTags.INIT_PARAMETERS, config);
 
 			try
 			{
@@ -464,25 +481,19 @@ public class XMLDomainParser implements IDomainParser
 		for (int i = 0; i < list.getLength(); ++i)
 		{
 			Element element = (Element) list.item(i);
+			Element temp;
 
 			// get the bindlet context name
-			String contextName = element.getAttribute("name");
-			if (contextName == null) throw new ParseException("The 'name' attribute is required");
-
+			String contextName = getElementAttribute(element, "name");
 			// get the bindlet context class name
-			Element temp = getElementByTag(element, XMLDomainTags.CONTEXT_CLASS);
-			if (temp == null)
-				throw new ParseException("The '" + XMLDomainTags.CONTEXT_CLASS
-					+ "' tag is required");
-			String contextClassName = temp.getTextContent();
-
-			// create the registred context parameters for this bindlet context
-			temp = getElementByTag(element, XMLDomainTags.CONTEXT_PARAMETERS);
-			ISection config = parseParameters(temp);
+			String contextClassName = getTagContent(element, XMLDomainTags.CONTEXT_CLASS);
+			// create the configuration object and get the service parameters
+			IContextConfig config = new ContextConfig(contextName);
+			parseParameters(element, XMLDomainTags.INIT_PARAMETERS, config);
 
 			try
 			{
-				ContextEntry entry = new ContextEntry(contextName, contextClassName, config);
+				ContextEntry entry = new ContextEntry(contextClassName, config);
 
 				// found the associated contexts
 				temp = getElementByTag(element, XMLDomainTags.BINDLETS);
@@ -509,11 +520,9 @@ public class XMLDomainParser implements IDomainParser
 		return output;
 	}
 
-	private ISection parseParameters( Element parent ) throws ParseException
+	private void parseParameters( Element parent, ISection config ) throws ParseException
 	{
-		ISection output = new Section("Parameters");
-
-		if (parent == null) return output;
+		if (parent == null || config == null) return;
 
 		if (!isTag(parent, XMLDomainTags.INIT_PARAMETERS)
 			&& !isTag(parent, XMLDomainTags.CONTEXT_PARAMETERS))
@@ -530,9 +539,8 @@ public class XMLDomainParser implements IDomainParser
 			// get the parameter value
 			String paramValue = getTagContent(element, XMLDomainTags.PARAMETER_VALUE);
 			// create the parameter
-			output.setValue(paramName, paramValue);
+			config.setValue(paramName, paramValue);
 		}
-		return output;
 	}
 
 	protected Element getElementByTag( Element parent, XMLDomainTags tag )
@@ -559,4 +567,15 @@ public class XMLDomainParser implements IDomainParser
 		return element.getTagName().equalsIgnoreCase(tag.getTagName());
 	}
 
+	private int stringToInt( String value, int radix, int defaultValue )
+	{
+		try
+		{
+			return Integer.parseInt(value, radix);
+		} catch (Exception e)
+		{
+			return defaultValue;
+		}
+	}
+	
 }

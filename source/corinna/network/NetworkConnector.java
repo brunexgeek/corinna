@@ -133,44 +133,42 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 		dispatchEventToDomain(event);
 	}
 	
-	@Override
-	public void start() throws LifecycleException
+	protected void startConnector() throws LifecycleException
 	{
-		StateTransition trans = lifecycle.changeLifecycleState(LifecycleState.STARTING);
-		if (trans == StateTransition.IGNORE) return;
-
 		try
 		{
 			if ( getDomain() == null )
 				throw new NullPointerException("Invalid domain");
-			startInternal();
 			this.channel = bootstrap.bind(config.getAddress());
-			lifecycle.changeLifecycleState(LifecycleState.STARTED);
 		} catch (Exception e)
 		{
-			lifecycle.setLifecycleState(LifecycleState.FAILED);
 			throw new LifecycleException("Error starting component", e);
 		}
 	}
-
+	
 	@Override
-	public void stop() throws LifecycleException
+	public void start() throws LifecycleException
 	{
-		StateTransition trans = lifecycle.changeLifecycleState(LifecycleState.STOPPING);
-		if (trans == StateTransition.IGNORE) return;
+		startConnector();
+	}
 
+	protected void stopConnector() throws LifecycleException
+	{
 		try
 		{
 			ChannelFuture future = this.channel.unbind();
 			future.await();
 			this.channel = null;
-			stopInternal();
-			lifecycle.changeLifecycleState(LifecycleState.STOPPED);
 		} catch (Exception e)
 		{
-			lifecycle.setLifecycleState(LifecycleState.FAILED);
 			throw new LifecycleException("Error stopping component", e);
 		}
+	}
+	
+	@Override
+	public void onStop() throws LifecycleException
+	{
+		stopConnector();
 	}
 	
 	@Override
@@ -200,30 +198,6 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 	public String[] getParameterNames()
 	{
 		return params.keySet().toArray(new String[0]);
-	}
-	
-	@Override
-	protected void initInternal() throws LifecycleException
-	{
-		// does nothing
-	}
-
-	@Override
-	protected void startInternal() throws LifecycleException
-	{
-		// does nothing
-	}
-
-	@Override
-	protected void stopInternal() throws LifecycleException
-	{
-		// does nothing
-	}
-
-	@Override
-	protected void destroyInternal() throws LifecycleException
-	{
-		// does nothing
 	}
 	
 }

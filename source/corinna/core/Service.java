@@ -38,31 +38,26 @@ public abstract class Service extends Lifecycle implements IService
 	private Map<String, IContext<?,?>> contexts;
 
 	private ObjectLocker contextsLock;
-	
-	private String name;
 
 	private IServer server = null;
 
-	private ISection config = null;
+	private IServiceConfig config = null;
 	
-	public Service( String name, IServer server, ISection config )
+	public Service( IServiceConfig config, IServer server )
 	{
-		if (name == null)
-			throw new IllegalArgumentException("A service name must be specified");
 		if (server == null)
 			throw new IllegalArgumentException("The server instance can not be null");
-		
-		this.name = name;
+
 		this.contexts = new HashMap<String, IContext<?,?>>();
 		this.contextsLock = new ObjectLocker();
 		this.server = server;
-		this.config  = (config == null) ? new Section("Parameters") : config;
+		this.config  = config;
 	}
 	
 	@Override
 	public String getName()
 	{
-		return name;
+		return config.getServiceName();
 	}
 
 	@Override
@@ -198,25 +193,7 @@ public abstract class Service extends Lifecycle implements IService
 	{
 		return new BindletService(this);
 	}
-	
-	@Override
-	public String getParameter( String name )
-	{
-		return config.getValue(name, null);
-	}
-
-	@Override
-	public void setParameter( String name, String value )
-	{
-		config.setValue(name, value);
-	}
-
-	@Override
-	public String[] getParameterNames()
-	{
-		return config.getKeys();
-	}
-	
+		
 	@Override
 	public String toString()
 	{
@@ -236,8 +213,7 @@ public abstract class Service extends Lifecycle implements IService
 		return sb.toString();
 	}
 
-	@Override
-	public void onStart() throws LifecycleException
+	protected void startContexts() throws LifecycleException
 	{
 		contextsLock.readLock();
 		try
@@ -250,9 +226,14 @@ public abstract class Service extends Lifecycle implements IService
 			contextsLock.readUnlock();
 		}
 	}
-
+	
 	@Override
-	public void onStop() throws LifecycleException
+	public void onStart() throws LifecycleException
+	{
+		startContexts();
+	}
+
+	protected void stopContexts() throws LifecycleException
 	{
 		contextsLock.readLock();
 		try
@@ -267,7 +248,12 @@ public abstract class Service extends Lifecycle implements IService
 	}
 	
 	@Override
-	public void onInit() throws LifecycleException
+	public void onStop() throws LifecycleException
+	{
+		stopContexts();
+	}
+	
+	protected void initContexts() throws LifecycleException
 	{
 		contextsLock.readLock();
 		try
@@ -280,9 +266,14 @@ public abstract class Service extends Lifecycle implements IService
 			contextsLock.readUnlock();
 		}
 	}
-
+	
 	@Override
-	public void onDestroy() throws LifecycleException
+	public void onInit() throws LifecycleException
+	{
+		initContexts();
+	}
+
+	protected void destroyContexts() throws LifecycleException
 	{
 		contextsLock.readLock();
 		try
@@ -294,6 +285,12 @@ public abstract class Service extends Lifecycle implements IService
 		{
 			contextsLock.readUnlock();
 		}
+	}
+	
+	@Override
+	public void onDestroy() throws LifecycleException
+	{
+		destroyContexts();
 	}
 	
 }

@@ -7,10 +7,8 @@ import javax.bindlet.http.IWebBindletResponse;
 import corinna.bindlet.http.WebBindletRequest;
 import corinna.core.Context;
 import corinna.core.IBindletRegistration;
+import corinna.core.IContextConfig;
 import corinna.core.IService;
-import corinna.core.http.HttpUtils;
-import corinna.thread.ObjectLocker;
-import corinna.util.conf.ISection;
 
 
 //TODO: move to "corinna.core.http"
@@ -22,9 +20,9 @@ public abstract class WebContext<R extends IWebBindletRequest, P extends IWebBin
 
 	private static final String CONTEXT_URL_MAPPING = "urlMapping";
 
-	public WebContext( String name, IService service, ISection config )
+	public WebContext( IContextConfig config, IService service )
 	{
-		super(name, service, config);
+		super(config, service);
 	}
 
 	protected IBindletRegistration findRegistration( IWebBindletRequest request )
@@ -59,7 +57,7 @@ public abstract class WebContext<R extends IWebBindletRequest, P extends IWebBin
 	protected boolean matchContextPath( IWebBindletRequest request )
 	{
 		// check if the URL of the request match with the current context path
-		String pattern = getParameter(CONTEXT_URL_MAPPING);
+		String pattern = getConfig().getParameter(CONTEXT_URL_MAPPING, null);
 		String path = request.getResourcePath();
 		if (pattern == null || path == null) return false;
 

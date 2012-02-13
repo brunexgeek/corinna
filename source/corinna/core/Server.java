@@ -38,22 +38,18 @@ public class Server extends Lifecycle implements IServer
 
 	private ObjectLocker servicesLock;
 	
-	private String name;
-	
 	private IDomain domain = null;
 
-	private ISection config;
+	private IServerConfig config;
 
-	public Server( String name, ISection config )
+	public Server( IServerConfig config )
 	{
-		if (name == null)
-			throw new IllegalArgumentException("The server name can not be null or empty");
-
-		this.name = name;
-		this.lifecycle = new LifecycleManager();
+		if (config == null)
+			throw new IllegalArgumentException("The context configuration can not be null");
+		
 		this.services = new HashMap<String, IService>();
 		this.servicesLock = new ObjectLocker();
-		this.config  = (config == null) ? new Section("Parameters") : config;
+		this.config  = config;
 	}
 
 	@Override
@@ -67,13 +63,20 @@ public class Server extends Lifecycle implements IServer
 	@Override
 	public String getName()
 	{
-		return name;
+		return config.getServerName();
 	}
 	
 	@Override
-	public List<IService> getServices()
+	public String[] getServiceNames()
 	{
-		return null;
+		servicesLock.readLock();
+		try
+		{
+			return services.keySet().toArray( new String[0] );
+		} finally
+		{
+			servicesLock.readUnlock();
+		}		
 	}
 
 	@Override
@@ -260,24 +263,6 @@ public class Server extends Lifecycle implements IServer
 	}
 	
 	@Override
-	public String getParameter( String name )
-	{
-		return config.getValue(name, null);
-	}
-
-	@Override
-	public void setParameter( String name, String value )
-	{
-		config.setValue(name, value);
-	}
-
-	@Override
-	public String[] getParameterNames()
-	{
-		return config.getKeys();
-	}
-	
-	@Override
 	public String toString()
 	{
 		StringBuffer sb = new StringBuffer();
@@ -294,6 +279,12 @@ public class Server extends Lifecycle implements IServer
 		}
 		
 		return sb.toString();
+	}
+
+	@Override
+	public IServerConfig getConfig()
+	{
+		return config;
 	}
 	
 }

@@ -16,7 +16,7 @@
 
 package corinna.core;
 
-
+//TODO: move to 'corinna.core.parser.xml'
 public enum XMLDomainTags
 {
 
@@ -46,7 +46,9 @@ public enum XMLDomainTags
 
 	CONNECTOR_CLASS("connector-class"),
 	
-	CONNECTOR_ADDRESS("connector-address"),
+	CONNECTOR_HOST_NAME("connector-hostname"),
+	
+	CONNECTOR_PORT("connector-port"),
 	
 	INIT_PARAMETERS("init-parameters"),
 	
