@@ -30,9 +30,8 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
 import corinna.core.IDomain;
+import corinna.core.INetworkConnectorConfig;
 import corinna.core.Lifecycle;
-import corinna.core.LifecycleManager.StateTransition;
-import corinna.core.LifecycleState;
 import corinna.exception.BindletException;
 import corinna.exception.LifecycleException;
 import corinna.thread.ObjectLocker;
@@ -51,7 +50,7 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 
 	private ServerBootstrap bootstrap;
 
-	private NetworkConfig config;
+	private INetworkConnectorConfig config;
 	
 	private IDomain domain = null;
 	
@@ -61,7 +60,7 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 	
 	private Map<String,String> params;
 	
-	public NetworkConnector( NetworkConfig config )
+	public NetworkConnector( INetworkConnectorConfig config )
 	{
 		if (config == null)
 			throw new IllegalArgumentException("The network configuration can not be null");

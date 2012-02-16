@@ -18,6 +18,7 @@ import javax.xml.soap.Text;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
+import org.w3c.dom.Node;
 
 import corinna.core.http.auth.AuthenticateResponse;
 import corinna.core.http.auth.DigestAuthenticator;
@@ -118,6 +119,9 @@ public class DefaultSoapBindlet extends SoapBindlet
 		IOException
 	{
 		ProcedureCall procedure = parseSoapMessage( req.getMessage() );
+
+		if (log.isTraceEnabled())
+			log.trace("Received method call for '" + procedure + "'");
 		
 		try
 		{
@@ -130,13 +134,10 @@ public class DefaultSoapBindlet extends SoapBindlet
 			res.setMessage(response);
 		} catch (Exception e)
 		{
-			//res.sendError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
 			log.error(e);
 			throw new IOException(e.getMessage());
 		}
-		log.warn("Received method call for '" + procedure + "'");
 	}
-
 
 	@SuppressWarnings("rawtypes")
 	protected ProcedureCall parseSoapMessage( SOAPMessage message )

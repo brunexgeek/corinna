@@ -53,7 +53,7 @@ public final class Domain extends Lifecycle implements IDomain
 		if (name == null || name.isEmpty())
 			throw new IllegalArgumentException("The domain name can not be null or empty");
 		this.name = name;
-		
+
 		connectorsByName = new HashMap<String, INetworkConnector>();
 		connectorsByProtocol = new HashMap<String, List<INetworkConnector>>();
 		servers = new HashMap<String, IServer>();
@@ -285,8 +285,21 @@ public final class Domain extends Lifecycle implements IDomain
 		return sb.toString();
 	}
 
-	@Override
-	public void onStart() throws LifecycleException
+	protected void startNetworkConenctors() throws LifecycleException
+	{
+		connectorsLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String, INetworkConnector> entry : connectorsByName.entrySet())
+				entry.getValue().start();
+		} finally
+		{
+			connectorsLock.readUnlock();
+		}
+	}
+	
+	protected void startServers() throws LifecycleException
 	{
 		serversLock.readLock();
 		try
@@ -299,9 +312,29 @@ public final class Domain extends Lifecycle implements IDomain
 			serversLock.readUnlock();
 		}
 	}
-
+	
 	@Override
-	public void onStop() throws LifecycleException
+	public void onStart() throws LifecycleException
+	{
+		startServers();
+		startNetworkConenctors();
+	}
+
+	protected void stopNetworkConenctors() throws LifecycleException
+	{
+		connectorsLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String, INetworkConnector> entry : connectorsByName.entrySet())
+				entry.getValue().stop();
+		} finally
+		{
+			connectorsLock.readUnlock();
+		}
+	}
+	
+	protected void stopServers() throws LifecycleException
 	{
 		serversLock.readLock();
 		try
@@ -316,7 +349,27 @@ public final class Domain extends Lifecycle implements IDomain
 	}
 	
 	@Override
-	public void onInit() throws LifecycleException
+	public void onStop() throws LifecycleException
+	{
+		stopServers();
+		stopNetworkConenctors();
+	}
+	
+	protected void initNetworkConenctors() throws LifecycleException
+	{
+		connectorsLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String, INetworkConnector> entry : connectorsByName.entrySet())
+				entry.getValue().init();
+		} finally
+		{
+			connectorsLock.readUnlock();
+		}
+	}
+	
+	protected void initServers() throws LifecycleException
 	{
 		serversLock.readLock();
 		try
@@ -329,9 +382,29 @@ public final class Domain extends Lifecycle implements IDomain
 			serversLock.readUnlock();
 		}
 	}
-
+	
 	@Override
-	public void onDestroy() throws LifecycleException
+	public void onInit() throws LifecycleException
+	{
+		initServers();
+		initNetworkConenctors();
+	}
+
+	protected void destroyNetworkConenctors() throws LifecycleException
+	{
+		connectorsLock.readLock();
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String, INetworkConnector> entry : connectorsByName.entrySet())
+				entry.getValue().destroy();
+		} finally
+		{
+			connectorsLock.readUnlock();
+		}
+	}
+	
+	protected void destroyServers() throws LifecycleException
 	{
 		serversLock.readLock();
 		try
@@ -343,6 +416,13 @@ public final class Domain extends Lifecycle implements IDomain
 		{
 			serversLock.readUnlock();
 		}
+	}
+	
+	@Override
+	public void onDestroy() throws LifecycleException
+	{
+		destroyServers();
+		destroyNetworkConenctors();
 	}
 	
 }

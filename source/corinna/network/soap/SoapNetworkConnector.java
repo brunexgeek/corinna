@@ -27,6 +27,7 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
+import corinna.core.INetworkConnectorConfig;
 import corinna.network.IProtocol;
 import corinna.network.NetworkConfig;
 import corinna.network.NetworkConnector;
@@ -49,7 +50,7 @@ public class SoapNetworkConnector extends NetworkConnector
 
 	private SoapStreamHandler channelHandler;
 	
-	public SoapNetworkConnector( NetworkConfig config ) throws SOAPException
+	public SoapNetworkConnector( INetworkConnectorConfig config ) throws SOAPException
 	{
 		super(config);
 		

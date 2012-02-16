@@ -2,6 +2,7 @@ package corinna.core;
 
 import corinna.exception.ConfigurationNotFoundException;
 import corinna.util.conf.ISection;
+import corinna.util.conf.Section;
 
 
 public abstract class BasicConfig implements IBasicConfig
@@ -17,6 +18,7 @@ public abstract class BasicConfig implements IBasicConfig
 			throw new IllegalArgumentException("The name can not be null or empty");
 		
 		this.name = name;
+		section = new Section(name + "Parameters");
 	}
 	
 	@Override

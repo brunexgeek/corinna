@@ -165,7 +165,7 @@ public class XMLDomainParser implements IDomainParser
 			}
 		} catch (Exception e)
 		{
-			throw new ParseException("Error creating a server instance", e);
+			throw new ParseException("Error creating a network connector instance", e);
 		}
 	}
 	
@@ -270,7 +270,7 @@ public class XMLDomainParser implements IDomainParser
 			String connectorClassName = getTagContent(element, XMLDomainTags.CONNECTOR_CLASS);
 			// get the connector address
 			String connectorHostName = getTagContent(element, XMLDomainTags.CONNECTOR_HOST_NAME);
-			String connectorPort = getTagContent(element, XMLDomainTags.CONNECTOR_HOST_NAME);
+			String connectorPort = getTagContent(element, XMLDomainTags.CONNECTOR_PORT);
 			int port = stringToInt(connectorPort, 10, -1);
 			// create the configuration object and get the connector parameters
 			NetworkConnectorConfig config = new NetworkConnectorConfig(connectorName, connectorHostName, port);

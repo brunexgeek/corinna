@@ -31,6 +31,7 @@ import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
 import corinna.bindlet.rest.IRestBindletRequest;
 import corinna.bindlet.rest.IRestBindletResponse;
+import corinna.core.INetworkConnectorConfig;
 import corinna.exception.LifecycleException;
 import corinna.network.IProtocol;
 import corinna.network.NetworkConfig;
@@ -55,7 +56,7 @@ public class RestNetworkConnector extends NetworkConnector
 
 	private RestStreamHandler channelHandler;
 	
-	public RestNetworkConnector( NetworkConfig config )
+	public RestNetworkConnector( INetworkConnectorConfig config )
 	{
 		super(config);
 		

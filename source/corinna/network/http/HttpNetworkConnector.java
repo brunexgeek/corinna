@@ -28,6 +28,7 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
+import corinna.core.INetworkConnectorConfig;
 import corinna.network.IProtocol;
 import corinna.network.NetworkConfig;
 import corinna.network.NetworkConnector;
@@ -49,7 +50,7 @@ public class HttpNetworkConnector extends NetworkConnector
 
 	private HttpStreamHandler channelHandler;
 	
-	public HttpNetworkConnector( NetworkConfig config )
+	public HttpNetworkConnector( INetworkConnectorConfig config )
 	{
 		super(config);
 		

@@ -36,7 +36,7 @@ import corinna.util.conf.ISection;
 public interface INetworkConnector extends ILifecycle
 {
 
-	public Class<?>[] CONSTRUCTOR_ARGS = { NetworkConfig.class };
+	public Class<?>[] CONSTRUCTOR_ARGS = { INetworkConnectorConfig.class };
 
 	public IDomain getDomain();
 

@@ -79,8 +79,8 @@ public class DefaultRestBindlet extends RestBindlet
 	@Override
 	public Object doCall( IProcedureCall procedure ) throws BindletException
 	{
-		if (log.isDebugEnabled())
-			log.debug("Received procedure call: " + procedure);
+		if (log.isTraceEnabled())
+			log.trace("Received procedure call: " + procedure);
 
 		try
 		{
