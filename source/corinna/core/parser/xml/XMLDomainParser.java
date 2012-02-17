@@ -53,6 +53,9 @@ import corinna.core.XMLDomainTags;
 import corinna.core.parser.IDomainParser;
 import corinna.exception.ParseException;
 import corinna.network.INetworkConnector;
+import corinna.service.bean.BeanConfig;
+import corinna.service.bean.BeanManager;
+import corinna.service.bean.IServiceBean;
 import corinna.util.ResourceLoader;
 import corinna.util.conf.ISection;
 import corinna.util.conf.Section;
@@ -64,15 +67,17 @@ public class XMLDomainParser implements IDomainParser
 	
 	private InputStream input;
 
-	List<ConnectorEntry> connectorList;
+	List<ConnectorEntry> connectorList = null;
 	
-	List<ServerEntry> serverList;
+	List<ServerEntry> serverList = null;
 	
-	Map<String, ServiceEntry> serviceList;
+	Map<String, ServiceEntry> serviceList = null;
 	
-	Map<String, BindletEntry> bindletList;
+	Map<String, BindletEntry> bindletList = null;
 	
-	Map<String, ContextEntry> contextList;
+	Map<String, ContextEntry> contextList = null;
+	
+	List<BeanEntry> beanList = null;
 	
 	public XMLDomainParser( String fileName ) throws IOException
 	{
@@ -143,13 +148,42 @@ public class XMLDomainParser implements IDomainParser
 			throw new ParseException("The '" + XMLDomainTags.BINDLETS + "' is required");
 		bindletList = parseBindlets(element);
 
+		// found the registred beans
+		element = getElementByTag(root, XMLDomainTags.BEANS);
+		if (element != null)
+			beanList = parseBeans(element);
+		else
+			beanList = null;
+		
 		IDomain domain = new Domain(domainName);
 		createServers(domain);
 		createNetworkConnectors(domain);
+		createBeans();
 
 		return domain;
 	}
 
+	protected void createBeans( ) throws ParseException
+	{
+		if (beanList == null) return;
+		
+		try
+		{
+			for (BeanEntry entry : beanList)
+			{
+				// create the current server
+				Class<?> classRef = Class.forName(entry.getClassName());
+				Constructor<?> ctor = classRef.getConstructor(IServiceBean.CONSTRUCTOR_ARGS);
+				IServiceBean bean = (IServiceBean)ctor.newInstance( entry.getConfig() );
+				// insert the server in domain
+				BeanManager.getInstance().addBean(bean);
+			}
+		} catch (Exception e)
+		{
+			throw new ParseException("Error creating a bean instance", e);
+		}
+	}
+	
 	protected void createNetworkConnectors( IDomain domain ) throws ParseException
 	{
 		try
@@ -251,6 +285,39 @@ public class XMLDomainParser implements IDomainParser
 		{
 			throw new ParseException("Error creating a bindlet registration", e);
 		}
+	}
+	
+	private List<BeanEntry> parseBeans( Element parent ) throws ParseException
+	{
+		if (!isTag(parent, XMLDomainTags.BEANS)) throw new ParseException("Invalid tag name");
+
+		List<BeanEntry> output = new LinkedList<BeanEntry>();
+		NodeList list = getElementsByTag(parent, XMLDomainTags.BEAN);
+
+		for (int i = 0; i < list.getLength(); ++i)
+		{
+			Element element = (Element) list.item(i);
+
+			// get the bean name
+			String beanName = getElementAttribute(element, "name");
+			// get the bean class name
+			String beanClassName = getTagContent(element, XMLDomainTags.BEAN_CLASS);
+			// create the configuration object and get the bean parameters
+			BeanConfig config = new BeanConfig(beanName);
+			parseParameters(element, XMLDomainTags.INIT_PARAMETERS, config);
+
+			try
+			{
+				BeanEntry entry = new BeanEntry(beanClassName, config);
+				// add the current connector in output list
+				output.add(entry);
+			} catch (Exception e)
+			{
+				throw new ParseException("Error creating server instance for '"
+					+ beanClassName + "'", e);
+			}
+		}
+		return output;
 	}
 	
 	private List<ConnectorEntry> parseConnectors( Element parent ) throws ParseException
@@ -362,7 +429,7 @@ public class XMLDomainParser implements IDomainParser
 	private String getElementAttribute( Element element, String attName ) throws ParseException
 	{
 		String value = element.getAttribute(attName);
-		if (value == null) 
+		if (value == null || value.isEmpty()) 
 			throw new ParseException("The '" + attName + "' attribute is required");
 		return value;
 	}

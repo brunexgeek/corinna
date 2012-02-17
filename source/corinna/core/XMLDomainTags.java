@@ -82,6 +82,14 @@ public enum XMLDomainTags
 	
 	ADD_SERVICE("add-service"),
 	
+	BEANS("beans"),
+	
+	BEAN("bean"),
+		
+	BEAN_NAME("bean-name"),
+	
+	BEAN_CLASS("bean-class"),
+	
 	UNKNOW(null);
 	
 	private String tag;

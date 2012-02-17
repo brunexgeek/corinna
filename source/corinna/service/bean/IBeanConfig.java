@@ -16,14 +16,13 @@
 
 package corinna.service.bean;
 
+import corinna.core.IBasicConfig;
 
-public interface IBeanConfig
+
+public interface IBeanConfig extends IBasicConfig
 {
 
-	public String getBeanName();
+	String getBeanName();
 	
-	public String getBeanParameter( String name );
-	
-	public String[] getBeanParameterNames();
 	
 }
