@@ -79,18 +79,30 @@ public class SoapBindletResponse extends WebBindletResponse implements ISoapBind
 	{
 		if (isClosed()) return;
 
+		String messageString = "";
+		
+		try
+		{
+			if (exception != null)
+			{
+				SOAPFault fault = message.getSOAPBody().addFault();
+				fault.setFaultCode("SOAP-ENV:Client");
+				fault.setFaultString(exception.getMessage());
+			}
+			messageString = getMarshaller().marshall(message);
+		} catch (Exception e)
+		{
+			// suprime os erros
+		}
+
+		if (!isChunked()) setContentLength(messageString.length());
+		
 		BindletOutputStream out = getOutputStream();
 		try
 		{
 			if (!out.isClosed() && out.writtenBytes() == 0)
 			{
-				if (exception != null)
-				{
-					SOAPFault fault = message.getSOAPBody().addFault();
-					fault.setFaultCode("SOAP-ENV:Client");
-					fault.setFaultString(exception.getMessage());
-				}
-				out.write( getMarshaller().marshall(message) );
+				out.write(messageString);
 			}
 		} catch (Exception e)
 		{
