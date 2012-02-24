@@ -135,7 +135,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 		} catch (Exception e)
 		{
 			log.error(e);
-			throw new IOException(e.getMessage());
+			throw new IOException("Error generating output SOAP/XML", e);
 		}
 	}
 

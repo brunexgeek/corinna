@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package corinna.core;
+package corinna.core.parser.xml;
 
 //TODO: move to 'corinna.core.parser.xml'
 public enum XMLDomainTags

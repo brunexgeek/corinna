@@ -16,9 +16,8 @@
 
 package corinna.core;
 
-// TODO: rename to "IComponentInterface"
-// TODO: can we remove this class?
-public interface IServiceInterface
+
+public interface IComponentInterface
 {
 
 	

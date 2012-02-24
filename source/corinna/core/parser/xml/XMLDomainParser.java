@@ -49,7 +49,6 @@ import corinna.core.IServiceConfig;
 import corinna.core.NetworkConnectorConfig;
 import corinna.core.ServerConfig;
 import corinna.core.ServiceConfig;
-import corinna.core.XMLDomainTags;
 import corinna.core.parser.IDomainParser;
 import corinna.exception.ParseException;
 import corinna.network.INetworkConnector;

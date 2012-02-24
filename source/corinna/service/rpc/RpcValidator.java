@@ -24,7 +24,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import corinna.core.IServiceInterface;
+import corinna.core.IComponentInterface;
 import corinna.exception.InvalidRpcClassException;
 import corinna.exception.InvalidRpcMethodException;
 import corinna.exception.InvalidRpcTypeException;
@@ -122,7 +122,7 @@ public class RpcValidator
 			throw new NullPointerException("The interface class must not be null");
 		if (!intfClass.isInterface())
 			throw new InvalidRpcClassException("The interface class must be an interface");
-		if (!IServiceInterface.class.isAssignableFrom(intfClass))
+		if (!IComponentInterface.class.isAssignableFrom(intfClass))
 			throw new InvalidRpcClassException(
 				"The interface class must extends 'IServiceInterface'");
 

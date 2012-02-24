@@ -25,7 +25,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import corinna.core.IServiceInterface;
+import corinna.core.IComponentInterface;
 import corinna.exception.IncompleteImplementationException;
 import corinna.exception.IncompleteInterfaceException;
 import corinna.exception.InternalException;
@@ -82,7 +82,7 @@ public class MethodRunner implements IMethodRunner
 	 */
 	private Object data;
 
-	private IServiceInterface implementation = null;
+	private IComponentInterface implementation = null;
 
 	private IPrototypeFilter prototypeFilter;
 
@@ -214,7 +214,7 @@ public class MethodRunner implements IMethodRunner
 			throw new MethodNotFoundException("Method \"" + name + "\" not found.");
 
 		// verifica se o objeto de implementação existe (consequentemente pode ser reusado)
-		IServiceInterface impl = getImplementation();
+		IComponentInterface impl = getImplementation();
 
 		// procura o construtor padrão
 		try
@@ -251,7 +251,7 @@ public class MethodRunner implements IMethodRunner
 			throw new MethodNotFoundException("Method \"" + methodPrototype + "\" not found.");
 
 		// verifica se o objeto de implementação existe (consequentemente pode ser reusado)
-		IServiceInterface impl = getImplementation();
+		IComponentInterface impl = getImplementation();
 
 		// procura o construtor padrão
 		try
@@ -341,15 +341,15 @@ public class MethodRunner implements IMethodRunner
 		return procedures.containsKey(methodPrototype);
 	}
 
-	private IServiceInterface createImplementation() throws IncompleteImplementationException,
+	private IComponentInterface createImplementation() throws IncompleteImplementationException,
 		InvocationTargetException
 	{
-		IServiceInterface impl;
+		IComponentInterface impl;
 
 		try
 		{
 			Constructor<?> ctor = getImplementationClass().getConstructor(ARGS_IMPL);
-			impl = (IServiceInterface) ctor.newInstance(getData());
+			impl = (IComponentInterface) ctor.newInstance(getData());
 		} catch (NoSuchMethodException e)
 		{
 			throw new IncompleteImplementationException("Standard constructor not found.");
@@ -362,7 +362,7 @@ public class MethodRunner implements IMethodRunner
 		return impl;
 	}
 
-	private IServiceInterface getImplementation() throws IncompleteImplementationException,
+	private IComponentInterface getImplementation() throws IncompleteImplementationException,
 		InvocationTargetException, InternalException
 	{
 		// verifica se já possui um objeto de implementação reusável
