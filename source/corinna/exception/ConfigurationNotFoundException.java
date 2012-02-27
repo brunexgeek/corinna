@@ -16,73 +16,29 @@
 
 package corinna.exception;
 
-
-/**
- * Disparada quando a seção ou entrada de configuração solicitada não existe. Esta exceção é 
- * representada pelo valor inteiro 0x41.
- * 
- * @author Bruno Ribeiro &lt;brunoc@cpqd.com.br&gt;
- * @since 1.0
- */
 public class ConfigurationNotFoundException extends ConfigurationException 
 {
 
-	/**
-	 * Identificador único para serialização.
-	 */
-	private static final long serialVersionUID = -2824048393239688953L;
-	
-	/**
-	 * Código numérico que representa a exceção.
-	 */
-	private static final int ERROR_CODE = 0x41;
-	
+	private static final long serialVersionUID = -3158225461883837024L;
 
-	/**
-	 * Constroi uma exceção sem uma descrição.
-	 */
 	public ConfigurationNotFoundException() 
 	{
 		super();
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a descricao e a referência da causa.
-	 * 
-	 * @param message Descrição da exceção.
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public ConfigurationNotFoundException( String message, Throwable cause ) 
 	{
 		super(message, cause);
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a referência da causa. A descrição da exceção recém 
-	 * criada será a mesma da causa especificada. 
-	 * 
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public ConfigurationNotFoundException( Throwable cause ) 
 	{
 		super(cause);
 	}
 
-	/**
-	 * Constroi uma nova exceção especificando a descrição.
-	 * 
-	 * @param message Descrição da exceção.
-	 */
 	public ConfigurationNotFoundException( String message ) 
 	{
 		super(message);
 	}
 
-	@Override
-	public int getErrorCode( )
-	{
-		return ERROR_CODE;
-	}
-	
-	
 }

@@ -11,6 +11,7 @@ import javax.xml.soap.SOAPMessage;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 
@@ -29,7 +30,15 @@ public class SoapBindletResponse extends WebBindletResponse implements ISoapBind
 	
 	private SoapMarshaller marshaller = null;
 	
-	public SoapBindletResponse( Channel channel, SoapMarshaller marshaller, HttpVersion version ) 
+	public SoapBindletResponse( SoapMarshaller marshaller, HttpResponse response, Channel channel ) 
+	throws SOAPException
+	{
+		super(channel, response);
+		this.marshaller = marshaller;
+		this.message = SoapUtils.createMessage();
+	}
+	
+	public SoapBindletResponse( SoapMarshaller marshaller, HttpVersion version, Channel channel ) 
 		throws SOAPException
 	{
 		super(channel, new DefaultHttpResponse(version, HttpResponseStatus.OK));

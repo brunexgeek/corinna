@@ -17,72 +17,30 @@
 package corinna.exception;
 
 
-/**
- * Disparada quando ocorre algum erro no mecanismo de autenticação. Esta exceção é representada pelo 
- * valor inteiro 0x01.
- * 
- * @author Bruno Ribeiro &lt;brunoc@cpqd.com.br&gt;
- * @since 1.1
- * @version 1.1
- */
+
 public class AuthenticationException extends GenericException 
 {
 
-	/**
-	 * Identificador único para serialização.
-	 */
-	private static final long serialVersionUID = 4877059741602561333L;
+	private static final long serialVersionUID = 1185886599835181238L;
 
-	/**
-	 * Código numérico que representa a exceção.
-	 */
-	private static final int ERROR_CODE = 0x01;
-	
-
-	/**
-	 * Constroi uma exceção sem uma descrição.
-	 */
 	public AuthenticationException() 
 	{
 		super();
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a descricao e a referência da causa.
-	 * 
-	 * @param message Descrição da exceção.
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public AuthenticationException( String message, Throwable cause ) 
 	{
 		super(message, cause);
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a referência da causa. A descrição da exceção recém 
-	 * criada será a mesma da causa especificada. 
-	 * 
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public AuthenticationException( Throwable cause ) 
 	{
 		super(cause);
 	}
 
-	/**
-	 * Constroi uma nova exceção especificando a descrição.
-	 * 
-	 * @param message Descrição da exceção.
-	 */
 	public AuthenticationException( String message ) 
 	{
 		super(message);
 	}
-	
-	@Override
-	public int getErrorCode( )
-	{
-		return ERROR_CODE;
-	}	
 	
 }

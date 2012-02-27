@@ -16,20 +16,10 @@
 
 package corinna.exception;
 
-
-/**
- * Defines the general exception a bindlet can throw when it encounters a problem.
- * 
- * @author Bruno Ribeiro
- * @version 1.0
- * @since 1.0
- */
 public class BindletException extends GenericException
 {
 
 	private static final long serialVersionUID = 933290522610959630L;
-
-	private static final int ERROR_CODE = 0x2001;
 
 	public BindletException()
 	{
@@ -51,9 +41,4 @@ public class BindletException extends GenericException
 		super(rootCause);
 	}
 
-	@Override
-	public int getErrorCode()
-	{
-		return ERROR_CODE;
-	}
 }

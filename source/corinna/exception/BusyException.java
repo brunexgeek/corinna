@@ -16,20 +16,8 @@
 
 package corinna.exception;
 
-
-/**
- * Disparada quando um recurso está indisponibilidade ou ocupado. Esta exceção é representada
- * pelo valor inteiro 0x04.
- * 
- * @author Bruno Ribeiro &lt;brunoc@cpqd.com.br&gt;
- * @since 1.0
- */
 public class BusyException extends GenericException
 {
-
-	private static final long serialVersionUID = -3441862887731242958L;
-	
-	private static final int ERROR_CODE = 0x1001;
 
 	public BusyException()
 	{
@@ -51,10 +39,4 @@ public class BusyException extends GenericException
 		super(cause);
 	}
 
-	@Override
-	public int getErrorCode()
-	{
-		return ERROR_CODE;
-	}
-	
 }

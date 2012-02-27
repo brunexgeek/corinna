@@ -17,68 +17,27 @@
 package corinna.exception;
 
 
-
-
-/**
- * Disparada quando ocorre algum erro no mecanismo de RPC. Esta exceção é representada pelo valor 
- * inteiro 0x50.
- * 
- * @author Bruno Ribeiro &lt;brunoc@cpqd.com.br&gt;
- * @since 1.2
- */
 public class RpcException extends GenericException
 {
 
-	/**
-	 * Identificador único para serialização.
-	 */
-	private static final long serialVersionUID = 5060996798891871880L;
-
-	/**
-	 * Constroi uma exceção sem uma descrição.
-	 */
 	public RpcException()
 	{
 		super();
 	}
-		
-	/**
-	 * Constroi uma nova exceção especificando a descricao e a referência da causa.
-	 * 
-	 * @param message Descrição da exceção.
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public RpcException( String message, Throwable cause ) 
 	{
 		super(message, cause);
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a referência da causa. A descrição da exceção recém 
-	 * criada será a mesma da causa especificada. 
-	 * 
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public RpcException( Throwable cause ) 
 	{
 		super(cause);
 	}
 
-	/**
-	 * Constroi uma nova exceção especificando a descrição.
-	 * 
-	 * @param message Descrição da exceção.
-	 */
 	public RpcException( String message ) 
 	{
 		super(message);
-	}
-
-	@Override
-	public int getErrorCode()
-	{
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 }

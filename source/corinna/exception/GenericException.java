@@ -90,6 +90,6 @@ public abstract class GenericException extends Exception
 	/**
 	 * Returns the numeric error code associated with current exception type.
 	 */
-	public abstract int getErrorCode();
+	//public abstract int getErrorCode();
 
 }

@@ -16,74 +16,27 @@
 
 package corinna.exception;
 
-
-/**
- * Disparada quando um tipo não é válido para uso através do mecanismo de RPC. Esta exceção é 
- * representada pelo valor inteiro 0x56.
- * 
- * @author Bruno Ribeiro &lt;brunoc@cpqd.com.br&gt;
- * @since 1.2
- * @see RpcValidator
- */
 public class InvalidRpcTypeException extends RpcException 
 {
 
-	
-	/**
-	 * Identificador único para serialização.
-	 */
-	private static final long serialVersionUID = -3848227670573172834L;
-	
-	/**
-	 * Código numérico que representa a exceção.
-	 */
-	private static final int ERROR_CODE = 0x56;
-
-	/**
-	 * Constroi uma exceção sem uma descrição.
-	 */
 	public InvalidRpcTypeException() 
 	{
 		super();
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a descricao e a referência da causa.
-	 * 
-	 * @param message Descrição da exceção.
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public InvalidRpcTypeException( String message, Throwable cause ) 
 	{
 		super(message, cause);
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a referência da causa. A descrição da exceção recém 
-	 * criada será a mesma da causa especificada. 
-	 * 
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public InvalidRpcTypeException( Throwable cause ) 
 	{
 		super(cause);
 	}
 
-	/**
-	 * Constroi uma nova exceção especificando a descrição.
-	 * 
-	 * @param message Descrição da exceção.
-	 */
 	public InvalidRpcTypeException( String message ) 
 	{
 		super(message);
 	}
-	
-	@Override
-	public int getErrorCode( )
-	{
-		return ERROR_CODE;
-	}
-	
 
 }

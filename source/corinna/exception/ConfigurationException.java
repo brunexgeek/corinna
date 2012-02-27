@@ -17,71 +17,29 @@
 package corinna.exception;
 
 
-/**
- * Disparada quando ocorre algum erro no mecanismo de configuração. Esta exceção é representada 
- * pelo valor inteiro 0x40.
- * 
- * @author Bruno Ribeiro &lt;brunoc@cpqd.com.br&gt;
- * @since 1.1
- */
 public class ConfigurationException extends GenericException 
 {
 
-	/**
-	 * Identificador único para serialização.
-	 */
-	private static final long serialVersionUID = 9050344499245056459L;
-	
-	/**
-	 * Código numérico que representa a exceção.
-	 */
-	private static final int ERROR_CODE = 0x40;
+	private static final long serialVersionUID = 5511297497954319071L;
 
-	
-	/**
-	 * Constroi uma exceção sem uma descrição.
-	 */
 	public ConfigurationException() 
 	{
 		super();
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a descricao e a referência da causa.
-	 * 
-	 * @param message Descrição da exceção.
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public ConfigurationException( String message, Throwable cause ) 
 	{
 		super(message, cause);
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a referência da causa. A descrição da exceção recém 
-	 * criada será a mesma da causa especificada. 
-	 * 
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public ConfigurationException( Throwable cause ) 
 	{
 		super(cause);
 	}
 
-	/**
-	 * Constroi uma nova exceção especificando a descrição.
-	 * 
-	 * @param message Descrição da exceção.
-	 */
 	public ConfigurationException( String message ) 
 	{
 		super(message);
 	}
-		
-	@Override
-	public int getErrorCode( )
-	{
-		return ERROR_CODE;
-	}
-	
+
 }

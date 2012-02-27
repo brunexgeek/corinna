@@ -73,8 +73,8 @@ public class WebStreamHandler extends BasicStreamHandler
 		{
 			try
 			{
-				if (unmarshaller != null) return new SoapBindletResponse(event.getChannel(), 
-					marshaller, request.getProtocolVersion());
+				if (unmarshaller != null) return new SoapBindletResponse(marshaller, 
+					request.getProtocolVersion(), event.getChannel());
 			} catch (Exception e)
 			{
 				// supress any errors

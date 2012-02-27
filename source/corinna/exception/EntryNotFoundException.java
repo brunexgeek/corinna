@@ -18,72 +18,28 @@ package corinna.exception;
 
 
 
-/**
- * Disparada quando solicitada uma entrada que não existe. Esta exceção é representada pelo valor 
- * inteiro 0x62.
- * 
- * @author Bruno Ribeiro &lt;brunoc@cpqd.com.br&gt;
- * @since 1.0
- */
+
 public class EntryNotFoundException extends GenericException 
 {
 
-	/**
-	 * Identificador único para serialização.
-	 */
-	private static final long serialVersionUID = -4754995087354231476L;
-
-	/**
-	 * Código numérico que representa a exceção.
-	 */
-	private static final int ERROR_CODE = 0x62;
-
-	
-	/**
-	 * Constroi uma exceção sem uma descrição.
-	 */
 	public EntryNotFoundException() 
 	{
 		super();
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a descricao e a referência da causa.
-	 * 
-	 * @param message Descrição da exceção.
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public EntryNotFoundException( String message, Throwable cause ) 
 	{
 		super(message, cause);
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a referência da causa. A descrição da exceção recém 
-	 * criada será a mesma da causa especificada. 
-	 * 
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public EntryNotFoundException( Throwable cause ) 
 	{
 		super(cause);
 	}
 
-	/**
-	 * Constroi uma nova exceção especificando a descrição.
-	 * 
-	 * @param message Descrição da exceção.
-	 */
 	public EntryNotFoundException( String message ) 
 	{
 		super(message);
 	}
-		
-	@Override
-	public int getErrorCode( )
-	{
-		return ERROR_CODE;
-	}
-	
-	
+
 }

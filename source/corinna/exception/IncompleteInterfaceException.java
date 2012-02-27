@@ -16,78 +16,27 @@
 
 package corinna.exception;
 
-
-
-/**
- * Disparada quando uma classe de interface não está no formato correto para uso através do
- * mecanismo de RPC. Esta exceção é representada pelo valor inteiro 0x53.
- * 
- * @author Bruno Ribeiro &lt;brunoc@cpqd.com.br&gt;
- * @since 1.1
- */
 public class IncompleteInterfaceException extends RpcException 
 {
 
-	/**
-	 * Identificador único para serialização.
-	 */
-	private static final long serialVersionUID = -2045620426287596145L;
-	
-	/**
-	 * Código numérico que representa a exceção.
-	 */
-	private static final int ERROR_CODE = 0x53;
-	
-	
-	/**
-	 * Constroi uma exceção sem uma descrição.
-	 */
 	public IncompleteInterfaceException() 
 	{
 		super();
 	}
 
-	
-	/**
-	 * Constroi uma nova exceção especificando a descricao e a referência da causa.
-	 * 
-	 * @param message Descrição da exceção.
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
 	public IncompleteInterfaceException( String message, Throwable cause ) 
 	{
 		super(message, cause);
 	}
 
-	
-	/**
-	 * Constroi uma nova exceção especificando a referência da causa. A descrição da exceção recém 
-	 * criada será a mesma da causa especificada. 
-	 * 
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
 	public IncompleteInterfaceException( Throwable cause ) 
 	{
 		super(cause);
 	}
 
-
-	/**
-	 * Constroi uma nova exceção especificando a descrição.
-	 * 
-	 * @param message Descrição da exceção.
-	 */
 	public IncompleteInterfaceException( String message ) 
 	{
 		super(message);
 	}
-	
-	
-	@Override
-	public int getErrorCode( )
-	{
-		return ERROR_CODE;
-	}
-	
-	
+
 }

@@ -37,6 +37,13 @@ public class MyBindlet extends SoapBindlet
 		stream.write("WSDL");
 		stream.close();
 	}
+
+	@Override
+	public boolean isRestricted()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 	
 }

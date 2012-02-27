@@ -67,7 +67,7 @@ public class SoapStreamHandler extends StreamHandler
 		HttpRequest request = (HttpRequest) event.getMessage();
 
 		ISoapBindletRequest req = new SoapBindletRequest(request, unmarshaller);
-		ISoapBindletResponse res = new SoapBindletResponse( event.getChannel(), marshaller, request.getProtocolVersion() );
+		ISoapBindletResponse res = new SoapBindletResponse(marshaller, request.getProtocolVersion(), event.getChannel());
 
 		res.setChunked(false);
 		res.setContentType("text/xml");

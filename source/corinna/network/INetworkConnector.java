@@ -54,4 +54,8 @@ public interface INetworkConnector extends ILifecycle
 
 	public String[] getParameterNames();
 
+	public void addAdapter( IAdapter<?,?> adapter );
+	
+	public void removeAdapter( String name );
+	
 }

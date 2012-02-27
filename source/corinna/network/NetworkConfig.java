@@ -2,7 +2,7 @@ package corinna.network;
 
 import java.net.InetSocketAddress;
 
-
+// TODO: rename to 'ConnectorConfig'
 public class NetworkConfig
 {
 

@@ -90,6 +90,14 @@ public enum XMLDomainTags
 	
 	BEAN_CLASS("bean-class"),
 	
+	ADAPTERS("adapters"),
+	
+	ADAPTER("adapter"),
+	
+	ADAPTER_CLASS("adapter-class"),
+	
+	ADD_ADAPTER("add-adapter"),
+	
 	UNKNOW(null);
 	
 	private String tag;

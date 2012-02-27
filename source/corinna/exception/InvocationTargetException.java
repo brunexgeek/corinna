@@ -16,73 +16,28 @@
 
 package corinna.exception;
 
-
-/**
- * Encapsula uma exceção lançada na chamada de um método ou construtor. Esta exceção é representada
- * pelo valor inteiro 0x56.
- * 
- * @author Bruno Ribeiro &lt;brunoc@cpqd.com.br&gt;
- * @since 1.0
- */
 public class InvocationTargetException extends MethodCallException
 {
-	
-	/**
-	 * Identificador único para serialização.
-	 */
-	private static final long serialVersionUID = -5165052421650614880L;
 
-	/**
-	 * Código numérico que representa a exceção.
-	 */
-	private static final int ERROR_CODE = 0x56;
-
-	
-	/**
-	 * Constroi uma exceção sem uma descrição.
-	 */
 	public InvocationTargetException() 
 	{
 		super();
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a descricao e a referência da causa.
-	 * 
-	 * @param message Descrição da exceção.
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public InvocationTargetException( String message, Throwable cause ) 
 	{
 		super(message, cause);
 	}
-	
-	/**
-	 * Constroi uma nova exceção especificando a referência da causa. A descrição da exceção recém 
-	 * criada será a mesma da causa especificada. 
-	 * 
-	 * @param cause Referência ao objeto <code>Throwable</code> que causou a exceção.
-	 */
+
 	public InvocationTargetException( Throwable cause ) 
 	{
 		super(cause);
 	}
 
-	/**
-	 * Constroi uma nova exceção especificando a descrição.
-	 * 
-	 * @param message Descrição da exceção.
-	 */
 	public InvocationTargetException( String message ) 
 	{
 		super(message);
 	}
-	
-	@Override
-	public int getErrorCode( )
-	{
-		return ERROR_CODE;
-	}
-	
+
 }
 

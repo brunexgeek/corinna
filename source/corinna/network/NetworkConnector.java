@@ -44,6 +44,7 @@ import corinna.thread.ObjectLocker;
  * @param <R> bindlet request type
  * @param <P> bindlet resposne type
  */
+// TODO: rename to 'Connector'
 public abstract class NetworkConnector extends Lifecycle implements INetworkConnector, 
 	ChannelPipelineFactory, IStreamHandlerListener
 {
@@ -60,6 +61,10 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 	
 	private Map<String,String> params;
 	
+	private Map<String, IAdapter<?,?>> adapters;
+	
+	private ObjectLocker adaptersLock;
+	
 	public NetworkConnector( INetworkConnectorConfig config )
 	{
 		if (config == null)
@@ -67,6 +72,7 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 
 		this.config = config;
 		this.params = new HashMap<String,String>();
+		this.adapters = new HashMap<String, IAdapter<?,?>>();
 	
 		ChannelFactory factory = new NioServerSocketChannelFactory(
 			Executors.newCachedThreadPool(), Executors.newCachedThreadPool(), config.getMaxWorkers());
@@ -74,6 +80,7 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 		this.bootstrap.setPipelineFactory(this);
 		
 		this.domainLock = new ObjectLocker();
+		this.adaptersLock = new ObjectLocker();
 	}
 
 	@Override
@@ -197,6 +204,34 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 	public String[] getParameterNames()
 	{
 		return params.keySet().toArray(new String[0]);
+	}
+	
+	public void addAdapter( IAdapter<?,?> adapter )
+	{
+		if (adapter == null) return;
+		
+		adaptersLock.readLock();
+		try
+		{
+			adapters.put(adapter.getName(), adapter);
+		} finally
+		{
+			adaptersLock.readUnlock();
+		}
+	}
+	
+	public void removeAdapter( String name )
+	{
+		if (name == null || name.isEmpty()) return;
+		
+		adaptersLock.readLock();
+		try
+		{
+			adapters.remove(name);
+		} finally
+		{
+			adaptersLock.readUnlock();
+		}
 	}
 	
 }
