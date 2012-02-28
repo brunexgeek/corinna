@@ -3,12 +3,14 @@ package corinna.core;
 import java.io.IOException;
 
 import javax.bindlet.IBindletContext;
+import javax.bindlet.IBindletRequest;
+import javax.bindlet.IBindletResponse;
 
 import corinna.exception.BindletException;
 import corinna.network.RequestEvent;
 
 
-public interface IContextRequestListener<R,P>
+public interface IContextRequestListener<R extends IBindletRequest,P extends IBindletResponse>
 {
 
 

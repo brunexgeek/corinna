@@ -22,18 +22,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
+import javax.bindlet.IBindletRequest;
+import javax.bindlet.IBindletResponse;
+import javax.bindlet.http.HttpStatus;
+
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
 
+import corinna.bindlet.http.HttpBindletRequest;
+import corinna.bindlet.http.HttpBindletResponse;
 import corinna.core.IDomain;
 import corinna.core.INetworkConnectorConfig;
 import corinna.core.Lifecycle;
+import corinna.exception.AdapterException;
 import corinna.exception.BindletException;
 import corinna.exception.LifecycleException;
+import corinna.network.http.HttpRequestEvent;
 import corinna.thread.ObjectLocker;
 
 
@@ -41,12 +51,12 @@ import corinna.thread.ObjectLocker;
  * 
  * @author bruno
  *
- * @param <R> bindlet request type
- * @param <P> bindlet resposne type
+ * @param <R> pipeline request type
+ * @param <P> pipeline response type
  */
 // TODO: rename to 'Connector'
-public abstract class NetworkConnector extends Lifecycle implements INetworkConnector, 
-	ChannelPipelineFactory, IStreamHandlerListener
+public abstract class NetworkConnector<R,P> extends Lifecycle implements INetworkConnector<R,P>, 
+	ChannelPipelineFactory, IStreamHandlerListener<R, P>
 {
 
 	private ServerBootstrap bootstrap;
@@ -61,7 +71,7 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 	
 	private Map<String,String> params;
 	
-	private Map<String, IAdapter<?,?>> adapters;
+	private Map<String, IAdapter> adapters;
 	
 	private ObjectLocker adaptersLock;
 	
@@ -72,7 +82,7 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 
 		this.config = config;
 		this.params = new HashMap<String,String>();
-		this.adapters = new HashMap<String, IAdapter<?,?>>();
+		this.adapters = new HashMap<String, IAdapter>();
 	
 		ChannelFactory factory = new NioServerSocketChannelFactory(
 			Executors.newCachedThreadPool(), Executors.newCachedThreadPool(), config.getMaxWorkers());
@@ -121,7 +131,7 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 		IOException
 	{
 		if (event == null || domain == null) return;
-
+		
 		domainLock.readLock();
 		try
 		{
@@ -132,11 +142,87 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 		}
 	}
 	
+	//public abstract RequestEvent<?,?> translateRequest( R request, P response, Channel channel ) throws AdapterException;
+	
+	/*@Override
+	public RequestEvent<?,?> adapt( R request, P response ) throws AdapterException
+	{
+		if (request == null)
+			throw new NullPointerException("The request can not be null");
+		
+		adaptersLock.readLock();
+		try
+		{
+			for ( Map.Entry<String,IAdapter> entry : adapters.entrySet() )
+			{
+				IAdapter adapter = entry.getValue();
+				if (adapter.isCompatibleWith(request, response))
+					return adapter.translate(request, response, channel);
+			}
+		} finally
+		{
+			adaptersLock.readUnlock();
+		}
+
+		return translateRequest(request, response, channel);
+	}*/
+	
+	public abstract IAdapter getDefaultAdapter();
+	
+	public IAdapter getAdapter( R request, P response )
+	{
+		if (request == null)
+			throw new NullPointerException("The request can not be null");
+		
+		adaptersLock.readLock();
+		try
+		{
+			for ( Map.Entry<String,IAdapter> entry : adapters.entrySet() )
+			{
+				IAdapter adapter = entry.getValue();
+				if (adapter.isCompatibleWith(request, response))
+					return adapter;
+			}
+		} finally
+		{
+			adaptersLock.readUnlock();
+		}
+
+		return getDefaultAdapter();
+	}
+	
 	@Override
-	public void handlerRequestReceived( StreamHandler handler, RequestEvent<?,?> event ) 
+	public void handlerRequestReceived( StreamHandler handler, R request, P response, Channel channel ) 
 		throws BindletException, IOException
 	{
-		dispatchEventToDomain(event);
+		/*RequestEvent<?, ?> ev;
+		try
+		{
+			ev = adapt(request, response);
+		} catch (AdapterException e)
+		{
+			throw new BindletException("Error translating request", e);
+		}
+		dispatchEventToDomain(ev);
+		ev.getResponse().close();
+		return ev.isHandled();
+		*/
+		RequestEvent<?, ?> event = null;
+		IAdapter adapter = getAdapter(request, response);
+
+		try
+		{
+			event = adapter.translate(request, response, channel);
+			dispatchEventToDomain(event);
+		} catch (AdapterException e)
+		{
+			throw new BindletException("Error translating request", e);
+		} catch (Exception e)
+		{
+			adapter.onError(event, channel, e);
+			return;
+		}
+		adapter.onSuccess(event, channel);
 	}
 	
 	protected void startConnector() throws LifecycleException
@@ -206,7 +292,8 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 		return params.keySet().toArray(new String[0]);
 	}
 	
-	public void addAdapter( IAdapter<?,?> adapter )
+	@Override
+	public void addAdapter( IAdapter adapter )
 	{
 		if (adapter == null) return;
 		
@@ -220,6 +307,7 @@ public abstract class NetworkConnector extends Lifecycle implements INetworkConn
 		}
 	}
 	
+	@Override
 	public void removeAdapter( String name )
 	{
 		if (name == null || name.isEmpty()) return;

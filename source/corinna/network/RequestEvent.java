@@ -16,10 +16,13 @@
 
 package corinna.network;
 
+import javax.bindlet.IBindletRequest;
+import javax.bindlet.IBindletResponse;
+
 import corinna.core.AbstractEvent;
 
 
-public class RequestEvent<R,P> extends AbstractEvent
+public class RequestEvent<R extends IBindletRequest,P extends IBindletResponse> extends AbstractEvent
 {
 
 	private static final long serialVersionUID = 8507321749616247470L;

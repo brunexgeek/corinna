@@ -22,6 +22,7 @@ import javax.bindlet.http.IHttpBindletResponse;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 
@@ -34,6 +35,11 @@ public class HttpBindletResponse extends WebBindletResponse implements IHttpBind
 		super(channel, new DefaultHttpResponse(version, HttpResponseStatus.OK));
 	}
 
+	public HttpBindletResponse( Channel channel, HttpResponse response )
+	{
+		super(channel, response);
+	}
+	
 	@Override
 	public void addCookie( Cookie cookie )
 	{

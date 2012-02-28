@@ -16,18 +16,13 @@
 
 package corinna.network.http;
 
-import javax.bindlet.http.HttpStatus;
-import javax.bindlet.http.IHttpBindletRequest;
-import javax.bindlet.http.IHttpBindletResponse;
-
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
+import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
-import corinna.bindlet.http.HttpBindletRequest;
-import corinna.bindlet.http.HttpBindletResponse;
-import corinna.network.RequestEvent;
 import corinna.network.StreamHandler;
 import corinna.util.StateModel;
 import corinna.util.StateModel.Model;
@@ -51,30 +46,15 @@ public class HttpStreamHandler extends StreamHandler
 		throws Exception
 	{
 		HttpRequest request = (HttpRequest) event.getMessage();
-		
-		HttpBindletRequest req = new HttpBindletRequest(request);
-		HttpBindletResponse res = new HttpBindletResponse(event.getChannel(), request.getProtocolVersion() );
+		HttpResponse response = new DefaultHttpResponse(request.getProtocolVersion(), HttpResponseStatus.OK);
 
-		// dispatch the request event to network connector
-		RequestEvent<IHttpBindletRequest, IHttpBindletResponse> e = new HttpRequestEvent(req, res);
 		try
 		{
-			connector.handlerRequestReceived(this, e);
+			connector.handlerRequestReceived(this, request, response, context.getChannel());
 		} catch (Exception ex)
 		{
 			ex.printStackTrace();
 		}
-		
-		// check if no bindlets handle this request
-		if (!e.isHandled())
-			// send 'HTTP 404' to client
-			res.sendError(HttpStatus.NOT_FOUND);
-		else
-			// flush the HTTP response content
-			res.close();
-		// close the connection, if necessary
-		if (!HttpHeaders.isKeepAlive(request))
-			event.getChannel().close();
 	}
 	
 }

@@ -1,7 +1,7 @@
 package corinna.network;
 
 
-public abstract class Adapter<R,P> implements IAdapter<R,P>
+public abstract class Adapter implements IAdapter
 {
 
 	private IAdapterConfig config;
@@ -24,4 +24,5 @@ public abstract class Adapter<R,P> implements IAdapter<R,P>
 	{
 		return config.getAdapterName();
 	}
+	
 }

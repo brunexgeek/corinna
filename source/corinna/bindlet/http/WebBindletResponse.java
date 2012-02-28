@@ -51,6 +51,11 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	
 	public WebBindletResponse( Channel channel, HttpResponse response )
 	{
+		if (response == null)
+			throw new IllegalAccessError("The response object can not be null");
+		if (channel == null)
+			throw new IllegalArgumentException("The channel can not be null");
+		
 		this.response = response;
 		this.channel = channel;
 		this.outputLocker = new ObjectLocker();

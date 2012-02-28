@@ -24,6 +24,7 @@ import javax.bindlet.http.Cookie;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.ISession;
 
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
 
@@ -120,5 +121,12 @@ public class HttpBindletRequest extends WebBindletRequest implements IHttpBindle
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
+
+	@Override
+	public boolean isKeepAlive()
+	{
+		String value = getHeader(HttpHeaders.Names.CONNECTION);
+		return !(value != null && value.equalsIgnoreCase(HttpHeaders.Values.CLOSE));
+	}
+
 }

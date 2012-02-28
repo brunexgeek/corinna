@@ -1,15 +1,21 @@
 package corinna.network.soap;
 
+import javax.bindlet.http.HttpStatus;
+import javax.bindlet.http.IHttpBindletRequest;
+import javax.bindlet.http.IHttpBindletResponse;
 import javax.bindlet.soap.ISoapBindletRequest;
 import javax.bindlet.soap.ISoapBindletResponse;
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
+import corinna.bindlet.http.HttpBindletRequest;
 import corinna.bindlet.soap.SoapBindletRequest;
 import corinna.bindlet.soap.SoapBindletResponse;
 import corinna.exception.AdapterException;
@@ -18,8 +24,8 @@ import corinna.network.AdapterConfig;
 import corinna.network.IAdapterConfig;
 import corinna.network.RequestEvent;
 
-
-public class HttpToSoapAdapter extends Adapter<HttpRequest,HttpResponse>
+// TODO: rename to 'SoapAdapter'
+public class HttpToSoapAdapter extends Adapter
 {
 
 	private SoapUnmarshaller unmarshaller;
@@ -35,15 +41,26 @@ public class HttpToSoapAdapter extends Adapter<HttpRequest,HttpResponse>
 	}
 	
 	@Override
-	public RequestEvent<?, ?> translate( HttpRequest request, HttpResponse response, Channel channel )
+	public RequestEvent<?, ?> translate( Object request, Object response, Channel channel )
 		throws AdapterException
 	{
+		if (request == null)
+			throw new NullPointerException("The request object can not be null");
+		
+		HttpRequest req = (HttpRequest)request;
+		HttpResponse res = null;
+		
+		if (response == null)
+			res = new DefaultHttpResponse( req.getProtocolVersion(), HttpResponseStatus.OK);
+		else
+			res = (HttpResponse)response;
+		
 		try
 		{
-			ISoapBindletRequest req = new SoapBindletRequest(request, unmarshaller);
-			ISoapBindletResponse res = new SoapBindletResponse(marshaller, response, channel);
+			ISoapBindletRequest r = new SoapBindletRequest(req, unmarshaller);
+			ISoapBindletResponse p = new SoapBindletResponse(marshaller, res, channel);
 			
-			return new SoapRequestEvent(req, res);
+			return new SoapRequestEvent(r, p);
 		} catch (Exception e)
 		{
 			throw new AdapterException("Error translating HTTP message to SOAP", e);
@@ -53,20 +70,54 @@ public class HttpToSoapAdapter extends Adapter<HttpRequest,HttpResponse>
 	@Override
 	public Class<?> getResponseType()
 	{
-		return ISoapBindletResponse.class;
+		return HttpResponse.class;
 	}
 
 	@Override
 	public Class<?> getRequestType()
 	{
-		return ISoapBindletRequest.class;
+		return HttpRequest.class;
 	}
 
 	@Override
-	public boolean isCompatibleWith( HttpRequest request, HttpResponse response )
+	public boolean isCompatibleWith( Object request, Object response )
 	{
-		String value = request.getHeader(HttpHeaders.Names.CONTENT_TYPE);
-		return value.contains("text/xml");
+		boolean valid;
+		
+		valid  = HttpRequest.class.isAssignableFrom(request.getClass());
+		valid &= HttpResponse.class.isAssignableFrom(response.getClass());
+		if (!valid) return false;
+		
+		String value = ((HttpRequest)request).getHeader(HttpHeaders.Names.CONTENT_TYPE);
+
+		return (value != null && value.contains("text/xml")) || 
+		       ((HttpRequest)request).getUri().endsWith("?wsdl");
+	}
+
+	@Override
+	public void onError( RequestEvent<?, ?> event, Throwable exception )
+	{
+		try
+		{
+			ISoapBindletResponse response = (ISoapBindletResponse) event.getResponse();
+			response.sendError(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
+		} catch (Exception e)
+		{
+			// supress any error
+		}
+	}
+
+	@Override
+	public void onSuccess( RequestEvent<?, ?> event )
+	{
+		try
+		{
+			ISoapBindletResponse response = (ISoapBindletResponse) event.getResponse();
+			response.close();
+		} catch (Exception e)
+		{
+			// supress any error
+		}
 	}
 
 }

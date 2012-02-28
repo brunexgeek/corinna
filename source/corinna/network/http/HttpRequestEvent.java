@@ -19,8 +19,6 @@ package corinna.network.http;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 
-import corinna.bindlet.http.HttpBindletRequest;
-import corinna.bindlet.http.HttpBindletResponse;
 import corinna.network.RequestEvent;
 
 
@@ -30,7 +28,7 @@ public class HttpRequestEvent extends
 
 	private static final long serialVersionUID = -1125203305586209689L;
 
-	public HttpRequestEvent( HttpBindletRequest request, HttpBindletResponse response )
+	public HttpRequestEvent( IHttpBindletRequest request, IHttpBindletResponse response )
 	{
 		super(request, response);
 	}

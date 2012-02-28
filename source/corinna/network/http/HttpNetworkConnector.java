@@ -16,28 +16,33 @@
 
 package corinna.network.http;
 
-import java.lang.annotation.Annotation;
-
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
+import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
+import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
+import corinna.bindlet.http.HttpBindletRequest;
+import corinna.bindlet.http.HttpBindletResponse;
 import corinna.core.INetworkConnectorConfig;
+import corinna.exception.AdapterException;
+import corinna.network.AdapterConfig;
+import corinna.network.IAdapter;
 import corinna.network.IProtocol;
-import corinna.network.NetworkConfig;
 import corinna.network.NetworkConnector;
+import corinna.network.RequestEvent;
 import corinna.util.StateModel;
 import corinna.util.StateModel.Model;
-import corinna.util.Stateless;
 
 
-public class HttpNetworkConnector extends NetworkConnector
+public class HttpNetworkConnector extends NetworkConnector<HttpRequest, HttpResponse>
 {
 
 	/*rivate HttpRequestDecoder decoder;
@@ -49,6 +54,8 @@ public class HttpNetworkConnector extends NetworkConnector
 	private ChunkedWriteHandler chunkedWriter;*/
 
 	private HttpStreamHandler channelHandler;
+	
+	private HttpAdapter httpAdapter;
 	
 	public HttpNetworkConnector( INetworkConnectorConfig config )
 	{
@@ -65,6 +72,9 @@ public class HttpNetworkConnector extends NetworkConnector
 			this.channelHandler = new HttpStreamHandler(this);
 		else
 			this.channelHandler = null;
+		
+		AdapterConfig adapterConfig = new AdapterConfig("DefaultHttpAdapter");
+		this.httpAdapter = new HttpAdapter(adapterConfig);
 	}
 	
 	@Override
@@ -88,5 +98,11 @@ public class HttpNetworkConnector extends NetworkConnector
 	public IProtocol<IHttpBindletRequest, IHttpBindletResponse> getProtocol()
 	{
 		return HttpProtocol.getInstance();
+	}
+
+	@Override
+	public IAdapter getDefaultAdapter()
+	{
+		return httpAdapter;
 	}
 }

@@ -184,7 +184,7 @@ public class XMLDomainParser implements IDomainParser
 				throw new ParseException("Adapter '" + adapterName + "' not found.");
 			Class<?> classRef = Class.forName(entry.getClassName());
 			Constructor<?> ctor = classRef.getConstructor(IAdapter.CONSTRUCTOR_ARGS);
-			IAdapter<?,?> adapter = (IAdapter<?,?>)ctor.newInstance( entry.getConfig() );
+			IAdapter adapter = (IAdapter)ctor.newInstance( entry.getConfig() );
 			// insert the adapter in the connector
 			connector.addAdapter(adapter);
 		} catch (Exception e)
