@@ -22,28 +22,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
-import javax.bindlet.IBindletRequest;
-import javax.bindlet.IBindletResponse;
-import javax.bindlet.http.HttpStatus;
-
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
 
-import corinna.bindlet.http.HttpBindletRequest;
-import corinna.bindlet.http.HttpBindletResponse;
 import corinna.core.IDomain;
 import corinna.core.INetworkConnectorConfig;
 import corinna.core.Lifecycle;
 import corinna.exception.AdapterException;
 import corinna.exception.BindletException;
 import corinna.exception.LifecycleException;
-import corinna.network.http.HttpRequestEvent;
 import corinna.thread.ObjectLocker;
 
 
