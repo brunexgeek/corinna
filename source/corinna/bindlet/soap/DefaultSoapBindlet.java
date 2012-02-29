@@ -58,12 +58,6 @@ public class DefaultSoapBindlet extends SoapBindlet
 	
 	public DefaultSoapBindlet( ) throws BindletException
 	{
-		authenticator = new DigestAuthenticator( new SimpleUserDatabase("test.txt") );
-		
-		User user = new User("admin", "test@realm");
-		user.setPassword("98d2042f25e3372e6c5aae3a125fd7f4");
-		
-		((SimpleUserDatabase)authenticator.getDatabase()).addUser(user);
 	}
 
 	@Override

@@ -288,6 +288,15 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	}
 
 	@Override
+	public void setDateHeader( String name, long date )
+	{
+		if (isCommited()) return;
+		
+		Date temp = new Date(date);
+		response.setHeader(name, HttpUtils.formatDate(temp));
+	}
+	
+	@Override
 	public void addDateHeader( String name, Date date )
 	{
 		if (isCommited()) return;
@@ -295,6 +304,15 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 		response.addHeader(name, HttpUtils.formatDate(date));
 	}
 
+	@Override
+	public void addDateHeader( String name, long date )
+	{
+		if (isCommited()) return;
+		
+		Date temp = new Date(date);
+		response.addHeader(name, HttpUtils.formatDate(temp));
+	}
+	
 	@Override
 	public void setHeader( String name, Object value )
 	{
@@ -363,5 +381,7 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 		update();
 		channel.write(getResponse());
 	}
+	
+	
 	
 }

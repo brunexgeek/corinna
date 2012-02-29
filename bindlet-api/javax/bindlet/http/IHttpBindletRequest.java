@@ -275,7 +275,4 @@ public interface IHttpBindletRequest extends IWebBindletRequest
 
 	public boolean isRequestedSessionIdFromURL();
 
-	
-	public boolean isKeepAlive();
-	
 }

@@ -1,8 +1,6 @@
 package corinna.network.soap;
 
 import javax.bindlet.http.HttpStatus;
-import javax.bindlet.http.IHttpBindletRequest;
-import javax.bindlet.http.IHttpBindletResponse;
 import javax.bindlet.soap.ISoapBindletRequest;
 import javax.bindlet.soap.ISoapBindletResponse;
 import javax.xml.soap.SOAPConstants;
@@ -15,12 +13,10 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
-import corinna.bindlet.http.HttpBindletRequest;
 import corinna.bindlet.soap.SoapBindletRequest;
 import corinna.bindlet.soap.SoapBindletResponse;
 import corinna.exception.AdapterException;
 import corinna.network.Adapter;
-import corinna.network.AdapterConfig;
 import corinna.network.IAdapterConfig;
 import corinna.network.RequestEvent;
 
@@ -70,13 +66,13 @@ public class HttpToSoapAdapter extends Adapter
 	@Override
 	public Class<?> getResponseType()
 	{
-		return HttpResponse.class;
+		return ISoapBindletResponse.class;
 	}
 
 	@Override
 	public Class<?> getRequestType()
 	{
-		return HttpRequest.class;
+		return ISoapBindletRequest.class;
 	}
 
 	@Override
@@ -95,7 +91,7 @@ public class HttpToSoapAdapter extends Adapter
 	}
 
 	@Override
-	public void onError( RequestEvent<?, ?> event, Throwable exception )
+	public void onError( RequestEvent<?, ?> event, Channel channel, Throwable exception )
 	{
 		try
 		{
@@ -108,12 +104,17 @@ public class HttpToSoapAdapter extends Adapter
 	}
 
 	@Override
-	public void onSuccess( RequestEvent<?, ?> event )
+	public void onSuccess( RequestEvent<?, ?> event, Channel channel )
 	{
 		try
 		{
 			ISoapBindletResponse response = (ISoapBindletResponse) event.getResponse();
-			response.close();
+			
+			if (!event.isHandled())
+				response.sendError(HttpStatus.NOT_FOUND);
+			else
+				response.close();
+			channel.close();
 		} catch (Exception e)
 		{
 			// supress any error

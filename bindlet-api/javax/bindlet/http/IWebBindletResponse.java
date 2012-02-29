@@ -260,6 +260,8 @@ public interface IWebBindletResponse extends ICloseable, IBindletResponse
 	 */
 	public void setDateHeader( String name, Date date );
 
+	public void setDateHeader( String name, long date );
+	
 	/**
 	 * 
 	 * Adds a response header with the given name and date-value. The date is specified in terms of
@@ -274,6 +276,8 @@ public interface IWebBindletResponse extends ICloseable, IBindletResponse
 	 */
 	public void addDateHeader( String name, Date date );
 
+	public void addDateHeader( String name, long date );
+	
 	/**
 	 * 
 	 * Sets a response header with the given name and value. If the header had already been set, the

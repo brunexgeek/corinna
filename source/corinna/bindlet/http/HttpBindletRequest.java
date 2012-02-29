@@ -122,11 +122,4 @@ public class HttpBindletRequest extends WebBindletRequest implements IHttpBindle
 		return false;
 	}
 
-	@Override
-	public boolean isKeepAlive()
-	{
-		String value = getHeader(HttpHeaders.Names.CONNECTION);
-		return !(value != null && value.equalsIgnoreCase(HttpHeaders.Values.CLOSE));
-	}
-
 }

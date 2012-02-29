@@ -11,6 +11,8 @@ import javax.bindlet.http.IWebBindletRequest;
 
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpHeaders.Names;
+import org.jboss.netty.handler.codec.http.HttpHeaders.Values;
 
 import corinna.core.http.HttpUtils;
 
@@ -383,4 +385,17 @@ public class WebBindletRequest implements IWebBindletRequest
 		this.resourcePath = path;
 	}
 
+
+	@Override
+	public boolean isKeepAlive()
+	{
+		String value = getHeader(Names.CONNECTION);
+		if (Values.CLOSE.equalsIgnoreCase(value)) return false;
+
+		if (request.getProtocolVersion().isKeepAliveDefault())
+			return true;
+		else
+			return Values.KEEP_ALIVE.equalsIgnoreCase(value);
+	}
+	
 }

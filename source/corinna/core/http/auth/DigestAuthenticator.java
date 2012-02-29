@@ -147,7 +147,7 @@ public class DigestAuthenticator implements IHttpAuthenticator
 			
 			MessageDigest digest = new MessageDigest("MD5");
 			
-			// Note: for digest authentication, the password is the 'A1' value instead the plain
+			// Note: for digest authentication, the password is the 'HA1' value instead the plain
 			//       password
 			String hashA1 = user.getPassword();
 

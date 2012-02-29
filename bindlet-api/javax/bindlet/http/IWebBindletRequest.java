@@ -304,5 +304,7 @@ public interface IWebBindletRequest extends IBindletRequest
 	 * 
 	 */
 	public String[] getParameterValues( String name );
+
+	public boolean isKeepAlive();
 	
 }

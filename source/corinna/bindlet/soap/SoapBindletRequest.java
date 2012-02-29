@@ -3,8 +3,6 @@ package corinna.bindlet.soap;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import javax.bindlet.http.IHttpBindletRequest;
-import javax.bindlet.http.IHttpBindletResponse;
 import javax.bindlet.soap.ISoapBindletRequest;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -13,8 +11,6 @@ import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import corinna.bindlet.http.WebBindletRequest;
-import corinna.exception.BindletException;
-import corinna.network.soap.SoapStreamHandler;
 import corinna.network.soap.SoapUnmarshaller;
 
 
@@ -48,8 +44,6 @@ public class SoapBindletRequest extends WebBindletRequest implements ISoapBindle
 			content = request.getContent().toString(charset);
 			message = unmarshaller.unmarshall(content, charset);
 		}
-		
-		// check if the client 
 	}
 
 	@Override
