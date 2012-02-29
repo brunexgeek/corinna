@@ -55,12 +55,6 @@ public interface IBindlet<R, P>
 {
 
 	/**
-	 * Argument types for default constructor of a bindlet. This constructor is used by a
-	 * {@link IDomainParser} implementation.
-	 */
-	// XXX public static final Class<?>[] CONSTRUCTOR_ARGS = { IBindletConfig.class };
-
-	/**
 	 * Called by the bindlet container to indicate that the bindlet is being placed into service.
 	 * 
 	 * <p>

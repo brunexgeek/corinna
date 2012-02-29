@@ -16,87 +16,55 @@
 
 package corinna.exception;
 
+
 import javax.bindlet.IBindlet;
 
 
 /**
- * Defines an exception that a servlet or filter throws to indicate that it is permanently or
+ * Defines an exception that a bindlet or filter throws to indicate that it is permanently or
  * temporarily unavailable.
  * 
  * <p>
- * When a servlet or filter is permanently unavailable, something is wrong with it, and it cannot
- * handle requests until some action is taken. For example, a servlet might be configured
+ * When a bindlet or filter is permanently unavailable, something is wrong with it, and it cannot
+ * handle requests until some action is taken. For example, a bindlet might be configured
  * incorrectly, or a filter's state may be corrupted. The component should log both the error and
  * the corrective action that is needed.
  * 
  * <p>
- * A servlet or filter is temporarily unavailable if it cannot handle requests momentarily due to
+ * A bindlet or filter is temporarily unavailable if it cannot handle requests momentarily due to
  * some system-wide problem. For example, a third-tier server might not be accessible, or there may
  * be insufficient memory or disk storage to handle requests. A system administrator may need to
  * take corrective action.
  * 
  * <p>
- * Servlet containers can safely treat both types of unavailable exceptions in the same way.
- * However, treating temporary unavailability effectively makes the servlet container more robust.
- * Specifically, the servlet container might block requests to the servlet or filter for a period of
- * time suggested by the exception, rather than rejecting them until the servlet container restarts.
+ * bindlet containers can safely treat both types of unavailable exceptions in the same way.
+ * However, treating temporary unavailability effectively makes the bindlet container more robust.
+ * Specifically, the bindlet container might block requests to the bindlet or filter for a period of
+ * time suggested by the exception, rather than rejecting them until the bindlet container restarts.
  * 
  * 
  * @author Various
  * @version $Version$
  * 
  */
-// TODO: revisar classe
 public class UnavailableException extends BindletException
 {
 
 	private static final long serialVersionUID = -7826664431870838411L;
 
-	private transient IBindlet<?,?> servlet;
-
 	private boolean permanent;
 
 	private int seconds;
 
-	
-	public UnavailableException( IBindlet<?,?> servlet, String msg )
+	public UnavailableException( IBindlet<?, ?> bindlet, String msg )
 	{
 		super(msg);
-		this.servlet = servlet;
 		permanent = true;
 	}
 
 	/**
-	 * @deprecated As of Java Servlet API 2.2, use {@link #UnavailableException(String, int)}
-	 *             instead.
 	 * 
-	 * @param seconds
-	 *            an integer specifying the number of seconds the servlet expects to be unavailable;
-	 *            if zero or negative, indicates that the servlet can't make an estimate
-	 * 
-	 * @param servlet
-	 *            the <code>Servlet</code> that is unavailable
-	 * 
-	 * @param msg
-	 *            a <code>String</code> specifying the descriptive message, which can be written to
-	 *            a log file or displayed for the user.
-	 * 
-	 */
-
-	public UnavailableException( int seconds, IBindlet servlet, String msg )
-	{
-		super(msg);
-		this.servlet = servlet;
-		if (seconds <= 0)
-			this.seconds = -1;
-		else
-			this.seconds = seconds;
-		permanent = false;
-	}
-
-	/**
-	 * 
-	 * Constructs a new exception with a descriptive message indicating that the servlet is
+	 * Constructs a new exception with a descriptive message indicating that the bindlet is
 	 * permanently unavailable.
 	 * 
 	 * @param msg
@@ -112,11 +80,11 @@ public class UnavailableException extends BindletException
 	}
 
 	/**
-	 * Constructs a new exception with a descriptive message indicating that the servlet is
+	 * Constructs a new exception with a descriptive message indicating that the bindlet is
 	 * temporarily unavailable and giving an estimate of how long it will be unavailable.
 	 * 
 	 * <p>
-	 * In some cases, the servlet cannot make an estimate. For example, the servlet might know that
+	 * In some cases, the bindlet cannot make an estimate. For example, the bindlet might know that
 	 * a server it needs is not running, but not be able to report how long it will take to be
 	 * restored to functionality. This can be indicated with a negative or zero value for the
 	 * <code>seconds</code> argument.
@@ -126,8 +94,8 @@ public class UnavailableException extends BindletException
 	 *            a log file or displayed for the user.
 	 * 
 	 * @param seconds
-	 *            an integer specifying the number of seconds the servlet expects to be unavailable;
-	 *            if zero or negative, indicates that the servlet can't make an estimate
+	 *            an integer specifying the number of seconds the bindlet expects to be unavailable;
+	 *            if zero or negative, indicates that the bindlet can't make an estimate
 	 * 
 	 */
 
@@ -145,12 +113,12 @@ public class UnavailableException extends BindletException
 
 	/**
 	 * 
-	 * Returns a <code>boolean</code> indicating whether the servlet is permanently unavailable. If
-	 * so, something is wrong with the servlet, and the system administrator must take some
+	 * Returns a <code>boolean</code> indicating whether the bindlet is permanently unavailable. If
+	 * so, something is wrong with the bindlet, and the system administrator must take some
 	 * corrective action.
 	 * 
-	 * @return <code>true</code> if the servlet is permanently unavailable; <code>false</code> if
-	 *         the servlet is available or temporarily unavailable
+	 * @return <code>true</code> if the bindlet is permanently unavailable; <code>false</code> if
+	 *         the bindlet is available or temporarily unavailable
 	 * 
 	 */
 
@@ -160,30 +128,15 @@ public class UnavailableException extends BindletException
 	}
 
 	/**
-	 * @deprecated As of Java Servlet API 2.2, with no replacement.
-	 * 
-	 *             Returns the servlet that is reporting its unavailability.
-	 * 
-	 * @return the <code>Servlet</code> object that is throwing the
-	 *         <code>UnavailableException</code>
-	 * 
-	 */
-
-	public IBindlet getServlet()
-	{
-		return servlet;
-	}
-
-	/**
-	 * Returns the number of seconds the servlet expects to be temporarily unavailable.
+	 * Returns the number of seconds the bindlet expects to be temporarily unavailable.
 	 * 
 	 * <p>
-	 * If this method returns a negative number, the servlet is permanently unavailable or cannot
+	 * If this method returns a negative number, the bindlet is permanently unavailable or cannot
 	 * provide an estimate of how long it will be unavailable. No effort is made to correct for the
 	 * time elapsed since the exception was first reported.
 	 * 
-	 * @return an integer specifying the number of seconds the servlet will be temporarily
-	 *         unavailable, or a negative number if the servlet is permanently unavailable or cannot
+	 * @return an integer specifying the number of seconds the bindlet will be temporarily
+	 *         unavailable, or a negative number if the bindlet is permanently unavailable or cannot
 	 *         make an estimate
 	 * 
 	 */

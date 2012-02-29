@@ -1,12 +1,9 @@
 package javax.bindlet.http;
 
 
-import java.util.Date;
-
 import javax.bindlet.IBindletRequest;
 
 
-//TODO: mover para 'javax.bindlet.http'
 public interface IWebBindletRequest extends IBindletRequest
 {
 

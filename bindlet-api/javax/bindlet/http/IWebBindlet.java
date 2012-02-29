@@ -1,6 +1,6 @@
 package javax.bindlet.http;
 
-//TODO: mover para 'javax.bindlet.http'
+
 public interface IWebBindlet
 {
 	

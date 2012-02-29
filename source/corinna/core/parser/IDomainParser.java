@@ -28,7 +28,6 @@ import corinna.exception.ParseException;
  * @version 1.0
  * @since 1.0
  */
-// TODO: move to 'corinna.core.parser'
 public interface IDomainParser
 {
 

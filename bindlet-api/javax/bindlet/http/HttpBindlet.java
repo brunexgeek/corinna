@@ -253,7 +253,7 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		 * 
 		 * doGet(request, response); response.setContentLength();
 		 */
-		// / XXX
+		// TODO: create a new class similar the "NoBodyResponse"
 	}
 
 	/**

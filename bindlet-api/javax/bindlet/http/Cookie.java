@@ -59,10 +59,7 @@ import java.util.ResourceBundle;
  * 
  */
 
-// XXX would implement java.io.Serializable too, but can't do that
-// so long as sun.servlet.* must run on older JDK 1.02 JVMs which
-// don't include that support.
-
+// TODO: adapt this class
 public class Cookie implements Cloneable
 {
 

@@ -105,7 +105,7 @@ public enum LifecycleState
 	
 	public static boolean waitTransitions( ILifecycle object, LifecycleState state )
 	{
-		return waitTransitions(object, state, 250);
+		return waitTransitions(object, state, 60000);
 	}
 
 	/**
@@ -113,52 +113,36 @@ public enum LifecycleState
 	 * indicado tenha alcançado um estado especificado. O estado alvo e o estado atual devem ser
 	 * do mesmo grupo.
 	 */
-	// TODO: incluir timeout!
-	public static boolean waitTransitions( ILifecycle object, LifecycleState state, long interval )
+	public static boolean waitTransitions( ILifecycle object, LifecycleState state, long timeout )
 	{
-		int fails = 0;
-		
 		// o estado atual precisa ser do mesmo grupo que o estado alvo
 		if ( state.equalGroup( object.getLifecycleState() ) ) return false;
 		
-		while (object.getLifecycleState() != state)
-		{
-			try
-			{
-				Thread.sleep(interval);
-			} catch (InterruptedException e)
-			{
-				++fails;
-				if (fails > 5) return false;
-			}
-		}
-		
-		return true;
+		return waitState(object, state, timeout);
 	}
 	
 	public static boolean waitState( ILifecycle object, LifecycleState state )
 	{
-		return waitState(object, state, 250);
+		return waitState(object, state, 60000);
 	}
 	
 	/**
 	 * Causa a parada momentânea da thread atual até que o estado do ciclo de vida do objeto 
 	 * indicado tenha alcançado um estado especificado.
 	 */
-	// TODO: incluir timeout!
-	public static boolean waitState( ILifecycle object, LifecycleState state, long interval )
+	public static boolean waitState( ILifecycle object, LifecycleState state, long timeout )
 	{
-		int fails = 0;
+		long expiration = System.currentTimeMillis() + timeout;
 		
 		while (object.getLifecycleState() != state)
 		{
 			try
 			{
-				Thread.sleep(interval);
-			} catch (InterruptedException e)
+				if (System.currentTimeMillis() > expiration) return false;
+				Thread.currentThread().wait(100);
+			} catch (Exception e)
 			{
-				++fails;
-				if (fails > 5) return false;
+				return false;
 			}
 		}
 		

@@ -84,6 +84,7 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 		update();
 	}
 	
+	// TODO: enhance this wrapper 
 	protected void update()
 	{
 		String now = HttpUtils.formatDate( calendar.getTime() );

@@ -35,7 +35,6 @@ import javax.bindlet.IBindletRequest;
  * 
  * 
  */
-//TODO: mover para 'javax.bindlet.http'
 public interface IHttpBindletRequest extends IWebBindletRequest
 {
 
