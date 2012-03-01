@@ -36,9 +36,9 @@ public class RequestEvent<R extends IBindletRequest,P extends IBindletResponse> 
 	public RequestEvent( R request, P response )
 	{
 		if (request == null)
-			throw new NullPointerException("The request can not be null");
+			throw new IllegalArgumentException("The request can not be null");
 		if (response == null)
-			throw new NullPointerException("The response can not be null");
+			throw new IllegalArgumentException("The response can not be null");
 		
 		this.request = request;
 		this.response = response;
@@ -65,9 +65,19 @@ public class RequestEvent<R extends IBindletRequest,P extends IBindletResponse> 
 		return response;
 	}
 
+	public Class<?> getResponseType()
+	{
+		return response.getClass();
+	}
+
 	public R getRequest()
 	{
 		return request;
+	}
+
+	public Class<?> getRequestType()
+	{
+		return request.getClass();
 	}
 	
 }

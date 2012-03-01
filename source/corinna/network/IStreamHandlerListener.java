@@ -23,10 +23,10 @@ import org.jboss.netty.channel.Channel;
 import corinna.exception.BindletException;
 
 
-public interface IStreamHandlerListener<R,P>
+public interface IStreamHandlerListener
 {
 
-	public void handlerRequestReceived( StreamHandler handler, R request, P response, Channel channel ) 
+	public void handlerRequestReceived( StreamHandler handler, Object request, Object response, Channel channel ) 
 	throws BindletException, IOException;
 	
 }

@@ -84,5 +84,17 @@ public class HttpProtocol extends Protocol<IHttpBindletRequest, IHttpBindletResp
 		return PROTOCOL_LICENSE;
 	}
 
+	@Override
+	public Class<?> getRequestClass()
+	{
+		return IHttpBindletRequest.class;
+	}
+
+	@Override
+	public Class<?> getResponseClass()
+	{
+		return IHttpBindletResponse.class;
+	}
+
 	
 }

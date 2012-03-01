@@ -17,25 +17,24 @@
 package corinna.core;
 
 import corinna.exception.ConnectorInUseException;
-import corinna.exception.LifecycleException;
 import corinna.exception.ServerInUseException;
-import corinna.network.INetworkConnector;
-import corinna.network.INetworkConnectorListener;
+import corinna.network.IConnector;
+import corinna.network.IConnectorListener;
 import corinna.network.IProtocol;
 
 
-public interface IDomain extends INetworkConnectorListener, ILifecycle
+public interface IDomain extends IConnectorListener, ILifecycle
 {
 
 	public String getName();
 	
-	public INetworkConnector getConnector( String name );
+	public IConnector getConnector( String name );
 	
-	public INetworkConnector getConnector( IProtocol<?,?> protocol, int index );
+	public IConnector getConnector( IProtocol<?,?> protocol, int index );
 	
-	public void addConnector( INetworkConnector connector ) throws ConnectorInUseException;
+	public void addConnector( IConnector connector ) throws ConnectorInUseException;
 	
-	public void removeConnector( INetworkConnector connector ) throws ConnectorInUseException;
+	public void removeConnector( IConnector connector ) throws ConnectorInUseException;
 	
 	public void removeConnector( String name ) throws ConnectorInUseException;
 		

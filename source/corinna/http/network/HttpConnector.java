@@ -22,22 +22,20 @@ import javax.bindlet.http.IHttpBindletResponse;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
-import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
-import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
-import corinna.core.INetworkConnectorConfig;
 import corinna.network.AdapterConfig;
+import corinna.network.Connector;
 import corinna.network.IAdapter;
+import corinna.network.IConnectorConfig;
 import corinna.network.IProtocol;
-import corinna.network.NetworkConnector;
 import corinna.util.StateModel;
 import corinna.util.StateModel.Model;
 
 
-public class HttpNetworkConnector extends NetworkConnector<HttpRequest, HttpResponse>
+public class HttpConnector extends Connector
 {
 
 	/*rivate HttpRequestDecoder decoder;
@@ -52,7 +50,7 @@ public class HttpNetworkConnector extends NetworkConnector<HttpRequest, HttpResp
 	
 	private HttpAdapter httpAdapter;
 	
-	public HttpNetworkConnector( INetworkConnectorConfig config )
+	public HttpConnector( IConnectorConfig config )
 	{
 		super(config);
 		

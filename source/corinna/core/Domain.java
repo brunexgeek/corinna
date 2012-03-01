@@ -26,9 +26,9 @@ import corinna.exception.BindletException;
 import corinna.exception.ConnectorInUseException;
 import corinna.exception.LifecycleException;
 import corinna.exception.ServerInUseException;
-import corinna.network.INetworkConnector;
+import corinna.network.Connector;
+import corinna.network.IConnector;
 import corinna.network.IProtocol;
-import corinna.network.NetworkConnector;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
 
@@ -42,9 +42,9 @@ public final class Domain extends Lifecycle implements IDomain
 
 	private ObjectLocker serversLock;
 	
-	private Map<String, INetworkConnector> connectorsByName;
+	private Map<String, IConnector> connectorsByName;
 	
-	private Map<String, List<INetworkConnector>> connectorsByProtocol;
+	private Map<String, List<IConnector>> connectorsByProtocol;
 	
 	private Map<String, IServer> servers;
 	
@@ -54,15 +54,15 @@ public final class Domain extends Lifecycle implements IDomain
 			throw new IllegalArgumentException("The domain name can not be null or empty");
 		this.name = name;
 
-		connectorsByName = new HashMap<String, INetworkConnector>();
-		connectorsByProtocol = new HashMap<String, List<INetworkConnector>>();
+		connectorsByName = new HashMap<String, IConnector>();
+		connectorsByProtocol = new HashMap<String, List<IConnector>>();
 		servers = new HashMap<String, IServer>();
 		connectorsLock = new ObjectLocker();
 		serversLock = new ObjectLocker();
 	}
 	
 	@Override
-	public INetworkConnector getConnector( String name )
+	public IConnector getConnector( String name )
 	{
 		if (name == null || name.isEmpty()) return null;
 
@@ -81,14 +81,14 @@ public final class Domain extends Lifecycle implements IDomain
 	 * se o índice especificado não existe, é retornado null.
 	 */
 	@Override
-	public INetworkConnector getConnector( IProtocol<?, ?> protocol, int index )
+	public IConnector getConnector( IProtocol<?, ?> protocol, int index )
 	{
 		if (name == null || name.isEmpty()) return null;
 
 		connectorsLock.readLock();
 		try
 		{
-			List<INetworkConnector> list = connectorsByProtocol.get(protocol.toString());
+			List<IConnector> list = connectorsByProtocol.get(protocol.toString());
 			if (list == null || list.size() <= index) return null;
 			return list.get(index);
 		} finally
@@ -98,7 +98,7 @@ public final class Domain extends Lifecycle implements IDomain
 	}
 
 	@Override
-	public void addConnector( INetworkConnector connector ) throws ConnectorInUseException
+	public void addConnector( IConnector connector ) throws ConnectorInUseException
 	{
 		if (connector == null) return;
 		
@@ -112,10 +112,10 @@ public final class Domain extends Lifecycle implements IDomain
 			connectorsByName.put(connector.getName(), connector);
 			// add connector by protocol
 			String protocol = connector.getProtocol().toString();
-			List<INetworkConnector> list = connectorsByProtocol.get(protocol);
+			List<IConnector> list = connectorsByProtocol.get(protocol);
 			if (list == null) 
 			{
-				list = new LinkedList<INetworkConnector>();
+				list = new LinkedList<IConnector>();
 				connectorsByProtocol.put(protocol, list);
 			}
 			list.add(connector);
@@ -136,7 +136,7 @@ public final class Domain extends Lifecycle implements IDomain
 	}
 
 	@Override
-	public void removeConnector( INetworkConnector connector ) throws ConnectorInUseException
+	public void removeConnector( IConnector connector ) throws ConnectorInUseException
 	{
 		if (connector == null) return;
 
@@ -151,7 +151,7 @@ public final class Domain extends Lifecycle implements IDomain
 			// remove connector by name
 			connectorsByName.remove( connector.getName() );
 			// remove connector by protocol
-			List<INetworkConnector> connectorList = connectorsByProtocol.get( connector.getProtocol().toString() );
+			List<IConnector> connectorList = connectorsByProtocol.get( connector.getProtocol().toString() );
 			if (connectorList != null) connectorList.remove(connector);
 			// unset the domain
 			connector.setDomain(null);
@@ -242,7 +242,7 @@ public final class Domain extends Lifecycle implements IDomain
 	}
 	
 	@Override
-	public void connectorRequestReceived( NetworkConnector connector,
+	public void connectorRequestReceived( Connector connector,
 		RequestEvent<?, ?> event ) throws BindletException, IOException
 	{
 		serversLock.readLock();
@@ -291,7 +291,7 @@ public final class Domain extends Lifecycle implements IDomain
 		try
 		{
 			// itera entre os servidores
-			for (Map.Entry<String, INetworkConnector> entry : connectorsByName.entrySet())
+			for (Map.Entry<String, IConnector> entry : connectorsByName.entrySet())
 				entry.getValue().start();
 		} finally
 		{
@@ -326,7 +326,7 @@ public final class Domain extends Lifecycle implements IDomain
 		try
 		{
 			// itera entre os servidores
-			for (Map.Entry<String, INetworkConnector> entry : connectorsByName.entrySet())
+			for (Map.Entry<String, IConnector> entry : connectorsByName.entrySet())
 				entry.getValue().stop();
 		} finally
 		{
@@ -361,7 +361,7 @@ public final class Domain extends Lifecycle implements IDomain
 		try
 		{
 			// itera entre os servidores
-			for (Map.Entry<String, INetworkConnector> entry : connectorsByName.entrySet())
+			for (Map.Entry<String, IConnector> entry : connectorsByName.entrySet())
 				entry.getValue().init();
 		} finally
 		{
@@ -396,7 +396,7 @@ public final class Domain extends Lifecycle implements IDomain
 		try
 		{
 			// itera entre os servidores
-			for (Map.Entry<String, INetworkConnector> entry : connectorsByName.entrySet())
+			for (Map.Entry<String, IConnector> entry : connectorsByName.entrySet())
 				entry.getValue().destroy();
 		} finally
 		{

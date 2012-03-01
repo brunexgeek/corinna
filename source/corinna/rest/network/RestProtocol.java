@@ -82,6 +82,18 @@ public final class RestProtocol extends Protocol<IRestBindletRequest, IRestBindl
 	{
 		return PROTOCOL_LICENSE;
 	}
+
+	@Override
+	public Class<?> getRequestClass()
+	{
+		return IRestBindletRequest.class;
+	}
+
+	@Override
+	public Class<?> getResponseClass()
+	{
+		return IRestBindletResponse.class;
+	}
 	
 	
 }

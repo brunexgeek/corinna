@@ -30,7 +30,6 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
 import corinna.core.IDomain;
-import corinna.core.INetworkConnectorConfig;
 import corinna.core.Lifecycle;
 import corinna.exception.AdapterException;
 import corinna.exception.BindletException;
@@ -45,14 +44,13 @@ import corinna.thread.ObjectLocker;
  * @param <R> pipeline request type
  * @param <P> pipeline response type
  */
-// TODO: rename to 'Connector'
-public abstract class NetworkConnector<R,P> extends Lifecycle implements INetworkConnector<R,P>, 
-	ChannelPipelineFactory, IStreamHandlerListener<R, P>
+public abstract class Connector extends Lifecycle implements IConnector, 
+	ChannelPipelineFactory, IStreamHandlerListener
 {
 
 	private ServerBootstrap bootstrap;
 
-	private INetworkConnectorConfig config;
+	private IConnectorConfig config;
 	
 	private IDomain domain = null;
 	
@@ -66,7 +64,7 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 	
 	private ObjectLocker adaptersLock;
 	
-	public NetworkConnector( INetworkConnectorConfig config )
+	public Connector( IConnectorConfig config )
 	{
 		if (config == null)
 			throw new IllegalArgumentException("The network configuration can not be null");
@@ -133,34 +131,9 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 		}
 	}
 	
-	//public abstract RequestEvent<?,?> translateRequest( R request, P response, Channel channel ) throws AdapterException;
-	
-	/*@Override
-	public RequestEvent<?,?> adapt( R request, P response ) throws AdapterException
-	{
-		if (request == null)
-			throw new NullPointerException("The request can not be null");
-		
-		adaptersLock.readLock();
-		try
-		{
-			for ( Map.Entry<String,IAdapter> entry : adapters.entrySet() )
-			{
-				IAdapter adapter = entry.getValue();
-				if (adapter.isCompatibleWith(request, response))
-					return adapter.translate(request, response, channel);
-			}
-		} finally
-		{
-			adaptersLock.readUnlock();
-		}
-
-		return translateRequest(request, response, channel);
-	}*/
-	
 	public abstract IAdapter getDefaultAdapter();
 	
-	public IAdapter getAdapter( R request, P response )
+	public IAdapter getAdapter( Object request, Object response )
 	{
 		if (request == null)
 			throw new NullPointerException("The request can not be null");
@@ -183,21 +156,9 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 	}
 	
 	@Override
-	public void handlerRequestReceived( StreamHandler handler, R request, P response, Channel channel ) 
+	public void handlerRequestReceived( StreamHandler handler, Object request, Object response, Channel channel ) 
 		throws BindletException, IOException
 	{
-		/*RequestEvent<?, ?> ev;
-		try
-		{
-			ev = adapt(request, response);
-		} catch (AdapterException e)
-		{
-			throw new BindletException("Error translating request", e);
-		}
-		dispatchEventToDomain(ev);
-		ev.getResponse().close();
-		return ev.isHandled();
-		*/
 		RequestEvent<?, ?> event = null;
 		IAdapter adapter = getAdapter(request, response);
 
@@ -257,7 +218,7 @@ public abstract class NetworkConnector<R,P> extends Lifecycle implements INetwor
 	@Override
 	public String getName()
 	{
-		return config.getName();
+		return config.getConnectorName();
 	}
 
 	@Override

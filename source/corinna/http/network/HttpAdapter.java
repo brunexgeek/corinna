@@ -98,7 +98,9 @@ public class HttpAdapter extends Adapter
 
 		IHttpBindletRequest r = new HttpBindletRequest(req);
 		IHttpBindletResponse p = new HttpBindletResponse(channel, res);
-		return new HttpRequestEvent(r, p);
+		HttpRequestEvent aaa = new HttpRequestEvent(r, p);
+		System.out.println( aaa.getResponseType() );
+		return aaa;
 	}
 
 }

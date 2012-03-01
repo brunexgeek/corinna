@@ -19,8 +19,6 @@ package corinna.network;
 import java.util.HashMap;
 import java.util.Map;
 
-import corinna.util.Reflection;
-
 
 public abstract class Protocol<R,P> implements IProtocol<R,P>
 {
@@ -47,18 +45,6 @@ public abstract class Protocol<R,P> implements IProtocol<R,P>
 	public String toString()
 	{
 		return getName() + "/" + getVersion();
-	}
-	
-	@Override
-	public Class<?> getRequestClass()
-	{
-		return Reflection.getGenericParameter(this, Protocol.class, 0);
-	}
-	
-	@Override
-	public Class<?> getResponseClass()
-	{
-		return Reflection.getGenericParameter(this, Protocol.class, 1);
 	}
 
 }

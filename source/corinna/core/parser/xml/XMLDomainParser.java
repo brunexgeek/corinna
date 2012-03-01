@@ -46,14 +46,14 @@ import corinna.core.IServer;
 import corinna.core.IServerConfig;
 import corinna.core.IService;
 import corinna.core.IServiceConfig;
-import corinna.core.NetworkConnectorConfig;
 import corinna.core.ServerConfig;
 import corinna.core.ServiceConfig;
 import corinna.core.parser.IDomainParser;
 import corinna.exception.ParseException;
 import corinna.network.AdapterConfig;
+import corinna.network.ConnectorConfig;
 import corinna.network.IAdapter;
-import corinna.network.INetworkConnector;
+import corinna.network.IConnector;
 import corinna.service.bean.BeanConfig;
 import corinna.service.bean.BeanManager;
 import corinna.service.bean.IServiceBean;
@@ -173,7 +173,7 @@ public class XMLDomainParser implements IDomainParser
 		return domain;
 	}
 
-	protected void createAdapter( INetworkConnector connector, String adapterName ) throws ParseException
+	protected void createAdapter( IConnector connector, String adapterName ) throws ParseException
 	{
 		if (adapterList == null) return;
 		try
@@ -222,8 +222,8 @@ public class XMLDomainParser implements IDomainParser
 			{
 				// create the current server
 				Class<?> classRef = Class.forName(entry.getClassName());
-				Constructor<?> ctor = classRef.getConstructor(INetworkConnector.CONSTRUCTOR_ARGS);
-				INetworkConnector connector = (INetworkConnector)ctor.newInstance( entry.getConfig() );
+				Constructor<?> ctor = classRef.getConstructor(IConnector.CONSTRUCTOR_ARGS);
+				IConnector connector = (IConnector)ctor.newInstance( entry.getConfig() );
 				// create the associated adapters
 				for (String adapterName : entry.getAdapters() )
 					createAdapter(connector, adapterName);
@@ -407,7 +407,7 @@ public class XMLDomainParser implements IDomainParser
 			String connectorPort = getTagContent(element, XMLDomainTags.CONNECTOR_PORT);
 			int port = stringToInt(connectorPort, 10, -1);
 			// create the configuration object and get the connector parameters
-			NetworkConnectorConfig config = new NetworkConnectorConfig(connectorName, connectorHostName, port);
+			ConnectorConfig config = new ConnectorConfig(connectorName, connectorHostName, port);
 			parseParameters(element, XMLDomainTags.INIT_PARAMETERS, config);
 
 			try

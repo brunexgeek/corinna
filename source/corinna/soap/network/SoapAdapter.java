@@ -20,15 +20,15 @@ import corinna.network.RequestEvent;
 import corinna.soap.bindlet.SoapBindletRequest;
 import corinna.soap.bindlet.SoapBindletResponse;
 
-// TODO: rename to 'SoapAdapter'
-public class HttpToSoapAdapter extends Adapter
+
+public class SoapAdapter extends Adapter
 {
 
 	private SoapUnmarshaller unmarshaller;
 
 	private SoapMarshaller marshaller;
 	
-	public HttpToSoapAdapter( IAdapterConfig config ) throws SOAPException
+	public SoapAdapter( IAdapterConfig config ) throws SOAPException
 	{
 		super(config);
 		

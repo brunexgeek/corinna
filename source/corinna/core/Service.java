@@ -27,9 +27,6 @@ import corinna.exception.BindletException;
 import corinna.exception.LifecycleException;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
-import corinna.util.Reflection;
-import corinna.util.conf.ISection;
-import corinna.util.conf.Section;
 
 
 public abstract class Service extends Lifecycle implements IService
@@ -152,24 +149,14 @@ public abstract class Service extends Lifecycle implements IService
 			{
 				// get the request and response types accepted by the current context
 				IContext<?, ?> context = entry.getValue();
-				Class<?> contextRequest = context.getRequestType();//Reflection.getGenericParameter(context, IContext.class, 0);
-				Class<?> contextResponse = context.getResponseType();//Reflection.getGenericParameter(context, IContext.class, 1);
+				Class<?> contextRequest = context.getRequestType();
+				Class<?> contextResponse = context.getResponseType();
 				// get the request and response types of the current event
-				Class<?> requestType = null;
-				Class<?> responseType = null;
-				if (event.getRequest() != null)
-					requestType = event.getRequest().getClass();
-				else
-					requestType = Reflection.getGenericParameter(event, RequestEvent.class, 0);
-				if (event.getResponse() != null)
-					responseType = event.getResponse().getClass();
-				else
-					responseType = Reflection.getGenericParameter(event, RequestEvent.class, 1);
+				Class<?> requestType = event.getRequestType();
+				Class<?> responseType = event.getResponseType();
 				// check if the types are compatible
-				boolean validReq = contextRequest.isAssignableFrom(requestType);
-				boolean validRes = contextResponse.isAssignableFrom(responseType);
-				
-				if (validReq && validRes)
+				if ( contextRequest.isAssignableFrom(requestType) &&
+					contextResponse.isAssignableFrom(responseType) )
 				{
 					entry.getValue().serviceRequestReceived(this, event);
 					if ( event.isHandled() ) break;

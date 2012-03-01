@@ -1,19 +1,14 @@
 package corinna.test;
 
-import org.apache.log4j.BasicConfigurator;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
-import corinna.bindlet.soap.DefaultSoapBindlet;
-import corinna.core.DefaultServer;
-import corinna.core.Domain;
-import corinna.core.IBindletRegistration;
-import corinna.core.IDomain;
-import corinna.core.IServer;
-import corinna.core.IService;
-import corinna.core.http.HttpContext;
-import corinna.core.soap.SoapContext;
-import corinna.network.NetworkConfig;
-import corinna.network.http.HttpNetworkConnector;
-import corinna.network.web.WebNetworkConnector;
+import javax.bindlet.http.IHttpBindletRequest;
+import javax.bindlet.http.IHttpBindletResponse;
+
+import corinna.http.network.HttpRequestEvent;
+import corinna.network.RequestEvent;
+import corinna.util.Reflection;
 
 
 public class MainTest
@@ -21,58 +16,50 @@ public class MainTest
 
 	public static void main( String[] args ) throws Exception
 	{
-		BasicConfigurator.configure();
+		RequestEvent<IHttpBindletRequest, IHttpBindletResponse> aaa = new RequestEvent<IHttpBindletRequest, IHttpBindletResponse>(null, null);
+		//MyClass aaa = new MyClass(null, null);
+		System.out.println( aaa.getResponseType() );
+	}
 		
-		/**
-		 * HTTP Context
-		 */
-
-		HttpContext context1 = new HttpContext("HttpContext");
-		context1.setParameter("urlMapping", "http");
-		IBindletRegistration reg1 = context1.addBindlet("MyBindlet1", MyHttpBindlet.class);
-		reg1.setBindletParameter("urlMapping", "login");
+	public static Class<?> getGenericType( Object obj, Class<?> refClass, int index )
+	{
+		if (obj == null)
+			throw new IllegalArgumentException("The object can not be null");
+		if (refClass == null)
+			throw new IllegalAccessError("The reference class can not be null");
+		if (index < 0)
+			throw new IllegalAccessError("The generic parameter index must be a positive integer");
 		
-		/**
-		 * SOAP Context
-		 */
+		Class<?> currentClass = obj.getClass();
+		if (!refClass.isAssignableFrom((Class<?>)currentClass)) return null;
 		
-		SoapContext context2 = new SoapContext("SoapContext");
-		context2.setParameter("urlMapping", "soap");
-		IBindletRegistration reg2 = context2.addBindlet("MyBindlet2", DefaultSoapBindlet.class);
-		reg2.setBindletParameter("urlMapping", "call");
-		reg2.setBindletParameter("interfaceClass", MyInterface.class.getName());
-		reg2.setBindletParameter("implementationClass", MyImpl.class.getName());
+		do {
+			TypeVariable<?> types[] = currentClass.getTypeParameters();
+			if (types != null && types.length > index)
+			{
+				Type[] inners = currentClass.getTypeParameters()[index].getBounds();
+				Type genericType = inners[0];
+				if (genericType instanceof Class) return (Class<?>)genericType;
+			}
+			currentClass = currentClass.getSuperclass();
+		} while (currentClass != Object.class); 
 		
-		/**
-		 * Another elements
-		 */
-		
-		IService service = new MyService("myService");
-		service.addContext(context1);
-		service.addContext(context2);
-		service.init();
-		
-		NetworkConfig config = new NetworkConfig("WebConnector", "localhost", 8080);
-		WebNetworkConnector connector = new WebNetworkConnector(config);
-		connector.init();
-		
-		IServer server = new DefaultServer("MyServer");
-		server.addService(service);
-		server.init();
-		
-		IDomain domain = new Domain("vaas.cpqd.com.br");
-		domain.addConnector(connector);
-		domain.addServer(server);
-
-		connector.start();
-		
-		/**
-		 * XML Parser
-		 */
-		//XMLDomainParser parser = new XMLDomainParser("/media/bruno/projetos/java/corinna/devel/test/corinna/test/domain.xml");
-		//IDomain domain = parser.parse();
-		
+		return null;
 	}
 	
+	public static class MyClass extends HttpRequestEvent
+	{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 5831619739264603193L;
+
+		public MyClass( IHttpBindletRequest request, IHttpBindletResponse response )
+		{
+			super(request, response);
+		}
+		
+	}
 	
 }

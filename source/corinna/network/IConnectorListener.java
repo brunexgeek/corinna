@@ -31,10 +31,10 @@ import corinna.exception.BindletException;
  * @param <P>
  */
 // TODO: remover a generalização em benefício do IServer?
-public interface INetworkConnectorListener extends EventListener
+public interface IConnectorListener extends EventListener
 {
 
-	public void connectorRequestReceived( NetworkConnector connection, 
+	public void connectorRequestReceived( Connector connection, 
 		RequestEvent<?,?> event ) throws BindletException, IOException;
 	
 }

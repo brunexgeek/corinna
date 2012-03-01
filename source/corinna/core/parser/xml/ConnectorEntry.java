@@ -3,7 +3,7 @@ package corinna.core.parser.xml;
 import java.util.LinkedList;
 import java.util.List;
 
-import corinna.core.INetworkConnectorConfig;
+import corinna.network.IConnectorConfig;
 
 
 public class ConnectorEntry extends BasicEntry
@@ -11,7 +11,7 @@ public class ConnectorEntry extends BasicEntry
 	
 	private List<String> adapters;
 
-	public ConnectorEntry( String className, INetworkConnectorConfig config )
+	public ConnectorEntry( String className, IConnectorConfig config )
 	{
 		super(className, config);
 		adapters = new LinkedList<String>();

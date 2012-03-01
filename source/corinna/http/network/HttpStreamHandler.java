@@ -32,9 +32,9 @@ import corinna.util.StateModel.Model;
 public class HttpStreamHandler extends StreamHandler
 {
 
-	private HttpNetworkConnector connector;
+	private HttpConnector connector;
 	
-	public HttpStreamHandler( HttpNetworkConnector connector )
+	public HttpStreamHandler( HttpConnector connector )
 	{
 		if (connector == null)
 			throw new NullPointerException("The network connector can not be null");

@@ -21,9 +21,6 @@ import java.net.SocketAddress;
 
 import corinna.core.IDomain;
 import corinna.core.ILifecycle;
-import corinna.core.INetworkConnectorConfig;
-import corinna.exception.AdapterException;
-import corinna.util.conf.ISection;
 
 
 /**
@@ -34,10 +31,10 @@ import corinna.util.conf.ISection;
  * @since 1.0
  * @version 1.0
  */
-public interface INetworkConnector<R,P> extends ILifecycle
+public interface IConnector extends ILifecycle
 {
 
-	public Class<?>[] CONSTRUCTOR_ARGS = { INetworkConnectorConfig.class };
+	public Class<?>[] CONSTRUCTOR_ARGS = { IConnectorConfig.class };
 
 	public IDomain getDomain();
 
@@ -58,7 +55,5 @@ public interface INetworkConnector<R,P> extends ILifecycle
 	public void addAdapter( IAdapter adapter );
 	
 	public void removeAdapter( String name );
-	
-	//public RequestEvent<?,?> adapt( R request, P response ) throws AdapterException;
 	
 }
