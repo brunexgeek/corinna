@@ -203,7 +203,7 @@ public class RpcValidator
 	 * @return <code>True</code> se a classe implementa a interface ou <code>false</cdoe> caso 
 	 *     contrário.
 	 */
-	protected static boolean haveInterface( Class<?> classRef, Class<?> intfRef )
+	public static boolean haveInterface( Class<?> classRef, Class<?> intfRef )
 	{
 		return intfRef.isAssignableFrom(classRef);
 	}
@@ -219,7 +219,7 @@ public class RpcValidator
 	 * @return <code>True</code> se a classe implementa um construtor público com os argumentos
 	 *         indicados ou <code>false</code> caso contrário.
 	 */
-	protected static boolean haveConstructor( Class<?> classRef, Class<?> args[] )
+	public static boolean haveConstructor( Class<?> classRef, Class<?> args[] )
 	{
 		try
 		{
