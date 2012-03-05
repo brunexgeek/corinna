@@ -117,6 +117,7 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 		bindlet.init(reg.getBindletConfig());
 		bindlet.process(request, response);
 		bindlet.destroy();
+		reg.releaseBindlet(bindlet);
 		return true;
 	}
 

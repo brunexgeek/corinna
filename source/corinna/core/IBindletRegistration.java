@@ -83,4 +83,6 @@ public interface IBindletRegistration
 	
 	public String getBindletName();
 
+	void releaseBindlet( IBindlet<?, ?> bindlet ) throws BindletException;
+
 }

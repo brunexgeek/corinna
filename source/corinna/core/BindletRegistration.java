@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import corinna.exception.BindletException;
 import corinna.thread.ObjectLocker;
+import corinna.util.ObjectPool;
 
 /**
  * 
@@ -27,6 +28,8 @@ import corinna.thread.ObjectLocker;
  */
 public class BindletRegistration implements IBindletRegistration
 {
+
+	private static final int DEFAULT_CAPACITY = 20;
 
 	private static Logger log = Logger.getLogger(BindletRegistration.class);
 	
@@ -53,6 +56,8 @@ public class BindletRegistration implements IBindletRegistration
 	private IBindlet<?,?> bindletInstance = null;
 	
 	private ObjectLocker bindletInstanceLock = null;
+	
+	private ObjectPool<IBindlet<?,?>> bindlets = null;
 
 	@SuppressWarnings("unchecked")
 	public BindletRegistration( IContext<?, ?> context, String bindletName, String bindletClassName )
@@ -70,6 +75,7 @@ public class BindletRegistration implements IBindletRegistration
 		this.bindletClassName = bindletClassName;
 		this.parameters = new HashMap<String,String>();
 		this.bindletInstanceLock = new ObjectLocker();
+		this.bindlets = new ObjectPool<IBindlet<?,?>>(DEFAULT_CAPACITY);
 
 		// try to load the bindlet class
 		try
@@ -83,7 +89,7 @@ public class BindletRegistration implements IBindletRegistration
 		BindletModel annot = this.bindletClass.getAnnotation(BindletModel.class);
 		if (annot != null) bindletModel = annot.value();
 		// ensures that the bindlet implements IRecyclable if was marked with this model
-		if (bindletModel == Model.RECYCLABLE && !bindletClass.isAssignableFrom(IRecyclable.class))
+		if (bindletModel == Model.RECYCLABLE && !IRecyclable.class.isAssignableFrom(bindletClass))
 			throw new BindletException("Recyclable bindlets must be implements 'IRecyclable'"
 				+ " interface");
 	}
@@ -123,7 +129,6 @@ public class BindletRegistration implements IBindletRegistration
 	}
 
 	@Override
-	// TODO: need to handle the recyclable bindlet creation
 	public IBindlet<?, ?> createBindlet() throws BindletException
 	{
 		IBindlet<?,?> instance = null;
@@ -131,12 +136,35 @@ public class BindletRegistration implements IBindletRegistration
 		if (bindletModel == Model.STATELESS) 
 			instance = getBindletInstance();
 		else
-		//if (bindletModel == Model.STATEFULL)
+		if (bindletModel == Model.RECYCLABLE)
+			instance = borrowBindletInstance();
+		else
 			instance = createBindletInstance();
 		
 		return instance;
 	}
 
+	@Override
+	public void releaseBindlet( IBindlet<?, ?> bindlet ) throws BindletException
+	{
+		if (bindlet == null) return;
+		
+		if (bindletClass.isAssignableFrom(bindlet.getClass()) && bindletModel == Model.RECYCLABLE)
+		{
+			((IRecyclable)bindlet).recycle();
+			bindlets.back(bindlet);
+		}
+	}
+	
+	protected IBindlet<?,?> borrowBindletInstance() throws BindletException
+	{
+		IBindlet<?,?> bindlet = bindlets.borrow();
+		if (bindlet == null)
+			return createBindletInstance();
+		else
+			return bindlet;
+	}
+	
 	protected IBindlet<?,?> getBindletInstance() throws BindletException
 	{
 		IBindlet<?,?> instance;

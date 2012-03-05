@@ -1,6 +1,7 @@
 package corinna.http.core.auth;
 
 
+
 public interface IUser
 {
 

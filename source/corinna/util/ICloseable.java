@@ -1,7 +1,6 @@
 package corinna.util;
 
 import java.io.Closeable;
-import java.io.Flushable;
 import java.io.IOException;
 
 
