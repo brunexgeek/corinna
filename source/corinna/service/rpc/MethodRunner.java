@@ -318,6 +318,9 @@ public class MethodRunner implements IMethodRunner
 			String name = annotation.name();
 			value = request.getParameter(name);
 
+			if (value != null && !annotation.isPublic())
+				args[c] = value;
+			else
 			if (value != null)
 				args[c] = TypeConverter.convert(types[c], value.toString());
 			else

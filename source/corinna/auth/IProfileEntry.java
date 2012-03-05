@@ -8,13 +8,13 @@ public interface IProfileEntry
 
 	public abstract Map<String, String> getOptions();
 
-	public abstract ProfileEntryFlags getFlags();
+	//public abstract ProfileEntryFlags getFlags();
 
 	public abstract Class<?> getModuleClass();
 
 	public ILoginModule getModule();
 		
-	public enum ProfileEntryFlags
+	/*public enum ProfileEntryFlags
 	{
 		
 		REQUIRED,
@@ -25,6 +25,6 @@ public interface IProfileEntry
 		
 		REQUISITE
 		
-	}
+	}*/
 	
 }

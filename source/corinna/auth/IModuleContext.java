@@ -1,16 +1,14 @@
 package corinna.auth;
 
-import java.util.Map;
-
 
 public interface IModuleContext
 {
 
-	public Subject getSubject();
+	public ISubject getSubject();
 	
 	public ICallbackHandler getCallbackHandler();
 	
-	public Map<String,?> getState();
+	//public Map<String,?> getState();
 	
 	public boolean isAuthenticated();
 	

@@ -19,9 +19,11 @@ import javax.xml.soap.Text;
 import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 
+import corinna.auth.bindlet.IBindletAuthenticator;
 import corinna.exception.BindletException;
 import corinna.http.core.auth.AuthenticateResponse;
 import corinna.http.core.auth.DigestAuthenticator;
+import corinna.http.core.auth.IHttpAuthenticator;
 import corinna.service.rpc.ClassDescriptor;
 import corinna.service.rpc.IPrototypeFilter;
 import corinna.service.rpc.MethodRunner;
@@ -43,6 +45,10 @@ public class DefaultSoapBindlet extends SoapBindlet
 	private static final String PARAMETER_INTERFACE = "interfaceClass";
 	
 	private static final String PARAMETER_IMPLEMENTATION = "implementationClass";
+
+	private static final String PARAM_REQUEST = "_request";
+	
+	private static final String PARAM_RESPONSE = "_response";
 	
 	private MethodRunner runner;
 	
@@ -50,7 +56,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	
 	private ObjectLocker wsdlLock = new ObjectLocker();
 	
-	private DigestAuthenticator authenticator = null;
+	protected IBindletAuthenticator authenticator = null;
 	
 	public DefaultSoapBindlet( ) throws BindletException
 	{
@@ -109,6 +115,8 @@ public class DefaultSoapBindlet extends SoapBindlet
 		IOException
 	{
 		ProcedureCall procedure = parseSoapMessage( req.getMessage() );
+		procedure.setParameter(PARAM_REQUEST, req);
+		procedure.setParameter(PARAM_RESPONSE, res);
 
 		if (log.isTraceEnabled())
 			log.trace("Received method call for '" + procedure + "'");
@@ -255,29 +263,16 @@ public class DefaultSoapBindlet extends SoapBindlet
 	protected boolean doAuthentication( ISoapBindletRequest request, ISoapBindletResponse response )
 		throws BindletException, IOException
 	{
-		String value = request.getHeader(HttpHeaders.Names.AUTHORIZATION);
-		if (value != null && authenticator.authenticate(request)) return true;
-	
-		AuthenticateResponse auth;
-		try
-		{
-			auth = authenticator.createAuthenticateResponse("test@realm", 10);
-			
-		} catch (Exception e)
-		{
-			response.sendError(HttpStatus.UNAUTHORIZED);
+		if (authenticator != null)
+			return authenticator.authenticate(request, response);
+		else
 			return false;
-		}
-		value = auth.toString();
-		response.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, value);
-		response.setStatus(HttpStatus.UNAUTHORIZED);
-		return false;
 	}
 
 	@Override
 	public boolean isRestricted()
 	{
-		return false;
+		return (authenticator != null);
 	}
 	
 }

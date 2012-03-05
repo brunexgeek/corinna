@@ -52,7 +52,8 @@ public class MethodDescriptor
 				throw new IncompleteInterfaceException(
 					"Some parameters were annotated with blank name.");
 			
-			ParameterDescriptor param = new ParameterDescriptor(name, types[c], c, annotation.required());
+			ParameterDescriptor param = new ParameterDescriptor(name, types[c], /*c,*/ 
+				annotation.required(), annotation.isPublic());
 			parameterList.add(param);
 			
 			c++;

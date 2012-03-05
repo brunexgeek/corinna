@@ -95,6 +95,8 @@ public class RpcValidator
 			if (paramName == null || paramName.trim() == "")
 				throw new InvalidRpcMethodException("The name of parameter " + i
 					+ " of the method " + method.getName() + " can not be empty");
+			// se o parâmetro não é público, ignora a verificação de tipos
+			if (!parameter.isPublic()) continue;
 			// verifica se o tipo especificado é válido
 			if (!parameter.required() && paramTypes[i].isPrimitive())
 				throw new InvalidRpcMethodException("The parameter " + i

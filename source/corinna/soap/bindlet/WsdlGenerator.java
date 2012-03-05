@@ -73,6 +73,7 @@ public class WsdlGenerator
 		for (int c = 0; c < method.getParameterCount(); ++c)
 		{
 			ParameterDescriptor param = method.getParameter(c);
+			if (!param.isPublic()) continue;
 			buffer.append("<element name=\"");
 			buffer.append( param.getName() );
 			buffer.append("\" type=\"");

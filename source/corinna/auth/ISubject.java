@@ -23,8 +23,6 @@ public interface ISubject extends Serializable
 	 */
 	public boolean isAuthenticated();
 	
-	public ICredential getCredential( String name );
-	
 	public ICredential[] getCredentials();
 	
 	/**

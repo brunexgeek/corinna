@@ -1,25 +1,25 @@
 package corinna.auth;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import javax.security.auth.Subject;
-import javax.security.auth.callback.CallbackHandler;
 
 
 public class ModuleContext implements IModuleContext
 {
 
-	private Subject subject;
+	private ISubject subject;
 	
-	private CallbackHandler callbackHandler;
+	private ICallbackHandler callbackHandler;
 	
-	private Map<String, Object> state;
+	//private Map<String, Object> state;
+	
+	private Map<String, Object> attributes;
 
 	private boolean isAuthenticated = false;
 
 	private boolean isCommited = false;
 
-	public ModuleContext( Subject subject, CallbackHandler callbackHandler, Map<String,Object> state )
+	public ModuleContext( ISubject subject, ICallbackHandler callbackHandler, Map<String,Object> state )
 	{
 		if (subject == null)
 			throw new IllegalArgumentException("The subject can not be null");
@@ -28,26 +28,27 @@ public class ModuleContext implements IModuleContext
 		
 		this.subject = subject;
 		this.callbackHandler = callbackHandler;
-		this.state = state;
+		//this.state = state;
+		this.attributes = new HashMap<String, Object>();
 	}
 	
 	@Override
-	public Subject getSubject()
+	public ISubject getSubject()
 	{
 		return subject;
 	}
 
 	@Override
-	public CallbackHandler getCallbackHandler()
+	public ICallbackHandler getCallbackHandler()
 	{
 		return callbackHandler;
 	}
 
-	@Override
+	/*@Override
 	public Map<String, ?> getState()
 	{
 		return state;
-	}
+	}*/
 
 	@Override
 	public boolean isAuthenticated()
@@ -69,6 +70,24 @@ public class ModuleContext implements IModuleContext
 	public void setCommited( boolean value )
 	{
 		isCommited = value;
+	}
+
+	@Override
+	public Object getAttibute( String name )
+	{
+		return attributes.get(name);
+	}
+
+	@Override
+	public void setAttribute( String name, Object value )
+	{
+		attributes.put(name, value);
+	}
+
+	@Override
+	public void removeAttribute( String name )
+	{
+		attributes.remove(name);
 	}
 	
 }

@@ -6,6 +6,8 @@ import javax.security.auth.login.LoginException;
 public interface ILoginModule
 {
 
+	public String getName();
+	
 	/**
      * Method to authenticate a <code>Subject</code> (phase 1).
      *

@@ -631,7 +631,7 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	{
 		String method = request.getHttpMethod();
 
-		if (isRestricted()) if (!doAuthentication(request, response)) return;
+		if (isRestricted() && !doAuthentication(request, response)) return;
 
 		if (method.equals(METHOD_GET))
 		{
@@ -723,10 +723,10 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	 */
 	private void maybeSetLastModified( IHttpBindletResponse response, long lastModified )
 	{
-		// if (response.containsHeader(HEADER_LASTMOD)) return;
-		// if (lastModified >= 0) response.setDateHeader(HEADER_LASTMOD, lastModified);
+		if (response.containsHeader(HEADER_LASTMOD)) return;
+		if (lastModified >= 0) response.setDateHeader(HEADER_LASTMOD, lastModified);
 	}
-
+	
 	/**
 	 * 
 	 * Dispatches client requests to the protected <code>service</code> method. There's no need to

@@ -44,5 +44,7 @@ public @interface Parameter
 	 * @return <code>True</code> if the parameter is required.
 	 */
 	public boolean required() default true;
+	
+	public boolean isPublic() default true;
 
 }
