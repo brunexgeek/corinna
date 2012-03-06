@@ -109,7 +109,6 @@ public abstract class StreamHandler implements IDownstreamHandler, IUpstreamHand
 		{
 			try
 			{
-				System.out.println(event);
 				this.incomingChannelEvent(context, (ChannelEvent) event);
 			} catch (Throwable e)
 			{

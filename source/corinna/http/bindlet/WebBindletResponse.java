@@ -102,7 +102,7 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 		response.setHeader(HttpHeaders.Names.CONTENT_LANGUAGE, Locale.ENGLISH.getLanguage());
 		
 		// update the response extra fields
-		response.setHeader(HttpHeaders.Names.SERVER, HEADER_SERVER);
+		//response.setHeader(HttpHeaders.Names.SERVER, HEADER_SERVER);
 		if (isChunked() && getContentLength() < 0)
 		{
 			response.setHeader(HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);

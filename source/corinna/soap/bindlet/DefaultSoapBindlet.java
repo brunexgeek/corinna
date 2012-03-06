@@ -3,6 +3,8 @@ package corinna.soap.bindlet;
 import java.io.IOException;
 import java.util.Iterator;
 
+import javax.bindlet.BindletModel;
+import javax.bindlet.BindletModel.Model;
 import javax.bindlet.BindletOutputStream;
 import javax.bindlet.IBindletConfig;
 import javax.bindlet.http.HttpStatus;
@@ -58,13 +60,42 @@ public class DefaultSoapBindlet extends SoapBindlet
 	
 	protected IBindletAuthenticator authenticator = null;
 	
+	private Boolean isInitialized = false;
+	
 	public DefaultSoapBindlet( ) throws BindletException
 	{
 	}
 
+	/**
+	 * Change the initialization state to specified value and return <code>true</code> if no actions
+	 * must be done (the previous value are the same) or <code>false</code> otherwise.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	private boolean setInitialized( boolean value )
+	{
+		synchronized (isInitialized)
+		{
+			if (value)
+			{
+				if (isInitialized) return true;
+				return !(isInitialized = true);
+			}
+			else
+			{
+				if (!isInitialized) return true;
+				return (isInitialized = false);
+			}
+		}
+	}
+	
 	@Override
 	public void init() throws BindletException
 	{
+		// if the bindlet are running in stateless model, ensure will be initialized only once
+		if (setInitialized(true)) return;
+
 		IBindletConfig config = getBindletConfig();
 
 		// load the interface class name
@@ -80,7 +111,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 		
 		Class<?> intfClass = loadClass(intfClassName);
 		Class<?> implClass = loadClass(implClassName);
-		
+
 		try
 		{
 			IPrototypeFilter filter = new SoapPrototypeFilter();
@@ -245,15 +276,13 @@ public class DefaultSoapBindlet extends SoapBindlet
 
 	protected String getWsdl( ISoapBindletRequest req ) throws BindletException
 	{
-		boolean hasWsdl = true;
 		String text = null;
 		
 		wsdlLock.readLock();
-		hasWsdl = (wsdl != null);
 		text = wsdl;
 		wsdlLock.readUnlock();
 		
-		if (hasWsdl)
+		if (text != null)
 			return text;
 		else
 			return generateWsdl(req);
@@ -274,5 +303,6 @@ public class DefaultSoapBindlet extends SoapBindlet
 	{
 		return (authenticator != null);
 	}
+
 	
 }

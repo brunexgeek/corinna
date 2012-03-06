@@ -16,21 +16,14 @@
 
 package corinna.http.network;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.Security;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import javax.script.SimpleScriptContext;
 
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.Channels;
@@ -50,29 +43,40 @@ import corinna.util.ResourceLoader;
 import corinna.util.StateModel;
 import corinna.util.StateModel.Model;
 
-
+/**
+ * Implements a network connector for HTTP requests.
+ * 
+ * <h1>Custom parameters</h1>
+ * 
+ * This connector support a set of parameters through which it's possible to customize the connector
+ * behavior. The following list show all supported parameters for this implementations:
+ * 
+ * <ul>
+ * <li><strong>EnableSSL:</strong> allow to enable/disable the SSL feature.</li>
+ * <li><strong>KeystoreFileName:</strong> define the keystore file name. This parameter must be set 
+ * if the SSL is enable.</li>
+ * <li><strong>KeystorePassword:</strong> define the password used to access the keystore.</li>
+ * <li><strong>PrivateKeyPassword:</strong> define the password used to access the private key.</li>
+ * 
+ * 
+ * @author Bruno Ribeiro
+ */
 public class HttpConnector extends Connector
 {
 
-	private static final String CONFIG_CERTS_FILE = "CertificatesFile";
+	private static final String CONFIG_CERTS_FILE = "KeystoreFileName";
 
 	private static final String CONFIG_ENABLE_SSL = "EnableSSL";
 
-	private static final String CONFIG_PASSWD = "Password";
+	private static final String CONFIG_KS_PASSWD = "KeystorePassword";
 	
-	private static final String DEFAULT_CERTS = "certs.dat";
-
-	private static final String DEFAULT_PASSWD = "dummys";
+	private static final String CONFIG_PK_PASSWD = "PrivateKeyPassword";
 
 	private HttpStreamHandler channelHandler;
 	
 	private HttpAdapter httpAdapter;
 	
 	private SSLContext sslContext;
-
-	private String passwd;
-
-	private String certsFile;
 	
 	private boolean enableSSL = false;
 	
@@ -97,32 +101,42 @@ public class HttpConnector extends Connector
 	protected void initSSL() throws ConnectorException
 	{
 		if (!enableSSL) return;
-		IConnectorConfig config = getConfig();
 		
-		certsFile = config.getParameter(CONFIG_CERTS_FILE, DEFAULT_CERTS);
-		passwd = config.getParameter(CONFIG_PASSWD, DEFAULT_PASSWD);
+		IConnectorConfig config = getConfig();
+		String ksPasswd = null;
+		String pkPasswd = null;
+		String keystoreFileName = null;
+		
 		try
 		{
-			// Make sure that JSSE is available
+			keystoreFileName = config.getParameter(CONFIG_CERTS_FILE);
+			ksPasswd = config.getParameter(CONFIG_KS_PASSWD);
+			pkPasswd = config.getParameter(CONFIG_PK_PASSWD);
+		} catch (Exception e)
+		{
+			throw new ConnectorException("Error initializing SSL mechanism", e);
+		}
+		
+		try
+		{
+			// make sure that JSSE is available
 			Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
-			// A keystore is where keys and certificates are kept
-			// Both the keystore and individual private keys should be password protected
+			// Note: a keystore is where keys and certificates are kept. Both the keystore and 
+			//       individual private keys should be password protected.
 			KeyStore keystore = KeyStore.getInstance("JKS");
-			keystore.load( ResourceLoader.getResourceAsStream(certsFile), passwd.toCharArray());
-			// A KeyManagerFactory is used to create key managers
+			keystore.load( ResourceLoader.getResourceAsStream(keystoreFileName), ksPasswd.toCharArray());
+			// a KeyManagerFactory is used to create key managers
 			KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-			// Initialize the KeyManagerFactory to work with our keystore
-			kmf.init(keystore, passwd.toCharArray());
-			// An SSLContext is an environment for implementing JSSE
-			// It is used to create a ServerSocketFactory
+			// initialize the KeyManagerFactory to work with our keystore
+			kmf.init(keystore, pkPasswd.toCharArray());
+			// Note: an SSLContext is an environment for implementing JSSE. It is used to create 
+			//       a ServerSocketFactory.
 			sslContext = SSLContext.getInstance("SSLv3");
 			sslContext.init(kmf.getKeyManagers(), null, null);
 		} catch (Exception e)
 		{
 			throw new ConnectorException("Error initializing network connector", e);
 		}
-				
-		
 	}
 	
 	@Override

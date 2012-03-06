@@ -50,7 +50,7 @@ import corinna.util.StringResource;
  * de implementação é possível especificar um objeto de dados, de tipo arbitrário, que os métodos
  * podem utilizar.
  * 
- * @author Bruno Ribeiro &lt;brunoc@cpqd.com.br&gt;
+ * @author Bruno Ribeiro
  * @since 1.0
  */
 public class MethodRunner implements IMethodRunner
@@ -164,7 +164,6 @@ public class MethodRunner implements IMethodRunner
 			prototype = prototypeFilter.getMethodPrototype(intrMethod);
 
 			// serverLog.debug( StringResource.get(MethodRunner.class, 1, name) );
-			System.out.println(prototype);
 
 			// verifica se já existe algum método com mesmo nome
 			if (procedures.containsKey(prototype))

@@ -28,19 +28,17 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 
 /**
  * Classe utilitária responsável por localizar e carregar recursos.
  * 
- * @author Bruno Ribeiro &lt;brunoc@cpqd.com.br&gt;
+ * @author Bruno Ribeiro
  * @since 1.0
  */
 public class ResourceLoader
 {
 
-	private static Logger serverLog = Logger.getLogger( ResourceLoader.class.getName() );
+	//private static Logger serverLog = Logger.getLogger( ResourceLoader.class.getName() );
 	
 	/**
 	 * Retorna um <code>InputStream</code> associado a um recurso. O método tenta localizar o 
@@ -53,16 +51,16 @@ public class ResourceLoader
 	 * @throw FileNotFoundException se o recurso não foi encontrado.
 	 * @throws IOException se ocorrer algum erro de leitura/conexão.
 	 */
-	public static InputStream getResourceAsStream( ClassLoader loader, String name ) 
+	public static InputStream getResourceAsStream( ClassLoader loader, String resourceName ) 
 		throws IOException
 	{
-		String resourceName = name;
+		/*String resourceName = name;
 		
 		// tenta obter o recurso pelo 'class loader' indicado
 		URL url = loader.getResource(resourceName);
 		if (url != null)
 		{
-			serverLog.info("Resource '" + name  + "' founded [" + url.toString() + "]");
+			//serverLog.info("Resource '" + name  + "' founded [" + url.toString() + "]");
 			return url.openStream();
 		}
 		
@@ -70,7 +68,7 @@ public class ResourceLoader
 		try
 		{
 			InputStream is = new FileInputStream(name);
-			serverLog.info("Resource '" + name  + "' founded on disk");
+			//serverLog.info("Resource '" + name  + "' founded on disk");
 			return is;
 		}
 		catch (IOException e)
@@ -87,9 +85,12 @@ public class ResourceLoader
 				full.append( urls[c] );
 				if (c < urls.length-1) full.append("; ");
 			}
-			serverLog.info("Resource '" + name + "' not found in [" + full + "]");
+			//serverLog.info("Resource '" + name + "' not found in [" + full + "]");
 			throw new FileNotFoundException("Resource '" + resourceName + "' not found in [" + full + "]");
-		}
+		}*/
+		URL url = findResource(loader, resourceName);
+		if (url != null)
+			return url.openStream();
 		
 		throw new FileNotFoundException("Resource '" + resourceName + "' not found");
 	}
@@ -106,7 +107,7 @@ public class ResourceLoader
 	 */
 	public static InputStream getResourceAsStream( String resourceName ) throws IOException
 	{
-		List<URL> list = new LinkedList<URL>();
+		/*List<URL> list = new LinkedList<URL>();
 		ClassLoader current;
 		
 		// itera entre os 'class loaders' registrados
@@ -133,9 +134,12 @@ public class ResourceLoader
 					full.append( urls[c] );
 					if (c < urls.length-1) full.append("; ");
 				}
-				serverLog.info("Resource '" + resourceName + "' not found in [" + full + "]");
+				//serverLog.info("Resource '" + resourceName + "' not found in [" + full + "]");
 			}
-		}
+		}*/
+		URL url = findResource(resourceName);
+		if (url != null)
+			return url.openStream();
 		
 		throw new FileNotFoundException("Resource '" + resourceName + "' not found");
 	}
@@ -215,7 +219,6 @@ public class ResourceLoader
 		ClassLoader current;
 		
 		// itera entre os 'class loaders' registrados
-		//for (ClassLoader loader : loaders)
 		for (int i = 0; null != (current = ClassLoaderManager.get(i)); ++i)
 			list.addAll( findResources(current, resourceName) );
 		
@@ -229,20 +232,12 @@ public class ResourceLoader
 		return temp.get(0);
 	}
 	
-	/**
-	 * Registra um novo <code>ClassLoader</code>. Quando um recurso é solicitado, todos os 
-	 * <i>class loaders</i> registrados são consultados.
-	 * <br/><br/>
-	 * Por padrão, o único <code>ClassLoader</code> registrado é o mesmo utilizado pelo framework.
-	 * @param loader Instância {@link ClassLoader} do <i>class loader</i> a ser incluído.
-	 */
-	/*public static void includeClassLoader( ClassLoader loader )
+	public static URL findResource( ClassLoader loader, String resourceName ) throws IOException
 	{
-		synchronized (loaders)
-		{
-			loaders.add(loader);
-		}
-	}*/
+		List<URL> temp = findResources(loader, resourceName);
+		if ( temp.size() == 0 ) return null;
+		return temp.get(0);
+	}
 	
 	public static String getCurrentDirectory()
 	{
