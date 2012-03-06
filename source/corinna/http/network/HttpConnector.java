@@ -16,21 +16,37 @@
 
 package corinna.http.network;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Security;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.script.SimpleScriptContext;
 
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
+import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
+import corinna.exception.ConnectorException;
 import corinna.network.AdapterConfig;
 import corinna.network.Connector;
 import corinna.network.IAdapter;
 import corinna.network.IConnectorConfig;
 import corinna.network.IProtocol;
+import corinna.util.ResourceLoader;
 import corinna.util.StateModel;
 import corinna.util.StateModel.Model;
 
@@ -38,27 +54,31 @@ import corinna.util.StateModel.Model;
 public class HttpConnector extends Connector
 {
 
-	/*rivate HttpRequestDecoder decoder;
+	private static final String CONFIG_CERTS_FILE = "CertificatesFile";
 
-	private HttpChunkAggregator aggregator;
+	private static final String CONFIG_ENABLE_SSL = "EnableSSL";
 
-	private HttpResponseEncoder encoder;
+	private static final String CONFIG_PASSWD = "Password";
+	
+	private static final String DEFAULT_CERTS = "certs.dat";
 
-	private ChunkedWriteHandler chunkedWriter;*/
+	private static final String DEFAULT_PASSWD = "dummys";
 
 	private HttpStreamHandler channelHandler;
 	
 	private HttpAdapter httpAdapter;
 	
-	public HttpConnector( IConnectorConfig config )
+	private SSLContext sslContext;
+
+	private String passwd;
+
+	private String certsFile;
+	
+	private boolean enableSSL = false;
+	
+	public HttpConnector( IConnectorConfig config ) throws ConnectorException
 	{
 		super(config);
-		
-		// TODO: create stateless (or pooled) decoders and encoders 
-		/*this.decoder = new HttpRequestDecoder(1024, 4096, 8192);
-		this.encoder = new HttpResponseEncoder();
-		this.aggregator = new HttpChunkAggregator(1024 * 1024);
-		this.chunkedWriter = new ChunkedWriteHandler();*/
 		
 		StateModel state = HttpStreamHandler.class.getAnnotation(StateModel.class);
 		if (state != null && state.value() == Model.STATELESS)
@@ -68,6 +88,41 @@ public class HttpConnector extends Connector
 		
 		AdapterConfig adapterConfig = new AdapterConfig("DefaultHttpAdapter");
 		this.httpAdapter = new HttpAdapter(adapterConfig);
+		
+		// check if the SSL is enable
+		enableSSL = (config.getParameter(CONFIG_ENABLE_SSL, "false").equalsIgnoreCase("true"));
+		initSSL();
+	}
+	
+	protected void initSSL() throws ConnectorException
+	{
+		if (!enableSSL) return;
+		IConnectorConfig config = getConfig();
+		
+		certsFile = config.getParameter(CONFIG_CERTS_FILE, DEFAULT_CERTS);
+		passwd = config.getParameter(CONFIG_PASSWD, DEFAULT_PASSWD);
+		try
+		{
+			// Make sure that JSSE is available
+			Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+			// A keystore is where keys and certificates are kept
+			// Both the keystore and individual private keys should be password protected
+			KeyStore keystore = KeyStore.getInstance("JKS");
+			keystore.load( ResourceLoader.getResourceAsStream(certsFile), passwd.toCharArray());
+			// A KeyManagerFactory is used to create key managers
+			KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+			// Initialize the KeyManagerFactory to work with our keystore
+			kmf.init(keystore, passwd.toCharArray());
+			// An SSLContext is an environment for implementing JSSE
+			// It is used to create a ServerSocketFactory
+			sslContext = SSLContext.getInstance("SSLv3");
+			sslContext.init(kmf.getKeyManagers(), null, null);
+		} catch (Exception e)
+		{
+			throw new ConnectorException("Error initializing network connector", e);
+		}
+				
+		
 	}
 	
 	@Override
@@ -75,6 +130,13 @@ public class HttpConnector extends Connector
 	{
 		// create the default stateless pipeline for all channels
 		ChannelPipeline pipeline = Channels.pipeline();
+		
+		if (enableSSL)
+		{
+			SSLEngine sslEngine = sslContext.createSSLEngine();
+			sslEngine.setUseClientMode(false);
+			pipeline.addLast("ssl", new SslHandler(sslEngine));
+		}
 		pipeline.addLast("decoder", new HttpRequestDecoder(1024, 4096, 8192));
 		pipeline.addLast("aggregator", new HttpChunkAggregator(1024 * 1024));
 		pipeline.addLast("encoder", new HttpResponseEncoder());

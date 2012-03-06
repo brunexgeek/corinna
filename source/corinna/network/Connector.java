@@ -273,5 +273,11 @@ public abstract class Connector extends Lifecycle implements IConnector,
 			adaptersLock.readUnlock();
 		}
 	}
+
+	protected IConnectorConfig getConfig()
+	{
+		return config;
+	}
+	
 	
 }
