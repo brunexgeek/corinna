@@ -3,6 +3,12 @@ package corinna.soap.bindlet;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.wsdl.Definition;
+import javax.wsdl.Port;
+import javax.wsdl.Service;
+import javax.wsdl.factory.WSDLFactory;
+import javax.xml.namespace.QName;
+
 import corinna.service.rpc.ClassDescriptor;
 import corinna.service.rpc.MethodDescriptor;
 import corinna.service.rpc.MultipleReturnValue;
