@@ -12,11 +12,14 @@ public class ClassDescriptor
 
 	private List<MethodDescriptor> methodList;
 	
+	private Class<?> type;
+	
 	public ClassDescriptor( Class<?> clazz ) throws InvalidRpcClassException
 	{
 		String name = "";
 		
 		methodList = new LinkedList<MethodDescriptor>();
+		type = clazz;
 		
 		Method[] methods = clazz.getMethods();
 		try
@@ -34,6 +37,21 @@ public class ClassDescriptor
 			throw new InvalidRpcClassException("Invalid RPC method '" + name + "' of interface '"
 				+ clazz.getName() + "'", e);
 		}
+	}
+	
+	public Class<?> getType()
+	{
+		return type;
+	}
+	
+	public String getName()
+	{
+		return type.getName();
+	}
+	
+	public String getCanonicalName()
+	{
+		return type.getCanonicalName();
 	}
 	
 	public MethodDescriptor[] getMethods()
