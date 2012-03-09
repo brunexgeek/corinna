@@ -17,7 +17,7 @@ import corinna.service.rpc.ClassDescriptor;
 import corinna.service.rpc.Parameter;
 import corinna.service.rpc.PublicProcedure;
 import corinna.service.rpc.annotation.Field;
-import corinna.soap.bindlet.JavaBeanSerializer;
+import corinna.soap.core.SchemaGenerator;
 
 
 public class MainTest
@@ -35,7 +35,7 @@ public class MainTest
 		
 		def.addService(serv);
 		
-		serializeBean(def, ServiceInterface.class, "http://vaas.cpqd.com.br/tts.xsd");
+		generateTypes(def, ServiceInterface.class, "http://vaas.cpqd.com.br/tts.xsd");
 		
 		WSDLWriter wr = factory.newWSDLWriter();
 		wr.writeWSDL(def, System.out);
@@ -43,7 +43,7 @@ public class MainTest
 		
 	}
 	
-	public static void serializeBean( Definition def, Class<?> classRef, String targetNamespace ) throws Exception
+	public static void generateTypes( Definition def, Class<?> classRef, String targetNamespace ) throws Exception
 	{
 		Types types = def.getTypes();
 		if (types == null)
@@ -54,7 +54,7 @@ public class MainTest
 
 		ClassDescriptor desc = new ClassDescriptor(classRef);
 		
-		JavaBeanSerializer ps = new JavaBeanSerializer();
+		SchemaGenerator ps = new SchemaGenerator();
 		Element root = ps.generateSchema(desc, "http://vaas.cpqd.com.br/tts.xsd");
 		
         Schema schema = new SchemaImpl();

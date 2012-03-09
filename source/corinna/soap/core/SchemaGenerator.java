@@ -1,7 +1,10 @@
-package corinna.soap.bindlet;
+package corinna.soap.core;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,23 +21,22 @@ import corinna.service.rpc.MethodDescriptor;
 import corinna.service.rpc.MultipleReturnValue;
 import corinna.service.rpc.ParameterDescriptor;
 
-// TODO: move to 'corinna.soap.core'
-// TODO: rename to 'SchemaGenerator'
-public class JavaBeanSerializer
+
+public class SchemaGenerator
 {
 
 	private static final Class<?>[] TYPE_CLASSES = { Integer.class, Float.class, Long.class,
 		String.class, Double.class, Boolean.class, MultipleReturnValue.class, Byte.class,
 		Short.class, int.class, float.class, long.class, double.class, boolean.class, 
-		byte.class, short.class };
+		byte.class, short.class, URL.class, Date.class, Calendar.class };
 
 	private static final String TYPE_NAMES[] = { "int", "float", "long", "string", 
 		"double", "boolean", "string", "byte", "short", "int", "float", 
-		"long", "double", "boolean", "byte", "short" };
+		"long", "double", "boolean", "byte", "short", "string", "datetime", "datetime" };
 	
 	private Document document;
 	
-	public JavaBeanSerializer() throws Exception 
+	public SchemaGenerator() throws Exception 
 	{
 		DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = dbfac.newDocumentBuilder();

@@ -3,8 +3,6 @@ package corinna.soap.bindlet;
 import java.io.IOException;
 import java.util.Iterator;
 
-import javax.bindlet.BindletModel;
-import javax.bindlet.BindletModel.Model;
 import javax.bindlet.BindletOutputStream;
 import javax.bindlet.IBindletConfig;
 import javax.bindlet.http.HttpStatus;
@@ -19,17 +17,14 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.Text;
 
 import org.apache.log4j.Logger;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
 
 import corinna.auth.bindlet.IBindletAuthenticator;
 import corinna.exception.BindletException;
-import corinna.http.core.auth.AuthenticateResponse;
-import corinna.http.core.auth.DigestAuthenticator;
-import corinna.http.core.auth.IHttpAuthenticator;
 import corinna.service.rpc.ClassDescriptor;
 import corinna.service.rpc.IPrototypeFilter;
 import corinna.service.rpc.MethodRunner;
 import corinna.service.rpc.ProcedureCall;
+import corinna.soap.core.WsdlGenerator;
 import corinna.thread.ObjectLocker;
 
 

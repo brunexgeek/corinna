@@ -1,4 +1,4 @@
-package corinna.soap.bindlet;
+package corinna.soap.core;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -14,7 +14,7 @@ import corinna.service.rpc.MethodDescriptor;
 import corinna.service.rpc.MultipleReturnValue;
 import corinna.service.rpc.ParameterDescriptor;
 
-// TODO: move to 'corinna.soap.core'
+
 public class WsdlGenerator
 {
 
