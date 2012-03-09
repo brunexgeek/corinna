@@ -18,6 +18,7 @@ import corinna.service.rpc.Parameter;
 import corinna.service.rpc.PublicProcedure;
 import corinna.service.rpc.annotation.Field;
 import corinna.soap.core.SchemaGenerator;
+import corinna.soap.core.WsdlGenerator;
 
 
 public class MainTest
@@ -26,7 +27,7 @@ public class MainTest
 	public static void main( String[] args ) throws Exception
 	{
 		WSDLFactory factory = WSDLFactory.newInstance();
-		Definition def = factory.newDefinition();
+		/*Definition def = factory.newDefinition();
 		Service serv = def.createService();
 		Port p = def.createPort();
 		p.setName("teste");
@@ -35,7 +36,13 @@ public class MainTest
 		
 		def.addService(serv);
 		
-		generateTypes(def, ServiceInterface.class, "http://vaas.cpqd.com.br/tts.xsd");
+		generateTypes(def, ServiceInterface.class, "http://vaas.cpqd.com.br/tts.xsd");*/
+		
+		ClassDescriptor desc = new ClassDescriptor(ServiceInterface.class);
+		
+		WsdlGenerator wgen = new WsdlGenerator();
+		Definition def = wgen.generateWsdl(desc, "http://vaas.cpqd.com.br/tts.wsdl",
+			"http://vaas.cpqd.com.br/tts.xsd");
 		
 		WSDLWriter wr = factory.newWSDLWriter();
 		wr.writeWSDL(def, System.out);
@@ -75,22 +82,29 @@ public class MainTest
 		
 	}
 	
-	public static class MyPOJO
+	public static enum MyEnum
 	{
 		
-		@Field(name="Money")
-		private float money;
+		PARADA,
+		
+		ANDANDO
+		
+	}
+	
+	public static class MyPOJO
+	{
+		private MyEnum state;
 
 		private boolean active;
 	
-		public void setMoney( float money )
+		public void setState( MyEnum state )
 		{
-			this.money = money;
+			this.state = state;
 		}
 
-		public float getMoney()
+		public MyEnum getState()
 		{
-			return money;
+			return state;
 		}
 
 		public void setActive( boolean active )

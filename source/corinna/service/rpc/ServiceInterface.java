@@ -30,7 +30,8 @@ public @interface ServiceInterface
 	public Accessibility defaultAccessibility() 
 		default Accessibility.PUBLIC;
 
-
+	public String serviceName() default "";
+	
 	public enum Accessibility
 	{
 		

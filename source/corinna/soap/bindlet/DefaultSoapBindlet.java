@@ -9,6 +9,10 @@ import javax.bindlet.http.HttpStatus;
 import javax.bindlet.soap.ISoapBindletRequest;
 import javax.bindlet.soap.ISoapBindletResponse;
 import javax.bindlet.soap.SoapBindlet;
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLWriter;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPElement;
@@ -49,7 +53,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	
 	private MethodRunner runner;
 	
-	private String wsdl = null;
+	private Definition wsdl = null;
 	
 	private ObjectLocker wsdlLock = new ObjectLocker();
 	
@@ -127,12 +131,21 @@ public class DefaultSoapBindlet extends SoapBindlet
 			return;
 		}
 		
-		String wsdl = getWsdl(req);
+		Definition wsdl = getWsdl(req);
 		response.setContentType("text/xml");
-		response.setContentLength(wsdl.length());
+		//response.setContentLength(wsdl.length);
 		
 		BindletOutputStream output = response.getOutputStream();
-		output.write(wsdl);
+		//output.write(wsdl);
+		WSDLWriter wr;
+		try
+		{
+			wr = WSDLFactory.newInstance().newWSDLWriter();
+			wr.writeWSDL(wsdl, output);	
+		} catch (WSDLException e)
+		{
+		}
+			
 		output.close();
 	}
 
@@ -252,14 +265,14 @@ public class DefaultSoapBindlet extends SoapBindlet
 		return message;
 	}
 
-	protected String generateWsdl( ISoapBindletRequest req ) throws BindletException
+	protected Definition generateWsdl( ISoapBindletRequest req ) throws BindletException
 	{
 		wsdlLock.writeLock();
 		try
 		{
 			ClassDescriptor desc = new ClassDescriptor(runner.getInterfaceClass());
-			WsdlGenerator wsdlgen = new WsdlGenerator(req.getRequestURL());
-			return (wsdl = wsdlgen.generateWsdl(desc));
+			WsdlGenerator wsdlgen = new WsdlGenerator();
+			return (wsdl = wsdlgen.generateWsdl(desc, req.getRequestURL(), ""));
 		} catch (Exception e)
 		{
 			throw new BindletException("Error generating WSDL", e);
@@ -269,16 +282,16 @@ public class DefaultSoapBindlet extends SoapBindlet
 		}
 	}
 
-	protected String getWsdl( ISoapBindletRequest req ) throws BindletException
+	protected Definition getWsdl( ISoapBindletRequest req ) throws BindletException
 	{
-		String text = null;
+		Definition def = null;
 		
 		wsdlLock.readLock();
-		text = wsdl;
+		def = wsdl;
 		wsdlLock.readUnlock();
 		
-		if (text != null)
-			return text;
+		if (def != null)
+			return def;
 		else
 			return generateWsdl(req);
 	}
