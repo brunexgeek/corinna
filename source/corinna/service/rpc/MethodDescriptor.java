@@ -10,19 +10,19 @@ import corinna.exception.IncompleteInterfaceException;
 
 public class MethodDescriptor
 {
-
-	private String name;
 	
 	private List<ParameterDescriptor> parameterList;
 
 	private Class<?> returnType;
+	
+	private Method method;
 	
 	public MethodDescriptor( Method method ) throws IncompleteInterfaceException
 	{
 		if (method == null)
 			throw new NullPointerException("The method instance can not be null");
 
-		name = method.getName();
+		this.method = method;
 		returnType = method.getReturnType();
 		this.parameterList = new LinkedList<ParameterDescriptor>();
 		
@@ -62,7 +62,7 @@ public class MethodDescriptor
 	
 	public String getName()
 	{
-		return name;
+		return method.getName();
 	}
 	
 	public int getParameterCount()

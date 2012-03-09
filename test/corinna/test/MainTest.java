@@ -41,7 +41,7 @@ public class MainTest
 		ClassDescriptor desc = new ClassDescriptor(ServiceInterface.class);
 		
 		WsdlGenerator wgen = new WsdlGenerator();
-		Definition def = wgen.generateWsdl(desc, "http://vaas.cpqd.com.br/tts.wsdl",
+		Definition def = wgen.generateWsdl(desc, "http://vaas.cpqd.com.br/vaas/soap/", "http://vaas.cpqd.com.br/tts.wsdl",
 			"http://vaas.cpqd.com.br/tts.xsd");
 		
 		WSDLWriter wr = factory.newWSDLWriter();
