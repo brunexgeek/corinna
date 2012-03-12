@@ -268,32 +268,6 @@ public class WsdlGenerator
 		
 		return operation;
 	}
-	
-	protected void generateWsdlBinding( StringBuffer buffer, ClassDescriptor classDesc )
-	{
-		buffer.append("<wsdl:binding name=\"ServiceBinding\" type=\"tns:ServicePortType\">");
-		buffer.append("<soap:binding style=\"document\" transport=\"http://schemas.xmlsoap.org/soap/http\"/>");
-		
-		for ( MethodDescriptor current : classDesc.getMethods() )
-			generateWsdlBindingOperation(buffer, current);
-		
-		buffer.append("</wsdl:binding>");
-	}
-	
-	protected void generateWsdlBindingOperation( StringBuffer buffer, MethodDescriptor current )
-	{
-		String methodName = current.getName();
-
-		buffer.append("<wsdl:operation name=\"");
-		buffer.append(methodName);
-		buffer.append("\"><soap:operation soapAction=\"");
-		buffer.append(endpointUrl);
-		buffer.append("/");
-		buffer.append(methodName);
-		buffer.append("\"/><wsdl:input><soap:body use=\"literal\"/></wsdl:input>");
-		buffer.append("<wsdl:output><soap:body use=\"literal\"/></wsdl:output>");
-		buffer.append("</wsdl:operation>");
-	}
 
 	protected void generateWsdlService( WsdlContext context )
 	{
@@ -313,19 +287,6 @@ public class WsdlGenerator
 		service.setQName( new QName(serviceName) );
 		
 		context.wsdlDef.addService(service);
-		
-		/*port.s
-		Service service = context.wsdlDef.createService();
-		service.
-		buffer.append("<wsdl:service name=\"");
-		buffer.append(serviceName);
-		buffer.append("\"><wsdl:documentation>");
-		buffer.append(serviceDescription);
-		buffer.append("</wsdl:documentation>");
-		buffer.append("<wsdl:port name=\"ServicePort\" binding=\"tns:ServiceBinding\">");
-		buffer.append("<soap:address location=\"");
-		buffer.append(endpointUrl);
-		buffer.append("\"/></wsdl:port></wsdl:service>");*/
 	}
 	
 	public static String getTypeName( Class<?> type )
@@ -371,7 +332,7 @@ public class WsdlGenerator
 		return serviceDescription;
 	}
 	
-	public class WsdlContext
+	protected class WsdlContext
 	{
 
 		public ExtensionRegistry extensionReg;

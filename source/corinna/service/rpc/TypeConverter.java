@@ -36,7 +36,9 @@ public final class TypeConverter
 
 	public static boolean isSupportedType( Class<?> type )
 	{
-		return TYPES_SET.contains(type);
+		boolean valid = TYPES_SET.contains(type);
+		valid |= Enum.class.isAssignableFrom(type);
+		return valid;
 	}
 
 	private static HashSet<Class<?>> getWrapperTypes()
@@ -92,6 +94,17 @@ public final class TypeConverter
 		return Short.valueOf(value);
 	}
 
+	public static Object toEnum( Class<Enum<?>> type, String value )
+	{
+		Enum<?>[] values = type.getEnumConstants();
+		value = value.trim();
+		
+		for (Enum<?> current : values)
+			if (current.toString().equals(value)) return current;
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public static Object convert( Class<?> type, String value )
 	{
 		if (type.equals(Integer.class) || type.equals(int.class)) return toInteger(value);
@@ -103,6 +116,7 @@ public final class TypeConverter
 		if (type.equals(Boolean.class) || type.equals(boolean.class)) return toBoolean(value);
 		if (type.equals(String.class)) return value;
 		if (MultipleReturnValue.class.isAssignableFrom(type)) return new MultipleReturnValue(value);
+		if (Enum.class.isAssignableFrom(type)) return toEnum((Class<Enum<?>>)type, value);
 
 		throw new ClassCastException("Unsupported type '" + type.getName() + "'");
 	}

@@ -198,7 +198,12 @@ public class DefaultSoapBindlet extends SoapBindlet
 			}
 			if (soapMethod == null) return null;
 
+			// extract the method name from input parameters
 			String soapMethodName = soapMethod.getElementQName().getLocalPart();
+			int pos = soapMethodName.indexOf("InputType");
+			if (pos <= 0) return null;
+			soapMethodName = soapMethodName.substring(0, pos);
+			
 			ProcedureCall procedure = new ProcedureCall(soapMethodName);
 			
 			// find all procedure parameters
