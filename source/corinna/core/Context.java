@@ -81,7 +81,7 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 		throws BindletException, IOException
 	{
 		if (getLifecycleState() != LifecycleState.STARTED) return;
-		
+				
 		R request = null;
 		P response = null;
 

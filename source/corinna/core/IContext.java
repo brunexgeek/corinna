@@ -21,9 +21,7 @@ import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletContext;
 
 import corinna.exception.BindletException;
-import corinna.exception.ConfigurationNotFoundException;
 import corinna.util.IComponentInformation;
-import corinna.util.conf.ISection;
 
 public interface IContext<R,P> extends IServiceRequestListener, ILifecycle
 {

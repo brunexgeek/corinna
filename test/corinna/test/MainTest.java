@@ -27,16 +27,6 @@ public class MainTest
 	public static void main( String[] args ) throws Exception
 	{
 		WSDLFactory factory = WSDLFactory.newInstance();
-		/*Definition def = factory.newDefinition();
-		Service serv = def.createService();
-		Port p = def.createPort();
-		p.setName("teste");
-		def.setTargetNamespace("http://vaas.cpqd.com.br/tts.wsdl");
-		def.addNamespace("xsds", "http://vaas.cpqd.com.br/tts.xsd");
-		
-		def.addService(serv);
-		
-		generateTypes(def, ServiceInterface.class, "http://vaas.cpqd.com.br/tts.xsd");*/
 		
 		ClassDescriptor desc = new ClassDescriptor(ServiceInterface.class);
 		

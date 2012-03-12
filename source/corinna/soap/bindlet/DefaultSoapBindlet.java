@@ -272,7 +272,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 		{
 			ClassDescriptor desc = new ClassDescriptor(runner.getInterfaceClass());
 			WsdlGenerator wsdlgen = new WsdlGenerator();
-			return (wsdl = wsdlgen.generateWsdl(desc, req.getRequestURL(), ""));
+			return (wsdl = wsdlgen.generateWsdl(desc, req.getRequestURL(), null, null));
 		} catch (Exception e)
 		{
 			throw new BindletException("Error generating WSDL", e);

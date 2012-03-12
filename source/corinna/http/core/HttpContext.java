@@ -17,6 +17,8 @@ public class HttpContext extends WebContext<IHttpBindletRequest,IHttpBindletResp
 	
 	private HttpBindletContext bindletContext = null;
 	
+	private int typesHash = 0;
+	
 	public HttpContext( IContextConfig config, IService service )
 	{
 		super(config, service);

@@ -16,30 +16,30 @@
 
 package corinna.network;
 
+
 import javax.bindlet.IBindletRequest;
 import javax.bindlet.IBindletResponse;
 
 import corinna.core.AbstractEvent;
 
 
-public class RequestEvent<R extends IBindletRequest,P extends IBindletResponse> extends AbstractEvent
+public class RequestEvent<R extends IBindletRequest, P extends IBindletResponse> extends
+	AbstractEvent
 {
 
 	private static final long serialVersionUID = 8507321749616247470L;
 
 	private Boolean isHandled = false;
-	
+
 	private transient R request;
-	
+
 	private transient P response;
-	
+
 	public RequestEvent( R request, P response )
 	{
-		if (request == null)
-			throw new IllegalArgumentException("The request can not be null");
-		if (response == null)
-			throw new IllegalArgumentException("The response can not be null");
-		
+		if (request == null) throw new IllegalArgumentException("The request can not be null");
+		if (response == null) throw new IllegalArgumentException("The response can not be null");
+
 		this.request = request;
 		this.response = response;
 	}
@@ -79,5 +79,5 @@ public class RequestEvent<R extends IBindletRequest,P extends IBindletResponse> 
 	{
 		return request.getClass();
 	}
-	
+
 }

@@ -54,6 +54,11 @@ public class ClassDescriptor
 		return type.getCanonicalName();
 	}
 	
+	public String getSimpleName()
+	{
+		return type.getSimpleName();
+	}
+	
 	public MethodDescriptor[] getMethods()
 	{
 		return methodList.toArray( new MethodDescriptor[0] );

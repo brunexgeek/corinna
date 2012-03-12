@@ -147,8 +147,9 @@ public abstract class Service extends Lifecycle implements IService
 			// TODO: criar um "map" indexando por tipo de requisição
 			for (Map.Entry<String,IContext<?, ?>> entry : contexts.entrySet())
 			{
-				// get the request and response types accepted by the current context
 				IContext<?, ?> context = entry.getValue();
+
+				// get the request and response types accepted by the current context
 				Class<?> contextRequest = context.getRequestType();
 				Class<?> contextResponse = context.getResponseType();
 				// get the request and response types of the current event
