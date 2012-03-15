@@ -18,6 +18,7 @@ package corinna.exception;
 
 
 import javax.bindlet.IBindlet;
+import javax.bindlet.exception.BindletException;
 
 
 /**

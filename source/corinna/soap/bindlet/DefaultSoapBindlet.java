@@ -5,6 +5,8 @@ import java.util.Iterator;
 
 import javax.bindlet.BindletOutputStream;
 import javax.bindlet.IBindletConfig;
+import javax.bindlet.IComponentInformation;
+import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpStatus;
 import javax.bindlet.soap.ISoapBindletRequest;
 import javax.bindlet.soap.ISoapBindletResponse;
@@ -23,7 +25,6 @@ import javax.xml.soap.Text;
 import org.apache.log4j.Logger;
 
 import corinna.auth.bindlet.IBindletAuthenticator;
-import corinna.exception.BindletException;
 import corinna.service.rpc.ClassDescriptor;
 import corinna.service.rpc.IPrototypeFilter;
 import corinna.service.rpc.MethodRunner;
@@ -35,7 +36,7 @@ import corinna.thread.ObjectLocker;
 public class DefaultSoapBindlet extends SoapBindlet
 {
 	
-	private static Logger log = Logger.getLogger(DefaultSoapBindlet.class);
+	private static Logger log = Logger.getLogger("Corinna");
 	
 	private static final long serialVersionUID = -5420790590792120345L;
 	
@@ -117,6 +118,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 			runner = new MethodRunner(intfClass, implClass, filter, null);
 		} catch (Exception e)
 		{
+			log.error(e);
 			throw new BindletException("Error creating the method runner", e);
 		}
 	}
@@ -315,6 +317,13 @@ public class DefaultSoapBindlet extends SoapBindlet
 	public boolean isRestricted()
 	{
 		return (authenticator != null);
+	}
+
+	@Override
+	public IComponentInformation getBindletInfo()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	

@@ -22,12 +22,8 @@ import java.lang.reflect.Method;
 import java.text.MessageFormat;
 
 import javax.bindlet.Bindlet;
-import javax.bindlet.IBindletRequest;
-import javax.bindlet.IBindletResponse;
-
-import corinna.core.ContextInfo;
-import corinna.exception.BindletException;
-import corinna.util.IComponentInformation;
+import javax.bindlet.IComponentInformation;
+import javax.bindlet.exception.BindletException;
 
 
 /**
@@ -96,8 +92,8 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 	private static final String COMPONENT_IMPLEMENTOR = "Bruno Ribeiro";
 
-	private static IComponentInformation COMPONENT_INFO = new ContextInfo(COMPONENT_NAME,
-		COMPONENT_VERSION, COMPONENT_IMPLEMENTOR);
+	/*private static IComponentInformation COMPONENT_INFO = new ContextInfo(COMPONENT_NAME,
+		COMPONENT_VERSION, COMPONENT_IMPLEMENTOR);*/
 
 	/**
 	 * Does nothing, because this is an abstract class.
@@ -771,11 +767,11 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		service(request, res);
 	}
 
-	@Override
+	/*@Override
 	public IComponentInformation getBindletInfo()
 	{
 		return COMPONENT_INFO;
-	}
+	}*/
 
 	protected boolean doAuthentication( IHttpBindletRequest request, IHttpBindletResponse response )
 		throws BindletException, IOException

@@ -3,11 +3,9 @@ package javax.bindlet.soap;
 import java.io.IOException;
 
 import javax.bindlet.Bindlet;
+import javax.bindlet.IComponentInformation;
+import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpStatus;
-
-import corinna.core.ContextInfo;
-import corinna.exception.BindletException;
-import corinna.util.IComponentInformation;
 
 
 @SuppressWarnings("serial")
@@ -22,8 +20,8 @@ public abstract class SoapBindlet extends Bindlet<ISoapBindletRequest, ISoapBind
 
 	private static final String COMPONENT_IMPLEMENTOR = "Bruno Ribeiro";
 	
-	private static IComponentInformation COMPONENT_INFO = new ContextInfo(COMPONENT_NAME, 
-		COMPONENT_VERSION, COMPONENT_IMPLEMENTOR);
+	/*private static IComponentInformation COMPONENT_INFO = new ContextInfo(COMPONENT_NAME, 
+		COMPONENT_VERSION, COMPONENT_IMPLEMENTOR);*/
 
 	public SoapBindlet( ) throws BindletException
 	{
@@ -63,10 +61,10 @@ public abstract class SoapBindlet extends Bindlet<ISoapBindletRequest, ISoapBind
 
 	public abstract boolean isRestricted();
 	
-	@Override
+	/*@Override
 	public IComponentInformation getBindletInfo()
 	{
 		return COMPONENT_INFO;
-	}
+	}*/
 	
 }

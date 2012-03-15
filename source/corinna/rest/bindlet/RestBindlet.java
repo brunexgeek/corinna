@@ -17,11 +17,11 @@
 package corinna.rest.bindlet;
 
 import javax.bindlet.Bindlet;
+import javax.bindlet.IComponentInformation;
+import javax.bindlet.exception.BindletException;
 
 import corinna.core.ContextInfo;
-import corinna.exception.BindletException;
 import corinna.service.rpc.IProcedureCall;
-import corinna.util.IComponentInformation;
 
 
 @SuppressWarnings("serial")

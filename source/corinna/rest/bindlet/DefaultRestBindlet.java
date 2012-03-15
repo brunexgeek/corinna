@@ -18,10 +18,10 @@ package corinna.rest.bindlet;
 
 
 import javax.bindlet.IBindletConfig;
+import javax.bindlet.exception.BindletException;
 
 import org.apache.log4j.Logger;
 
-import corinna.exception.BindletException;
 import corinna.service.rpc.IProcedureCall;
 import corinna.service.rpc.IPrototypeFilter;
 import corinna.service.rpc.MethodRunner;

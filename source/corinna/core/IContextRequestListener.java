@@ -5,8 +5,8 @@ import java.io.IOException;
 import javax.bindlet.IBindletContext;
 import javax.bindlet.IBindletRequest;
 import javax.bindlet.IBindletResponse;
+import javax.bindlet.exception.BindletException;
 
-import corinna.exception.BindletException;
 import corinna.network.RequestEvent;
 
 

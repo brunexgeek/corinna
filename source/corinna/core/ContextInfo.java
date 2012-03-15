@@ -16,7 +16,7 @@
 
 package corinna.core;
 
-import corinna.util.IComponentInformation;
+import javax.bindlet.IComponentInformation;
 
 
 public final class ContextInfo implements IComponentInformation

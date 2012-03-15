@@ -16,7 +16,6 @@
 
 package javax.bindlet;
 
-import corinna.util.IComponentInformation;
 
 
 public interface IBindletService extends IObjectSharing

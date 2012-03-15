@@ -10,10 +10,10 @@ import javax.bindlet.BindletModel.Model;
 import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletConfig;
 import javax.bindlet.IRecyclable;
+import javax.bindlet.exception.BindletException;
 
 import org.apache.log4j.Logger;
 
-import corinna.exception.BindletException;
 import corinna.thread.ObjectLocker;
 import corinna.util.ObjectPool;
 

@@ -17,7 +17,6 @@
 package javax.bindlet;
 
 
-import corinna.util.IComponentInformation;
 
 
 /**

@@ -19,16 +19,13 @@ package corinna.core;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import corinna.core.LifecycleManager.StateTransition;
-import corinna.exception.BindletException;
+import javax.bindlet.exception.BindletException;
+
 import corinna.exception.LifecycleException;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
-import corinna.util.conf.ISection;
-import corinna.util.conf.Section;
 
 
 public class Server extends Lifecycle implements IServer

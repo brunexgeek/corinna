@@ -17,11 +17,11 @@
 package corinna.bindlet;
 
 import javax.bindlet.IBindletContext;
+import javax.bindlet.IComponentInformation;
 import javax.bindlet.ILogger;
 
 import corinna.core.IContext;
 import corinna.util.ApacheLogger;
-import corinna.util.IComponentInformation;
 
 
 public abstract class BindletContext<R,P> extends ObjectSharing implements IBindletContext

@@ -1,6 +1,6 @@
 package corinna.soap.core;
 
-import corinna.util.IComponentInformation;
+import javax.bindlet.IComponentInformation;
 
 
 public class SoapContextInfo  implements IComponentInformation

@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
+import javax.bindlet.exception.BindletException;
+
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
@@ -32,7 +34,6 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import corinna.core.IDomain;
 import corinna.core.Lifecycle;
 import corinna.exception.AdapterException;
-import corinna.exception.BindletException;
 import corinna.exception.LifecycleException;
 import corinna.thread.ObjectLocker;
 

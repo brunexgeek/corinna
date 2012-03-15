@@ -19,7 +19,8 @@ package corinna.core;
 import java.io.IOException;
 import java.util.EventListener;
 
-import corinna.exception.BindletException;
+import javax.bindlet.exception.BindletException;
+
 import corinna.network.RequestEvent;
 
 

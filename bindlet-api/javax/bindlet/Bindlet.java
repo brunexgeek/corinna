@@ -19,8 +19,8 @@ package javax.bindlet;
 
 import java.io.Serializable;
 
-import corinna.exception.BindletException;
-import corinna.util.IComponentInformation;
+import javax.bindlet.exception.BindletException;
+
 
 
 /**

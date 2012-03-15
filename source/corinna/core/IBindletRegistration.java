@@ -19,8 +19,8 @@ package corinna.core;
 import javax.bindlet.BindletModel;
 import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletConfig;
+import javax.bindlet.exception.BindletException;
 
-import corinna.exception.BindletException;
 
 
 public interface IBindletRegistration

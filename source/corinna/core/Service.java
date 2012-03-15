@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.bindlet.IBindletService;
+import javax.bindlet.exception.BindletException;
 
 import corinna.bindlet.BindletService;
-import corinna.exception.BindletException;
 import corinna.exception.LifecycleException;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;

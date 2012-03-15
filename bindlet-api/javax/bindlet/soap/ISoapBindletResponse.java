@@ -3,7 +3,6 @@ package javax.bindlet.soap;
 import javax.bindlet.http.IWebBindletResponse;
 import javax.xml.soap.SOAPMessage;
 
-import corinna.soap.network.SoapMarshaller;
 
 
 public interface ISoapBindletResponse extends IWebBindletResponse
@@ -21,6 +20,6 @@ public interface ISoapBindletResponse extends IWebBindletResponse
 	
 	SOAPMessage getMessage();
 	
-	SoapMarshaller getMarshaller();
+	ISoapMarshaler getMarshaller();
 	
 }

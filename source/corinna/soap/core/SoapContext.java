@@ -1,6 +1,7 @@
 package corinna.soap.core;
 
 import javax.bindlet.IBindletContext;
+import javax.bindlet.IComponentInformation;
 import javax.bindlet.soap.ISoapBindletRequest;
 import javax.bindlet.soap.ISoapBindletResponse;
 
@@ -9,7 +10,6 @@ import corinna.core.IContextConfig;
 import corinna.core.IService;
 import corinna.http.core.WebContext;
 import corinna.soap.bindlet.SoapBindletContext;
-import corinna.util.IComponentInformation;
 
 
 public class SoapContext extends WebContext<ISoapBindletRequest,ISoapBindletResponse>

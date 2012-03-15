@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.bindlet.BindletOutputStream;
 import javax.bindlet.soap.ISoapBindletResponse;
+import javax.bindlet.soap.ISoapMarshaler;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
@@ -15,7 +16,6 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 
 import corinna.http.bindlet.WebBindletResponse;
-import corinna.soap.network.SoapMarshaller;
 
 
 public class SoapBindletResponse extends WebBindletResponse implements ISoapBindletResponse
@@ -27,9 +27,9 @@ public class SoapBindletResponse extends WebBindletResponse implements ISoapBind
 	
 	private SOAPMessage message = null;
 	
-	private SoapMarshaller marshaller = null;
+	private ISoapMarshaler marshaller = null;
 	
-	public SoapBindletResponse( SoapMarshaller marshaller, HttpResponse response, Channel channel ) 
+	public SoapBindletResponse( ISoapMarshaler marshaller, HttpResponse response, Channel channel ) 
 	throws SOAPException
 	{
 		super(channel, response);
@@ -37,7 +37,7 @@ public class SoapBindletResponse extends WebBindletResponse implements ISoapBind
 		this.message = SoapUtils.createMessage();
 	}
 	
-	public SoapBindletResponse( SoapMarshaller marshaller, HttpVersion version, Channel channel ) 
+	public SoapBindletResponse( ISoapMarshaler marshaller, HttpVersion version, Channel channel ) 
 		throws SOAPException
 	{
 		super(channel, new DefaultHttpResponse(version, HttpResponseStatus.OK));
@@ -52,7 +52,7 @@ public class SoapBindletResponse extends WebBindletResponse implements ISoapBind
 	}
 
 	@Override
-	public SoapMarshaller getMarshaller()
+	public ISoapMarshaler getMarshaller()
 	{
 		return marshaller;
 	}

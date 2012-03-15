@@ -19,7 +19,8 @@ package javax.bindlet;
 
 import java.io.IOException;
 
-import corinna.util.ICloseable;
+import javax.bindlet.io.ICloseable;
+
 
 
 /**

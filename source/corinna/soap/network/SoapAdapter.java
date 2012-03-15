@@ -3,6 +3,7 @@ package corinna.soap.network;
 import javax.bindlet.http.HttpStatus;
 import javax.bindlet.soap.ISoapBindletRequest;
 import javax.bindlet.soap.ISoapBindletResponse;
+import javax.bindlet.soap.ISoapMarshaler;
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 
@@ -26,7 +27,7 @@ public class SoapAdapter extends Adapter
 
 	private SoapUnmarshaller unmarshaller;
 
-	private SoapMarshaller marshaller;
+	private ISoapMarshaler marshaller;
 	
 	public SoapAdapter( IAdapterConfig config ) throws SOAPException
 	{

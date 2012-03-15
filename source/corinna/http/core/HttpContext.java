@@ -2,6 +2,7 @@ package corinna.http.core;
 
 
 import javax.bindlet.IBindletContext;
+import javax.bindlet.IComponentInformation;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 
@@ -9,7 +10,6 @@ import corinna.core.IBindletRegistration;
 import corinna.core.IContextConfig;
 import corinna.core.IService;
 import corinna.http.bindlet.HttpBindletContext;
-import corinna.util.IComponentInformation;
 
 
 public class HttpContext extends WebContext<IHttpBindletRequest,IHttpBindletResponse>

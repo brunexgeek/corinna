@@ -18,9 +18,9 @@ package corinna.network;
 
 import java.io.IOException;
 
-import org.jboss.netty.channel.Channel;
+import javax.bindlet.exception.BindletException;
 
-import corinna.exception.BindletException;
+import org.jboss.netty.channel.Channel;
 
 
 public interface IStreamHandlerListener

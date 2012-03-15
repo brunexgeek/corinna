@@ -19,17 +19,19 @@ package corinna.soap.network;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import javax.bindlet.soap.ISoapMarshaler;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
 
-public class SoapMarshaller
+public class SoapMarshaller implements ISoapMarshaler
 {
 	
 	public SoapMarshaller( String protocol ) throws SOAPException
 	{
 	}
 	
+	@Override
 	public String marshall( SOAPMessage message ) throws SOAPException, IOException
 	{
 		if (message == null) return null;

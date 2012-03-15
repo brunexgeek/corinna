@@ -1,5 +1,7 @@
 package corinna.util;
 
+import javax.bindlet.IComponentInformation;
+
 
 public class ComponentInformation implements IComponentInformation
 {

@@ -21,7 +21,8 @@ import java.io.Flushable;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import corinna.util.ICloseable;
+import javax.bindlet.io.ICloseable;
+
 
 
 /**

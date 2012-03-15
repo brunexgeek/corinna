@@ -7,8 +7,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import javax.bindlet.IBindletResponse;
-
-import corinna.util.ICloseable;
+import javax.bindlet.io.ICloseable;
 
 
 public interface IWebBindletResponse extends ICloseable, IBindletResponse

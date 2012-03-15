@@ -22,7 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import corinna.exception.BindletException;
+import javax.bindlet.exception.BindletException;
+
 import corinna.exception.ConnectorInUseException;
 import corinna.exception.LifecycleException;
 import corinna.exception.ServerInUseException;

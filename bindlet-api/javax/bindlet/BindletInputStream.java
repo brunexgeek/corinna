@@ -21,7 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-import corinna.util.ICloseable;
+import javax.bindlet.io.ICloseable;
+
 
 
 public abstract class BindletInputStream extends InputStream implements ICloseable

@@ -1,9 +1,9 @@
 package corinna.bindlet;
 
 import javax.bindlet.IBindletService;
+import javax.bindlet.IComponentInformation;
 
 import corinna.core.IService;
-import corinna.util.IComponentInformation;
 
 
 public class BindletService extends ObjectSharing implements IBindletService

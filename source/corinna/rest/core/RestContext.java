@@ -1,6 +1,7 @@
 package corinna.rest.core;
 
 import javax.bindlet.IBindletContext;
+import javax.bindlet.IComponentInformation;
 
 import corinna.core.IBindletRegistration;
 import corinna.core.IContextConfig;
@@ -10,7 +11,6 @@ import corinna.http.core.WebContext;
 import corinna.rest.bindlet.IRestBindletRequest;
 import corinna.rest.bindlet.IRestBindletResponse;
 import corinna.rest.bindlet.RestBindletContext;
-import corinna.util.IComponentInformation;
 
 
 public class RestContext extends WebContext<IRestBindletRequest, IRestBindletResponse>

@@ -19,9 +19,9 @@ package javax.bindlet;
 
 import java.io.IOException;
 
-import corinna.exception.BindletException;
-import corinna.exception.UnavailableException;
-import corinna.util.IComponentInformation;
+import javax.bindlet.exception.BindletException;
+
+
 
 
 /**

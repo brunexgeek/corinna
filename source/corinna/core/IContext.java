@@ -19,9 +19,8 @@ package corinna.core;
 
 import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletContext;
-
-import corinna.exception.BindletException;
-import corinna.util.IComponentInformation;
+import javax.bindlet.IComponentInformation;
+import javax.bindlet.exception.BindletException;
 
 public interface IContext<R,P> extends IServiceRequestListener, ILifecycle
 {

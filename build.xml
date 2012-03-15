@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Corinna" default="export-all" basedir=".">
+	<description>
+       Script file for Corinna build
+    </description>
+
+	<target name="init">
+		<property environment="env" />
+		<property file="${basedir}/build.properties" />
+
+		<path id="compilation.class.path">
+			<fileset dir="${lib.dir}" includes="**/*.jar" />
+		</path>
+		
+		<pathconvert property="global.classpath" pathsep=" ">
+		  <path refid="compilation.class.path"/>
+			<chainedmapper>
+			    <flattenmapper/>
+			    <globmapper from="*" to="lib/*"/>
+			  </chainedmapper>
+		</pathconvert>
+	</target>
+
+	<target name="prepare" depends="init">
+		<mkdir dir="${global.dir.build}" />
+		<mkdir dir="${global.dir.dist}" />
+	</target>
+	
+
+	<target name="export-core" 
+		depends="compile" 
+		description="Construct the JAR file for Corinna core classes">
+		<jar destfile="${global.dir.dist}/${core.filename}" update="true" index="false">
+			<manifest>
+				<attribute name="Product-Name" value="${product.title}"/>
+				<attribute name="Package-Title" value="${core.title}"/>
+				<attribute name="Package-Version" value="${core.version}"/> 
+				<attribute name="Class-Path" value=". ${global.classpath}"/>
+				<attribute name="Main-Class" value="${core.main}"/>
+			</manifest> 
+			<fileset dir="${global.dir.build}" excludes="**/service/*"/>
+			<fileset dir="${core.dir.source}" includes="**/*.properties,**/*.conf,**/domain.xml"/>
+		</jar>
+	</target>
+	
+
+	<target name="export-bindlet-api" 
+		depends="compile" 
+		description="Constrói o JAR do serviço de TTS">
+		<jar destfile="${global.dir.dist}/${tts.filename}" update="true" index="true">
+			<manifest>
+				<attribute name="Class-Path" value="${core.filename}"/>
+				<attribute name="Product-Name" value="${product.title}"/>
+				<attribute name="Package-Title" value="${tts.title}"/>
+				<attribute name="Package-Version" value="${tts.version}"/>
+			</manifest>
+			<fileset dir="${global.dir.build}" includes="**/service/tts/*"/>
+		</jar>
+	</target>
+	
+
+	<target name="export-all" 
+		depends="clean,export-core,export-bindlet-api"
+		description="Build all">
+	</target>
+	
+
+	<target name="compile" 
+		depends="prepare" 
+		description="Compila o código do núcleo">
+		<javac destdir="${global.dir.build}" 
+			debug="${compiler.debug}" 
+			deprecation="${compiler.deprecation}" 
+			compiler="${compiler.type}" 
+			classpathref="compilation.class.path">
+			<src path="${api.dir.source}"/>
+		</javac>
+		<javac destdir="${global.dir.build}" 
+			debug="${compiler.debug}" 
+			deprecation="${compiler.deprecation}" 
+			compiler="${compiler.type}" 
+			classpathref="compilation.class.path">
+			<src path="${core.dir.source}"/>
+		</javac>
+	</target>
+
+	<!-- Limpa os arquivos compilados e empacotamentos atuais -->
+	<target name="clean" depends="init" description="Limpa os arquivos compilados e empacotamentos atuais">
+		<delete includeEmptyDirs="true" verbose="true">
+			<fileset dir="${global.dir.dist}" includes="**/*" />
+		</delete>
+		<delete includeEmptyDirs="true">
+			<fileset dir="${global.dir.build}" includes="**/*" />
+		</delete>
+	</target>
+
+</project>

@@ -1,7 +1,8 @@
 package corinna.rest.core;
 
+import javax.bindlet.IComponentInformation;
+
 import corinna.http.core.HttpContextInfo;
-import corinna.util.IComponentInformation;
 
 
 public class RestContextInfo implements IComponentInformation
