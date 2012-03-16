@@ -3,11 +3,8 @@ package corinna.auth;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.security.auth.login.LoginException;
-
-import sun.swing.PrintingStatus;
 
 
 

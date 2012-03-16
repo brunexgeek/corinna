@@ -22,8 +22,6 @@ import java.io.IOException;
 import javax.bindlet.BindletInputStream;
 import javax.bindlet.IBindletRequest;
 
-import org.jboss.netty.buffer.ChannelBufferInputStream;
-
 
 /**
  * 
@@ -51,8 +49,6 @@ import org.jboss.netty.buffer.ChannelBufferInputStream;
 
 public abstract class HttpBindletInputStream extends BindletInputStream
 {
-
-	private ChannelBufferInputStream stream;
 
 	/**
 	 * Does nothing, because this is an abstract class.
@@ -109,12 +105,6 @@ public abstract class HttpBindletInputStream extends BindletInputStream
 			}
 		}
 		return count > 0 ? count : -1;
-	}
-
-	@Override
-	public int read() throws IOException
-	{
-		return stream.readByte();
 	}
 	
 }

@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.security.auth.login.LoginException;
 
-import sun.security.util.ResourcesMgr;
 import corinna.auth.ICallbackHandler;
 import corinna.auth.ILoginModule;
 import corinna.auth.IModuleContext;
@@ -158,10 +157,7 @@ public class LoginContext implements ILoginContext
 	public void logout() throws LoginException
 	{
 		if (subject == null)
-		{
-			throw new LoginException(
-				ResourcesMgr.getString("null subject - logout called before login"));
-		}
+			throw new LoginException("Logout called before login");
 
 		invoke(METHOD_LOGOUT);
 	}

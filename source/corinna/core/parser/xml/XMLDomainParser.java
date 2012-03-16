@@ -33,8 +33,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.sun.corba.se.spi.activation.Server;
-
 import corinna.core.ContextConfig;
 import corinna.core.Domain;
 import corinna.core.IBasicConfig;
@@ -46,6 +44,7 @@ import corinna.core.IServer;
 import corinna.core.IServerConfig;
 import corinna.core.IService;
 import corinna.core.IServiceConfig;
+import corinna.core.Server;
 import corinna.core.ServerConfig;
 import corinna.core.ServiceConfig;
 import corinna.core.parser.IDomainParser;

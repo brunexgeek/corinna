@@ -8,80 +8,79 @@
 		<property environment="env" />
 		<property file="${basedir}/build.properties" />
 
-		<path id="compilation.class.path">
-			<fileset dir="${lib.dir}" includes="**/*.jar" />
+		<path id="core.path">
+			<fileset dir="${global.dir.libs}" includes="**/wsdl4j.jar" />
+			<fileset dir="${global.dir.libs}" includes="**/qname.jar" />
+			<fileset dir="${global.dir.libs}" includes="**/log4j-1.2.16.jar" />
+			<fileset dir="${global.dir.libs}" includes="**/netty-3.2.7.Final.jar" />
+			<fileset dir="${global.dir.dist}" includes="**/bindlet*.jar" />
 		</path>
 		
-		<pathconvert property="global.classpath" pathsep=" ">
-		  <path refid="compilation.class.path"/>
+		<pathconvert property="core.classpath" pathsep=" ">
+		  <path refid="core.path"/>
 			<chainedmapper>
 			    <flattenmapper/>
 			    <globmapper from="*" to="lib/*"/>
 			  </chainedmapper>
 		</pathconvert>
+		<echo>${core.classpath}</echo>
 	</target>
 
 	<target name="prepare" depends="init">
 		<mkdir dir="${global.dir.build}" />
 		<mkdir dir="${global.dir.dist}" />
+		<mkdir dir="${api.dir.build}" />
+		<mkdir dir="${core.dir.build}" />
 	</target>
 	
 
 	<target name="export-core" 
-		depends="compile" 
+		depends="prepare" 
 		description="Construct the JAR file for Corinna core classes">
+		<javac destdir="${core.dir.build}" 
+			debug="${compiler.debug}" 
+			deprecation="${compiler.deprecation}" 
+			compiler="${compiler.type}" 
+			classpathref="core.path">
+			<src path="${core.dir.source}"/>
+		</javac>
 		<jar destfile="${global.dir.dist}/${core.filename}" update="true" index="false">
 			<manifest>
-				<attribute name="Product-Name" value="${product.title}"/>
+				<attribute name="Product-Name" value="${core.title}"/>
 				<attribute name="Package-Title" value="${core.title}"/>
 				<attribute name="Package-Version" value="${core.version}"/> 
-				<attribute name="Class-Path" value=". ${global.classpath}"/>
-				<attribute name="Main-Class" value="${core.main}"/>
+				<attribute name="Class-Path" value=". ${api.filename} ${core.classpath}"/>
 			</manifest> 
-			<fileset dir="${global.dir.build}" excludes="**/service/*"/>
-			<fileset dir="${core.dir.source}" includes="**/*.properties,**/*.conf,**/domain.xml"/>
+			<fileset dir="${core.dir.build}" excludes="**/service/*"/>
+			<fileset dir="${core.dir.source}" includes="**/*.properties"/>
 		</jar>
 	</target>
 	
 
 	<target name="export-bindlet-api" 
-		depends="compile" 
-		description="Constrói o JAR do serviço de TTS">
-		<jar destfile="${global.dir.dist}/${tts.filename}" update="true" index="true">
+		depends="prepare" 
+		description="Build the Bindlet API">
+		<javac destdir="${api.dir.build}" 
+			debug="${compiler.debug}" 
+			deprecation="${compiler.deprecation}" 
+			compiler="${compiler.type}">
+			<src path="${api.dir.source}"/>
+		</javac>
+		<jar destfile="${global.dir.dist}/${api.filename}" update="true" index="true">
 			<manifest>
-				<attribute name="Class-Path" value="${core.filename}"/>
-				<attribute name="Product-Name" value="${product.title}"/>
-				<attribute name="Package-Title" value="${tts.title}"/>
-				<attribute name="Package-Version" value="${tts.version}"/>
+				<attribute name="Class-Path" value="${api.filename}"/>
+				<attribute name="Product-Name" value="${api.title}"/>
+				<attribute name="Package-Title" value="${api.title}"/>
+				<attribute name="Package-Version" value="${api.version}"/>
 			</manifest>
-			<fileset dir="${global.dir.build}" includes="**/service/tts/*"/>
+			<fileset dir="${api.dir.build}"/>
 		</jar>
 	</target>
 	
 
 	<target name="export-all" 
-		depends="clean,export-core,export-bindlet-api"
+		depends="clean,export-bindlet-api,export-core"
 		description="Build all">
-	</target>
-	
-
-	<target name="compile" 
-		depends="prepare" 
-		description="Compila o código do núcleo">
-		<javac destdir="${global.dir.build}" 
-			debug="${compiler.debug}" 
-			deprecation="${compiler.deprecation}" 
-			compiler="${compiler.type}" 
-			classpathref="compilation.class.path">
-			<src path="${api.dir.source}"/>
-		</javac>
-		<javac destdir="${global.dir.build}" 
-			debug="${compiler.debug}" 
-			deprecation="${compiler.deprecation}" 
-			compiler="${compiler.type}" 
-			classpathref="compilation.class.path">
-			<src path="${core.dir.source}"/>
-		</javac>
 	</target>
 
 	<!-- Limpa os arquivos compilados e empacotamentos atuais -->
