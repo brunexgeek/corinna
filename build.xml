@@ -20,10 +20,9 @@
 		  <path refid="core.path"/>
 			<chainedmapper>
 			    <flattenmapper/>
-			    <globmapper from="*" to="lib/*"/>
+			    <globmapper from="*" to="*"/>
 			  </chainedmapper>
 		</pathconvert>
-		<echo>${core.classpath}</echo>
 	</target>
 
 	<target name="prepare" depends="init">
@@ -49,11 +48,17 @@
 				<attribute name="Product-Name" value="${core.title}"/>
 				<attribute name="Package-Title" value="${core.title}"/>
 				<attribute name="Package-Version" value="${core.version}"/> 
-				<attribute name="Class-Path" value=". ${api.filename} ${core.classpath}"/>
+				<attribute name="Class-Path" value=". lib/${api.filename} ${core.classpath}"/>
 			</manifest> 
 			<fileset dir="${core.dir.build}" excludes="**/service/*"/>
 			<fileset dir="${core.dir.source}" includes="**/*.properties"/>
+			<!--zipfileset prefix="lib" dir="${global.dir.libs}" includes="${core.classpath.plain}"/-->
 		</jar>
+		<echo>Copying libraries to distribution directory...</echo>
+		<copy todir="${global.dir.dist}" flatten="false">
+			<path refid="core.path">
+			</path>
+		</copy>
 	</target>
 	
 

@@ -155,6 +155,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	protected void doPost( ISoapBindletRequest req, ISoapBindletResponse res ) throws BindletException, 
 		IOException
 	{
+		Object result = null;
 		ProcedureCall procedure = parseSoapMessage( req.getMessage() );
 		procedure.setParameter(PARAM_REQUEST, req);
 		procedure.setParameter(PARAM_RESPONSE, res);
@@ -165,16 +166,23 @@ public class DefaultSoapBindlet extends SoapBindlet
 		try
 		{
 			// call the method and generate the SOAP response message
-			Object result = runner.callMethod(procedure);
+			result = runner.callMethod(procedure);
+		} catch (Exception e)
+		{
+			log.error(e);
+			res.setException(e);
+		}
+
+		try
+		{
 			SOAPMessage response = createSoapResponse(DEFAULT_NAMESPACE, procedure.getMethodPrototype(), result);
-			
 			res.setChunked(false);
 			res.setContentType("text/xml");
 			res.setMessage(response);
 		} catch (Exception e)
 		{
 			log.error(e);
-			throw new IOException("Error generating output SOAP/XML", e);
+			res.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -267,7 +275,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 		// create the return value element
 		qname = new QName(namespace, WsdlGenerator.PARAMETER_RESULT, "");
 		SOAPElement carrier = element.addChildElement(qname);
-		carrier.setValue( result.toString() );
+		carrier.setValue( (result == null) ? "" : result.toString() );
 		
 		return message;
 	}

@@ -33,6 +33,10 @@ public class SchemaGenerator
 	private static final String TYPE_NAMES[] = { "int", "float", "long", "string", 
 		"double", "boolean", "string", "byte", "short", "int", "float", 
 		"long", "double", "boolean", "byte", "short", "string", "datetime", "datetime" };
+
+	private static final String PREFIX_XMLSCHEMA = "xsd";
+
+	private static final String PREFIX_TYPES = "types";
 	
 	private Document document;
 	
@@ -53,6 +57,7 @@ public class SchemaGenerator
         
 		Element root = createElement(context, SchemaConstants.ELEM_SCHEMA);
         root.setAttribute("targetNamespace", targetNamespace);
+        root.setAttribute("xmlns:" + PREFIX_TYPES, targetNamespace);
 		context.schemaElement = root;
         
         MethodDescriptor methods[] = classDesc.getMethods();
@@ -69,7 +74,7 @@ public class SchemaGenerator
 			throw new IllegalArgumentException("The element name can not be null");
 		
 		Element element = document.createElementNS(context.xmlSchemaNamespace , name);
-		element.setPrefix("xsd");
+		element.setPrefix(PREFIX_XMLSCHEMA);
 		if (parent != null) parent.appendChild(element);
 		return element;
 	}
@@ -98,7 +103,7 @@ public class SchemaGenerator
 	{
 		Element element = createElement(context, parent, "element");
 		element.setAttribute("name", name);
-		element.setAttribute("type", "xsd:" + mapToSchemaType(classRef));
+		element.setAttribute("type", PREFIX_XMLSCHEMA + ":" + mapToSchemaType(classRef));
 		element.setAttribute("minOccurs", "0");
 		element.setAttribute("maxOccurs", "1");
 	}
@@ -113,26 +118,12 @@ public class SchemaGenerator
 		
 		for (int c = 0; c < method.getParameterCount(); ++c)
 		{
+
 			ParameterDescriptor param = method.getParameter(c);
 			if (!param.isPublic()) continue;
 			
-			Class<?> fieldType = param.getType();
-			
-			if (isPrimitive(fieldType))
-				generatePrimitive(context, sequence, param.getName(), fieldType);
-			else
-			{
-				String typeName = null;
-				if (isEnumeration(fieldType))
-					typeName = generateEnum(context, fieldType);
-				else
-					typeName = generateBean(context, fieldType);
-				element = createElement(context, sequence, "element");
-				element.setAttribute("name", param.getName());
-				element.setAttribute("type", typeName);
-				element.setAttribute("minOccurs", param.isRequired()? "1" : "0");
-				element.setAttribute("maxOccurs", "1");
-			}
+			createElementField(context, sequence, param.getName(), param.getType(), 
+				param.isRequired());
 		}
 		
 		// construct the WSDL message for method response
@@ -141,21 +132,33 @@ public class SchemaGenerator
 		element = createElement(context, element, "complexType");
 		sequence = createElement(context, element, "sequence");
 		
-		Class<?> returnType = method.getReturnType();
+		createElementField(context, sequence, "result", method.getReturnType(), true);
+	}
+	
+	private Element createElementField( SchemaContext context, Element parent, String name,
+		Class<?> type, boolean isRequired )
+	{
+		String typeName = "";
+		boolean isPrimitive = false;
+		Element element;
 		
-		if (isPrimitive(returnType))
-			generatePrimitive(context, sequence, "result", returnType);
-		else
+		if (isPrimitive(type))
 		{
-			String typeName = null;
-			if (isEnumeration(returnType))
-				typeName = generateEnum(context, returnType);
-			else
-				typeName = generateBean(context, returnType);
-			element = createElement(context, sequence, "element");
-			element.setAttribute("name", "result");
-			element.setAttribute("type", typeName);	
+			typeName = PREFIX_XMLSCHEMA + ":" + mapToSchemaType(type);
+			isPrimitive = true;
 		}
+		else
+		if (isEnumeration(type))
+			typeName = generateEnum(context, null, type);
+		else
+			typeName = PREFIX_TYPES + ":" + generateBean(context, null, type);
+
+		element = createElement(context, parent, "element");
+		element.setAttribute("type", typeName);
+		element.setAttribute("nillable", isRequired? "false" : "true");
+		element.setAttribute("name", name);
+		
+		return element;
 	}
 	
 	private String mapToSchemaType( Class<?> type )
@@ -170,7 +173,7 @@ public class SchemaGenerator
 			return null;
 	}
 	
-	protected String generateBean( SchemaContext context, Class<?> classRef )
+	protected String generateBean( SchemaContext context, String name, Class<?> classRef )
 	{
 		if (classRef == null)
 			throw new IllegalArgumentException("The schema element can not be null");
@@ -194,9 +197,9 @@ public class SchemaGenerator
 				typeName = mapToSchemaType(type);
 			else
 			if (isEnumeration(type))
-				typeName = generateEnum(context, type);
+				typeName = generateEnum(context, null, type);
 			else
-				typeName = generateBean(context, type);
+				typeName = generateBean(context, null, type);
 				
 			Element temp = createElement(context, element, "element");
 			temp.setAttributeNS(SchemaConstants.NS_URI_XSD_2001, "name", current.getKey());
@@ -214,7 +217,7 @@ public class SchemaGenerator
 	 * @param type
 	 * @return
 	 */
-	protected String getTypeName( SchemaContext context, Class<?> type )
+	/*protected String getTypeName( SchemaContext context, Class<?> type )
 	{
 		if (isPrimitive(type))
 			return mapToSchemaType(type);
@@ -223,23 +226,23 @@ public class SchemaGenerator
 			return generateEnum(context, type);
 		else
 			return generateBean(context, type);
-	}
+	}*/
 	
-	protected String generateEnum( SchemaContext context, Class<?> classRef )
+	protected String generateEnum( SchemaContext context, String name, Class<?> classRef )
 	{
 		if (classRef == null)
 			throw new IllegalArgumentException("The schema element can not be null");
 		if (context == null)
 			throw new IllegalArgumentException("The schema context can not be null");
 		
-		String typeName = classRef.getSimpleName() + "Type";
+		String typeName = name;
+		if (typeName == null) typeName = classRef.getSimpleName() + "Type";
 		Object values[] = classRef.getEnumConstants();
 		
-		Element element = createElement(context, context.schemaElement, "element");
+		Element element = createElement(context, context.schemaElement, "simpleType");
 		element.setAttribute("name", typeName);
-		element = createElement(context, element, "simpleType");
 		element = createElement(context, element, "restriction");
-		element.setAttribute("base", "xsd:" + mapToSchemaType(String.class));
+		element.setAttribute("base", PREFIX_XMLSCHEMA + ":" + mapToSchemaType(String.class));
 		
 		for (Object current : values)
 		{
@@ -247,7 +250,7 @@ public class SchemaGenerator
 			temp.setAttributeNS(SchemaConstants.NS_URI_XSD_2001, "value", current.toString());
 		}
 		
-		return typeName;
+		return PREFIX_TYPES + ":" + typeName;
 	}
 	
 	protected Map<String,Class<?>> extractBeanFields( Class<?> classRef )
