@@ -79,7 +79,9 @@ public class BasicBindletAuthenticator implements IBindletAuthenticator
 		
 		IUser user = database.getUser(userName);
 		if (user == null) return false;
-		return user.getPassword().equals(password);
+		boolean result =  user.getPassword().equals(password);
+		if (result) request.setUserName(userName);
+		return result;
 	}
 	
 }

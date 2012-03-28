@@ -316,7 +316,9 @@ public class DefaultSoapBindlet extends SoapBindlet
 		throws BindletException, IOException
 	{
 		if (authenticator != null)
+		{
 			return authenticator.authenticate(request, response);
+		}
 		else
 			return false;
 	}

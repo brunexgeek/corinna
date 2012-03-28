@@ -304,4 +304,8 @@ public interface IWebBindletRequest extends IBindletRequest
 
 	public boolean isKeepAlive();
 	
+	public String getUserName();
+	
+	public void setUserName( String userName );
+	
 }

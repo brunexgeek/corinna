@@ -109,7 +109,8 @@ public class DigestAuthenticator implements IHttpAuthenticator
 			try
 			{
 				AuthorizationRequest auth = new AuthorizationRequest(value);
-				return authenticate(request.getHttpMethod(), auth);
+				boolean result = authenticate(request.getHttpMethod(), auth);
+				if (result) request.setUserName(auth.getUserName());
 			} catch (Exception e)
 			{
 				return false;

@@ -43,6 +43,8 @@ public class WebBindletRequest implements IWebBindletRequest
 	private String contentType;
 
 	private String characterEncoding;
+	
+	private String userName = null;
 
 	public WebBindletRequest( HttpRequest request )
 	{
@@ -396,6 +398,17 @@ public class WebBindletRequest implements IWebBindletRequest
 			return true;
 		else
 			return Values.KEEP_ALIVE.equalsIgnoreCase(value);
+	}
+
+	@Override
+	public String getUserName()
+	{
+		return userName;
+	}
+	
+	public void setUserName( String userName )
+	{
+		this.userName = userName;
 	}
 	
 }
