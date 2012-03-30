@@ -20,6 +20,8 @@ package corinna.exception;
 public class RpcException extends GenericException
 {
 
+	private static final long serialVersionUID = 5060996798891871880L;
+
 	public RpcException()
 	{
 		super();

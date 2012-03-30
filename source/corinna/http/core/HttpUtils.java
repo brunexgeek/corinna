@@ -14,7 +14,7 @@ import javax.bindlet.http.IWebBindletRequest;
 public class HttpUtils
 {
 
-	private static final String RFC1123_PATTERN = "EEE, dd MMM yyyyy HH:mm:ss z";
+	private static final String RFC1123_PATTERN = "EEE, dd MMM yyyy HH:mm:ss z";
 
 	private final static SimpleDateFormat DATE_FORMAT;
 

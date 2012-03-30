@@ -20,6 +20,8 @@ package corinna.exception;
 public class MethodCallException extends RpcException
 {
 
+	private static final long serialVersionUID = -1029127449785925736L;
+
 	public MethodCallException()
 	{
 		super();

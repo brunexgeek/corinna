@@ -19,6 +19,8 @@ package corinna.exception;
 public class InvocationTargetException extends MethodCallException
 {
 
+	private static final long serialVersionUID = -2177979913795446695L;
+
 	public InvocationTargetException() 
 	{
 		super();

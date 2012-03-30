@@ -24,11 +24,15 @@ import javax.bindlet.http.HttpBindletOutputStream;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
+
+import corinna.util.Flag;
 
 
-public class BufferedHttpOutputStream extends HttpBindletOutputStream
+public class BufferedHttpOutputStream extends HttpBindletOutputStream implements ChannelFutureListener
 {
-
+	
 	/**
 	 * Default buffer size, used when no value is specified in constructor (2 KiB)
 	 */
@@ -57,6 +61,8 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream
 	protected Boolean isCommited = false;
 
 	private Long writtenBytes = 0L;
+
+	private Flag isFlushing = new Flag();
 
 	public BufferedHttpOutputStream( WebBindletResponse resp, int bufferSize )
 	{
@@ -149,7 +155,22 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream
 	public void flush() throws IOException
 	{
 		checkClosed();
-
+	/*	System.out.println("Want to flush...");
+		// wait while a previous flush don't have completed
+		while (!isFlushing.setFlag(false, true))
+		{
+			try
+			{
+				System.out.println("Waiting...");
+				Thread.sleep(1000);
+			} catch (InterruptedException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("Error waiting!");
+			}
+		}
+		System.out.println("Flush started");*/
 		if (!isCommited())
 		{
 			response.sendHeaders();
@@ -158,8 +179,13 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream
 
 		// ignore if the buffer has no data to flush (the last chunk will be sent by 'close' method)
 		if (!buffer.readable()) return;
-		
-		channel.write(buffer);
+
+		// Note: we need to create a copy of the main buffer because the 'Channel.write' method is
+		//       asynchronous. It's necessary to discover a new method that not require create
+		//       multiple intermediary buffers when writting to output channel.
+		// TODO: optimize this 
+		ChannelBuffer temp = ChannelBuffers.copiedBuffer(buffer);
+		channel.write(temp);
 		incWrittenBytes(buffer.writerIndex());
 		buffer.clear();
 	}
@@ -260,6 +286,15 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream
 		{
 			writtenBytes += amount;
 		}
+	}
+	
+	@Override
+	public void operationComplete( ChannelFuture arg0 ) throws Exception
+	{
+		/*incWrittenBytes(buffer.writerIndex());
+		buffer.clear();
+		isFlushing.setFlag(false);
+		System.out.println("Flushed ended! Current total is " + writtenBytes());*/
 	}
 	
 }

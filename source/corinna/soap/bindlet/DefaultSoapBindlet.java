@@ -36,7 +36,7 @@ import corinna.thread.ObjectLocker;
 public class DefaultSoapBindlet extends SoapBindlet
 {
 	
-	private static Logger log = Logger.getLogger("Corinna");
+	private static Logger log = Logger.getLogger("CorinnaLog");
 	
 	private static final long serialVersionUID = -5420790590792120345L;
 	
