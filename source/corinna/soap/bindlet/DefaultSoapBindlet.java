@@ -25,10 +25,10 @@ import javax.xml.soap.Text;
 import org.apache.log4j.Logger;
 
 import corinna.auth.bindlet.IBindletAuthenticator;
-import corinna.service.rpc.ClassDescriptor;
-import corinna.service.rpc.IPrototypeFilter;
-import corinna.service.rpc.MethodRunner;
-import corinna.service.rpc.ProcedureCall;
+import corinna.rpc.ClassDescriptor;
+import corinna.rpc.IPrototypeFilter;
+import corinna.rpc.MethodRunner;
+import corinna.rpc.ProcedureCall;
 import corinna.soap.core.WsdlGenerator;
 import corinna.thread.ObjectLocker;
 

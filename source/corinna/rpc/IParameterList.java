@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-package corinna.rest.bindlet;
-
-import javax.bindlet.http.IWebBindletRequest;
-
-import corinna.rpc.IProcedureCall;
+package corinna.rpc;
 
 
-public interface IRestBindletRequest extends IWebBindletRequest
+import java.nio.charset.Charset;
+
+import corinna.exception.EntryNotFoundException;
+
+
+
+public interface IParameterList
 {
 
-	public IProcedureCall getProcedureCall();
-	
+	public abstract boolean containsParameter( String name );
+
+	public abstract Object getParameter( String name, Object defaultValue );
+
+	public abstract Object getParameter( String name ) throws EntryNotFoundException;
+
+	public abstract Charset getCharset();
+		
+	public String[] getParameterNames();
+
 }

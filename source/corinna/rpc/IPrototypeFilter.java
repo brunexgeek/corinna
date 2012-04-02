@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package corinna.rest.bindlet;
+package corinna.rpc;
 
-import javax.bindlet.http.IWebBindletRequest;
-
-import corinna.rpc.IProcedureCall;
+import java.lang.reflect.Method;
 
 
-public interface IRestBindletRequest extends IWebBindletRequest
+public interface IPrototypeFilter
 {
 
-	public IProcedureCall getProcedureCall();
+	public String getMethodPrototype( Method method );
 	
 }

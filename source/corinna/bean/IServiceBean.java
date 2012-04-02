@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package corinna.rest.bindlet;
+package corinna.bean;
 
-import javax.bindlet.http.IWebBindletRequest;
-
-import corinna.rpc.IProcedureCall;
+import corinna.core.parser.IDomainParser;
 
 
-public interface IRestBindletRequest extends IWebBindletRequest
+public interface IServiceBean
 {
 
-	public IProcedureCall getProcedureCall();
+	/**
+	 * Argument types for default constructor of a bindlet. This constructor is used by a
+	 * {@link IDomainParser} implementation.
+	 */
+	public static final Class<?>[] CONSTRUCTOR_ARGS = { IBeanConfig.class };
+	
+	public String getName();
+	
+	public IBeanConfig getConfig();
 	
 }

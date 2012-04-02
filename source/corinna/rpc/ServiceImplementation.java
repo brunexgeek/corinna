@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package corinna.rest.bindlet;
-
-import javax.bindlet.http.IWebBindletRequest;
-
-import corinna.rpc.IProcedureCall;
+package corinna.rpc;
 
 
-public interface IRestBindletRequest extends IWebBindletRequest
+public @interface ServiceImplementation
 {
 
-	public IProcedureCall getProcedureCall();
+	public boolean isStateless() default false;
 	
 }

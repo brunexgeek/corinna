@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package corinna.rest.bindlet;
+package corinna.bean;
 
-import javax.bindlet.http.IWebBindletRequest;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import corinna.rpc.IProcedureCall;
 
-
-public interface IRestBindletRequest extends IWebBindletRequest
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface BeanInject
 {
 
-	public IProcedureCall getProcedureCall();
-	
+	public String name();
+
 }

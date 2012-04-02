@@ -28,7 +28,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 
 import corinna.http.bindlet.WebBindletResponse;
-import corinna.service.rpc.ParameterList;
+import corinna.rpc.ParameterList;
 
 public class RestBindletResponse extends WebBindletResponse implements IRestBindletResponse
 {

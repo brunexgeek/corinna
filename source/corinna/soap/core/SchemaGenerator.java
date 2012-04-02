@@ -16,22 +16,21 @@ import org.w3c.dom.Element;
 
 import com.ibm.wsdl.extensions.schema.SchemaConstants;
 
-import corinna.service.rpc.ClassDescriptor;
-import corinna.service.rpc.MethodDescriptor;
-import corinna.service.rpc.MultipleReturnValue;
-import corinna.service.rpc.ParameterDescriptor;
+import corinna.rpc.ClassDescriptor;
+import corinna.rpc.MethodDescriptor;
+import corinna.rpc.ParameterDescriptor;
 
 
 public class SchemaGenerator
 {
 
 	private static final Class<?>[] TYPE_CLASSES = { Integer.class, Float.class, Long.class,
-		String.class, Double.class, Boolean.class, MultipleReturnValue.class, Byte.class,
+		String.class, Double.class, Boolean.class, Byte.class,
 		Short.class, int.class, float.class, long.class, double.class, boolean.class, 
 		byte.class, short.class, URL.class, Date.class, Calendar.class };
 
 	private static final String TYPE_NAMES[] = { "int", "float", "long", "string", 
-		"double", "boolean", "string", "byte", "short", "int", "float", 
+		"double", "boolean", "byte", "short", "int", "float", 
 		"long", "double", "boolean", "byte", "short", "string", "datetime", "datetime" };
 
 	private static final String PREFIX_XMLSCHEMA = "xsd";
@@ -263,7 +262,7 @@ public class SchemaGenerator
 		{
 			String fieldName = null;
 			
-			corinna.service.rpc.annotation.Field annot = field.getAnnotation(corinna.service.rpc.annotation.Field.class);
+			corinna.rpc.annotation.Field annot = field.getAnnotation(corinna.rpc.annotation.Field.class);
 			if (annot != null) fieldName = annot.name();
 			if (fieldName == null || fieldName.isEmpty()) fieldName = field.getName();
 			

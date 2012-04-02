@@ -11,9 +11,9 @@ import org.w3c.dom.Element;
 import com.ibm.wsdl.extensions.schema.SchemaConstants;
 import com.ibm.wsdl.extensions.schema.SchemaImpl;
 
-import corinna.service.rpc.ClassDescriptor;
-import corinna.service.rpc.Parameter;
-import corinna.service.rpc.annotation.RemoteMethod;
+import corinna.rpc.ClassDescriptor;
+import corinna.rpc.annotation.Parameter;
+import corinna.rpc.annotation.RemoteMethod;
 import corinna.soap.core.SchemaGenerator;
 import corinna.soap.core.WsdlGenerator;
 

@@ -25,9 +25,9 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import corinna.http.bindlet.WebBindletRequest;
-import corinna.service.rpc.IProcedureCall;
-import corinna.service.rpc.ParameterList;
-import corinna.service.rpc.ProcedureCall;
+import corinna.rpc.IProcedureCall;
+import corinna.rpc.ParameterList;
+import corinna.rpc.ProcedureCall;
 
 public class RestBindletRequest extends WebBindletRequest implements IRestBindletRequest
 {

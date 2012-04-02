@@ -2,7 +2,7 @@ package corinna.soap.bindlet;
 
 import java.lang.reflect.Method;
 
-import corinna.service.rpc.IPrototypeFilter;
+import corinna.rpc.IPrototypeFilter;
 
 // TODO: mover para 'corinna.rpc.soap'
 public class SoapPrototypeFilter implements IPrototypeFilter

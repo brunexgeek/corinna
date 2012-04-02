@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package corinna.rest.bindlet;
+package corinna.bean;
 
-import javax.bindlet.http.IWebBindletRequest;
-
-import corinna.rpc.IProcedureCall;
+import corinna.core.IBasicConfig;
 
 
-public interface IRestBindletRequest extends IWebBindletRequest
+public interface IBeanConfig extends IBasicConfig
 {
 
-	public IProcedureCall getProcedureCall();
+	String getBeanName();
+	
 	
 }

@@ -1,5 +1,6 @@
 package corinna.soap.core;
 
+
 import java.net.URL;
 
 import javax.wsdl.Binding;
@@ -39,45 +40,43 @@ import com.ibm.wsdl.extensions.soap.SOAPBodyImpl;
 import com.ibm.wsdl.extensions.soap.SOAPConstants;
 import com.ibm.wsdl.extensions.soap.SOAPOperationImpl;
 
-import corinna.service.rpc.ClassDescriptor;
-import corinna.service.rpc.MethodDescriptor;
-import corinna.service.rpc.MultipleReturnValue;
+import corinna.rpc.ClassDescriptor;
+import corinna.rpc.MethodDescriptor;
 
 
 public class WsdlGenerator
 {
 
 	private static final Class<?>[] TYPE_CLASSES = { Integer.class, Float.class, Long.class,
-		String.class, Double.class, Boolean.class, MultipleReturnValue.class, Byte.class,
-		Short.class, int.class, float.class, long.class, double.class, boolean.class, 
-		byte.class, short.class };
+			String.class, Double.class, Boolean.class, Byte.class, Short.class, int.class,
+			float.class, long.class, double.class, boolean.class, byte.class, short.class };
 
-	private static final String TYPE_NAMES[] = { "int", "float", "long", "string", 
-		"double", "boolean", "string", "byte", "short", "int", "float", 
-		"long", "double", "boolean", "byte", "short" };
+	private static final String TYPE_NAMES[] = { "int", "float", "long", "string", "double",
+			"boolean", "byte", "short", "int", "float", "long", "double", "boolean", "byte",
+			"short" };
 
 	public static final String PARAMETER_RESULT = "result";
-	
+
 	public static final String METHOD_RESPONSE_SUFFIX = "Response";
-		
+
 	public static final String DEFAULT_SCHEMA = "service.xsd";
-	
+
 	public static final String DEFAULT_WSDL = "service.wsdl";
-	
+
 	private URL endpointUrl;
-	
+
 	private String serviceName = "ServiceName";
-	
+
 	private String serviceDescription = "Service description";
-	
+
 	private WSDLFactory wsdlFactory = null;
-	
+
 	private Document document;
-	
-	public WsdlGenerator( ) throws WSDLException
+
+	public WsdlGenerator() throws WSDLException
 	{
 		wsdlFactory = WSDLFactory.newInstance();
-		
+
 		// used to create the documentation elements
 		try
 		{
@@ -86,29 +85,27 @@ public class WsdlGenerator
 			document = docBuilder.newDocument();
 		} catch (Exception e)
 		{
-			throw new WSDLException(WSDLException.CONFIGURATION_ERROR, "Error initializing WSDL generator", e);
+			throw new WSDLException(WSDLException.CONFIGURATION_ERROR,
+				"Error initializing WSDL generator", e);
 		}
 	}
-	
-	public Definition generateWsdl( ClassDescriptor classDesc, String endpointUrl, String wsdlNamespace, 
-		String schemaNamespace ) throws Exception
+
+	public Definition generateWsdl( ClassDescriptor classDesc, String endpointUrl,
+		String wsdlNamespace, String schemaNamespace ) throws Exception
 	{
-		if (!endpointUrl.endsWith("/")) 
-			endpointUrl += "/";
-		if (wsdlNamespace == null)
-			wsdlNamespace = endpointUrl + classDesc.getName() + ".wsdl";
-		if (schemaNamespace == null)
-			schemaNamespace = endpointUrl + classDesc.getName() + ".xsd";
-		
+		if (!endpointUrl.endsWith("/")) endpointUrl += "/";
+		if (wsdlNamespace == null) wsdlNamespace = endpointUrl + classDesc.getName() + ".wsdl";
+		if (schemaNamespace == null) schemaNamespace = endpointUrl + classDesc.getName() + ".xsd";
+
 		Definition wsdlDef = wsdlFactory.newDefinition();
-		
+
 		wsdlDef.setTargetNamespace(wsdlNamespace);
-		wsdlDef.setQName( new QName(classDesc.getName()));
+		wsdlDef.setQName(new QName(classDesc.getName()));
 		wsdlDef.addNamespace("soap", SOAPConstants.NS_URI_SOAP);
 		wsdlDef.addNamespace("types", schemaNamespace);
 		wsdlDef.addNamespace("lns", wsdlNamespace);
 		wsdlDef.addNamespace("xsd", SchemaConstants.NS_URI_XSD_2001);
-		
+
 		WsdlContext context = new WsdlContext();
 		context.wsdlDef = wsdlDef;
 		context.classDesc = classDesc;
@@ -116,73 +113,75 @@ public class WsdlGenerator
 		context.schemaNamespace = schemaNamespace;
 		context.endpointUrl = endpointUrl;
 		context.extensionReg = new ExtensionRegistry();
-		
+
 		generateWsdlTypes(context);
 		generateWsdlMethods(context, classDesc);
 		generateWsdlService(context);
-		
+
 		return wsdlDef;
 	}
-	
+
 	protected void generateWsdlTypes( WsdlContext context ) throws Exception
 	{
 		SchemaGenerator ps = new SchemaGenerator();
 		Element root = ps.generateSchema(context.classDesc, context.schemaNamespace);
-		
-        Schema schema = new SchemaImpl();
-        schema.setElement(root);
-        schema.setElementType( SchemaConstants.Q_ELEM_XSD_2001 );
-        
-        Types types = context.wsdlDef.createTypes();
+
+		Schema schema = new SchemaImpl();
+		schema.setElement(root);
+		schema.setElementType(SchemaConstants.Q_ELEM_XSD_2001);
+
+		Types types = context.wsdlDef.createTypes();
 		types.addExtensibilityElement(schema);
 		context.wsdlDef.setTypes(types);
 	}
-	
-	protected void generateWsdlMethods( WsdlContext context, ClassDescriptor classDesc ) throws WSDLException
+
+	protected void generateWsdlMethods( WsdlContext context, ClassDescriptor classDesc )
+		throws WSDLException
 	{
 		if (classDesc == null)
 			throw new NullPointerException("The class descriptor can not be null");
-		
-		for ( MethodDescriptor current : classDesc.getMethods() )
+
+		for (MethodDescriptor current : classDesc.getMethods())
 			generateMethod(context, current);
 	}
 
-	protected void generateMethod( WsdlContext context, MethodDescriptor methodDesc ) throws WSDLException
+	protected void generateMethod( WsdlContext context, MethodDescriptor methodDesc )
+		throws WSDLException
 	{
 		if (context == null)
 			throw new IllegalArgumentException("The WSDL context can not be null");
 		if (methodDesc == null)
 			throw new IllegalArgumentException("The method descriptor can not be null");
-		
+
 		String serviceName = context.classDesc.getName() + "Service";
 		String portTypeName = serviceName + "PortType";
 		String methodName = methodDesc.getName();
 		String bindingName = serviceName + "Binding";
-		
+
 		// create the input and output messages
 		Message inputMessage = createMessage(context, methodDesc.getName() + "Input");
 		Message outputMessage = createMessage(context, methodDesc.getName() + "Output");
 		context.wsdlDef.addMessage(inputMessage);
 		context.wsdlDef.addMessage(outputMessage);
-		
+
 		// check if the port type is already created
 		if (context.portType == null)
 		{
 			context.portType = context.wsdlDef.createPortType();
-			context.portType.setQName( new QName(context.wsdlNamespace, portTypeName) );
+			context.portType.setQName(new QName(context.wsdlNamespace, portTypeName));
 			context.portType.setUndefined(false);
 			context.wsdlDef.addPortType(context.portType);
 		}
-		
+
 		// create the operation documentation
 		Element docRoot = document.createElementNS(context.wsdlNamespace, "documentation");
 		docRoot.setPrefix("wsdl");
-		docRoot.setTextContent( methodDesc.getDescription() );
+		docRoot.setTextContent(methodDesc.getDescription());
 		// create the operation
 		Operation operation = createOperation(context, methodName, inputMessage, outputMessage);
 		operation.setDocumentationElement(docRoot);
 		context.portType.addOperation(operation);
-		
+
 		// check if the binding is already created
 		if (context.binding == null)
 		{
@@ -190,46 +189,46 @@ public class WsdlGenerator
 			SOAPBinding soapBinding = new SOAPBindingImpl();
 			soapBinding.setStyle("document");
 			soapBinding.setTransportURI("http://schemas.xmlsoap.org/soap/http");
-			
+
 			context.binding = context.wsdlDef.createBinding();
-			context.binding.setQName( new QName(context.wsdlNamespace, bindingName) );
+			context.binding.setQName(new QName(context.wsdlNamespace, bindingName));
 			context.binding.setPortType(context.portType);
 			context.binding.setUndefined(false);
 			context.binding.addExtensibilityElement(soapBinding);
 			context.wsdlDef.addBinding(context.binding);
 		}
 		// create the operation binding
-		BindingOperation bindingOp = createBindingOperation(context, methodName, (inputMessage != null), 
-			(outputMessage != null));
+		BindingOperation bindingOp = createBindingOperation(context, methodName,
+			(inputMessage != null), (outputMessage != null));
 		context.binding.addBindingOperation(bindingOp);
 	}
-	
+
 	protected Message createMessage( WsdlContext context, String name )
 	{
 		String messageName = name;
-		
+
 		// create the input message
 		Part part = context.wsdlDef.createPart();
 		part.setName("body");
-		part.setElementName( new QName(context.schemaNamespace, messageName + "Type") );
-		
+		part.setElementName(new QName(context.schemaNamespace, messageName + "Type"));
+
 		Message message = context.wsdlDef.createMessage();
 		message.addPart(part);
-		message.setQName( new QName(context.wsdlNamespace, messageName) );
+		message.setQName(new QName(context.wsdlNamespace, messageName));
 		message.setUndefined(false);
-		
+
 		return message;
 	}
-	
+
 	protected Operation createOperation( WsdlContext context, String name, Message inputMessage,
 		Message outputMessage )
 	{
 		Input input = null;
 		Output output = null;
 		String operationName = name;
-		
+
 		if (inputMessage == null && outputMessage == null) return null;
-		
+
 		// try to create the input
 		if (inputMessage != null)
 		{
@@ -248,19 +247,19 @@ public class WsdlGenerator
 		if (input != null) operation.setInput(input);
 		if (output != null) operation.setOutput(output);
 		operation.setUndefined(false);
-		
+
 		return operation;
 	}
-	
-	protected BindingOperation createBindingOperation( WsdlContext context, String name, 
+
+	protected BindingOperation createBindingOperation( WsdlContext context, String name,
 		boolean hasInput, boolean hasOutput ) throws WSDLException
 	{
 		BindingInput input = null;
 		BindingOutput output = null;
 		String operationName = name;
-		
-		if (!hasInput &&  !hasOutput) return null;
-		
+
+		if (!hasInput && !hasOutput) return null;
+
 		// try to create the input
 		if (hasInput)
 		{
@@ -278,7 +277,7 @@ public class WsdlGenerator
 			output.addExtensibilityElement(soapBody);
 		}
 		// create the SOAP operation
-		String soapActionUrl = context.endpointUrl + name; 
+		String soapActionUrl = context.endpointUrl + name;
 		SOAPOperation soapOp = new SOAPOperationImpl();
 		soapOp.setSoapActionURI(soapActionUrl);
 		// create the operation
@@ -287,7 +286,7 @@ public class WsdlGenerator
 		operation.addExtensibilityElement(soapOp);
 		if (input != null) operation.setBindingInput(input);
 		if (output != null) operation.setBindingOutput(output);
-		
+
 		return operation;
 	}
 
@@ -295,28 +294,27 @@ public class WsdlGenerator
 	{
 		String serviceName = context.classDesc.getName() + "Service";
 		String bindingName = serviceName + "Binding";
-		
+
 		SOAPAddress soapAd = new SOAPAddressImpl();
 		soapAd.setLocationURI(context.endpointUrl);
-		
+
 		Port port = context.wsdlDef.createPort();
-		port.setBinding( context.wsdlDef.getBinding( new QName(context.wsdlNamespace, bindingName) ) );
+		port.setBinding(context.wsdlDef.getBinding(new QName(context.wsdlNamespace, bindingName)));
 		port.addExtensibilityElement(soapAd);
 		port.setName(serviceName + "Port");
-		
+
 		Service service = context.wsdlDef.createService();
 		service.addPort(port);
-		service.setQName( new QName(serviceName) );
-		
+		service.setQName(new QName(serviceName));
+
 		context.wsdlDef.addService(service);
 	}
-	
+
 	public static String getTypeName( Class<?> type )
 	{
 		int k;
 
-		for (k = 0; k < TYPE_NAMES.length && !TYPE_CLASSES[k].equals(type); ++k)
-			;
+		for (k = 0; k < TYPE_NAMES.length && !TYPE_CLASSES[k].equals(type); ++k);
 
 		if (k < TYPE_NAMES.length)
 			return TYPE_NAMES[k];
@@ -353,7 +351,7 @@ public class WsdlGenerator
 	{
 		return serviceDescription;
 	}
-	
+
 	protected class WsdlContext
 	{
 
@@ -368,12 +366,11 @@ public class WsdlGenerator
 		public String wsdlNamespace = null;
 
 		public ClassDescriptor classDesc = null;
-		
+
 		public Definition wsdlDef = null;
-		
+
 		public PortType portType = null;
-		
-		
+
 	}
-	
+
 }

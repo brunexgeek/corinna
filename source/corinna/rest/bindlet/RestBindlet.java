@@ -21,7 +21,7 @@ import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
 
 import corinna.core.ContextInfo;
-import corinna.service.rpc.IProcedureCall;
+import corinna.rpc.IProcedureCall;
 
 
 @SuppressWarnings("serial")
