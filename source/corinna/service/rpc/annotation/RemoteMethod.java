@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-package corinna.service.rpc;
-
+package corinna.service.rpc.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -23,28 +22,38 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
+/**
+ * Indicates that a method should be exposed through the RPC mechanism.
+ * 
+ * @author bruno
+ */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
+@Target(ElementType.METHOD)
 @Inherited
-public @interface Parameter
+public @interface RemoteMethod
 {
-
-	/**
-	 * The name by which the procedure parameter will be accessible.
-	 * 
-	 * @return Nome do parâmetro.
-	 */
-	public String name();
-
-	/**
-	 * Indicates that the procedure parameter is required. Optional parameters can not be of
-	 * primitive types.
-	 * 
-	 * @return <code>True</code> if the parameter is required.
-	 */
-	public boolean required() default true;
 	
-	public boolean isPublic() default true;
-
+	/**
+	 * The name by which the procedure will be accessible. If this parameter is empty or null,
+	 * the method name in the Java interface will be used.
+	 * 
+	 * @return
+	 */
+	public String name() default "";
+	
+	/**
+	 * Indicates that the procedure can be invoked only after authentication process, if any.
+	 * 
+	 * @return
+	 */
+	public boolean secure() default false;
+	
+	
+	/**
+	 * Indicates that the method can me invoked remotely.
+	 * 
+	 * @return
+	 */
+	public boolean export() default true;
+	
 }

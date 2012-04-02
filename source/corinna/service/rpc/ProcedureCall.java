@@ -24,6 +24,7 @@ import java.util.LinkedList;
 
 import corinna.exception.IncompleteInterfaceException;
 import corinna.exception.MethodNotFoundException;
+import corinna.service.rpc.annotation.Parameter;
 
 
 /**

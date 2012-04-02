@@ -25,7 +25,10 @@ import javax.wsdl.extensions.soap.SOAPBody;
 import javax.wsdl.extensions.soap.SOAPOperation;
 import javax.wsdl.factory.WSDLFactory;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.ibm.wsdl.extensions.schema.SchemaConstants;
@@ -69,9 +72,22 @@ public class WsdlGenerator
 	
 	private WSDLFactory wsdlFactory = null;
 	
+	private Document document;
+	
 	public WsdlGenerator( ) throws WSDLException
 	{
 		wsdlFactory = WSDLFactory.newInstance();
+		
+		// used to create the documentation elements
+		try
+		{
+			DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
+			document = docBuilder.newDocument();
+		} catch (Exception e)
+		{
+			throw new WSDLException(WSDLException.CONFIGURATION_ERROR, "Error initializing WSDL generator", e);
+		}
 	}
 	
 	public Definition generateWsdl( ClassDescriptor classDesc, String endpointUrl, String wsdlNamespace, 
@@ -80,14 +96,14 @@ public class WsdlGenerator
 		if (!endpointUrl.endsWith("/")) 
 			endpointUrl += "/";
 		if (wsdlNamespace == null)
-			wsdlNamespace = endpointUrl + classDesc.getSimpleName() + ".wsdl";
+			wsdlNamespace = endpointUrl + classDesc.getName() + ".wsdl";
 		if (schemaNamespace == null)
-			schemaNamespace = endpointUrl + classDesc.getSimpleName() + ".xsd";
+			schemaNamespace = endpointUrl + classDesc.getName() + ".xsd";
 		
 		Definition wsdlDef = wsdlFactory.newDefinition();
 		
 		wsdlDef.setTargetNamespace(wsdlNamespace);
-		wsdlDef.setQName( new QName(classDesc.getSimpleName()));
+		wsdlDef.setQName( new QName(classDesc.getName()));
 		wsdlDef.addNamespace("soap", SOAPConstants.NS_URI_SOAP);
 		wsdlDef.addNamespace("types", schemaNamespace);
 		wsdlDef.addNamespace("lns", wsdlNamespace);
@@ -138,7 +154,7 @@ public class WsdlGenerator
 		if (methodDesc == null)
 			throw new IllegalArgumentException("The method descriptor can not be null");
 		
-		String serviceName = context.classDesc.getSimpleName() + "Service";
+		String serviceName = context.classDesc.getName() + "Service";
 		String portTypeName = serviceName + "PortType";
 		String methodName = methodDesc.getName();
 		String bindingName = serviceName + "Binding";
@@ -157,8 +173,14 @@ public class WsdlGenerator
 			context.portType.setUndefined(false);
 			context.wsdlDef.addPortType(context.portType);
 		}
+		
+		// create the operation documentation
+		Element docRoot = document.createElementNS(context.wsdlNamespace, "documentation");
+		docRoot.setPrefix("wsdl");
+		docRoot.setTextContent( methodDesc.getDescription() );
 		// create the operation
 		Operation operation = createOperation(context, methodName, inputMessage, outputMessage);
+		operation.setDocumentationElement(docRoot);
 		context.portType.addOperation(operation);
 		
 		// check if the binding is already created
@@ -271,7 +293,7 @@ public class WsdlGenerator
 
 	protected void generateWsdlService( WsdlContext context )
 	{
-		String serviceName = context.classDesc.getSimpleName() + "Service";
+		String serviceName = context.classDesc.getName() + "Service";
 		String bindingName = serviceName + "Binding";
 		
 		SOAPAddress soapAd = new SOAPAddressImpl();

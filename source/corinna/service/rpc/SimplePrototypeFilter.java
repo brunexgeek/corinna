@@ -24,11 +24,11 @@ public class SimplePrototypeFilter implements IPrototypeFilter
 {
 
 	private static final Class<?>[] TYPE_CLASSES = { Integer.class, Float.class, Long.class,
-		String.class, Double.class, Boolean.class, MultipleReturnValue.class, Byte.class,
+		String.class, Double.class, Boolean.class, Byte.class,
 		Short.class, int.class, float.class, long.class, double.class, boolean.class, 
 		byte.class, short.class };
 
-	private static final String TYPE_NAMES[] = { "I", "F", "L", "T", "D", "N", "P", "B", "S", "I", 
+	private static final String TYPE_NAMES[] = { "I", "F", "L", "T", "D", "N", "B", "S", "I", 
 		"F", "L", "D", "N", "B", "S" };
 
 	@Override
@@ -62,6 +62,6 @@ public class SimplePrototypeFilter implements IPrototypeFilter
 		if (k < TYPE_NAMES.length)
 			return TYPE_NAMES[k];
 		else
-			return "*";//return "L" + type.getName() + ";";
+			return "C" + type.getName() + ";";
 	}
 }

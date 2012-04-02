@@ -43,7 +43,7 @@ public class HttpBindletResponse extends WebBindletResponse implements IHttpBind
 	@Override
 	public void addCookie( Cookie cookie )
 	{
-		// TODO: implementar
+		// TODO: implements the cokie support
 	}
 
 	@Override

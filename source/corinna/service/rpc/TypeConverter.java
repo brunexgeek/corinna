@@ -20,13 +20,14 @@ package corinna.service.rpc;
 import java.util.HashSet;
 
 
+// TODO: move this class to SOAP package
 public final class TypeConverter
 {
 
 	private static final Class<?>[] TYPES_ARRAY = { boolean.class, byte.class, short.class,
 			int.class, long.class, float.class, double.class, void.class, Boolean.class,
 			Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class,
-			Void.class, String.class, MultipleReturnValue.class };
+			Void.class, String.class };
 
 	private static final HashSet<Class<?>> TYPES_SET = getWrapperTypes();
 
@@ -115,7 +116,6 @@ public final class TypeConverter
 		if (type.equals(Short.class) || type.equals(short.class)) return toShort(value);
 		if (type.equals(Boolean.class) || type.equals(boolean.class)) return toBoolean(value);
 		if (type.equals(String.class)) return value;
-		if (MultipleReturnValue.class.isAssignableFrom(type)) return new MultipleReturnValue(value);
 		if (Enum.class.isAssignableFrom(type)) return toEnum((Class<Enum<?>>)type, value);
 
 		throw new ClassCastException("Unsupported type '" + type.getName() + "'");

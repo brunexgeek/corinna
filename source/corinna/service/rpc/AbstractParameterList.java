@@ -20,7 +20,6 @@ package corinna.service.rpc;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 import corinna.exception.EntryNotFoundException;
 

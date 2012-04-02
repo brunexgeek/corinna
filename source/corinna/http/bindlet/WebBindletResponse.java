@@ -20,10 +20,9 @@ import corinna.http.core.HttpUtils;
 import corinna.thread.ObjectLocker;
 
 
+// TODO: promote this class to a concrete response (not a response wrapper)
 public abstract class WebBindletResponse implements IWebBindletResponse
 {
-
-	private static final String HEADER_SERVER = "Corinna";
 
 	protected HttpResponse response = null;
 
@@ -46,8 +45,6 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	private BindletOutputStream outputStream = null;
 	
 	private ObjectLocker outputLocker = null;
-	
-	//private Boolean isClosed = false;
 	
 	public WebBindletResponse( Channel channel, HttpResponse response )
 	{

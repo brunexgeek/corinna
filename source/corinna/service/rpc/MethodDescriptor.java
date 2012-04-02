@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import corinna.exception.IncompleteInterfaceException;
+import corinna.service.rpc.annotation.Parameter;
+import corinna.service.rpc.annotation.RemoteMethodDescription;
 
 
 public class MethodDescriptor
@@ -17,17 +19,23 @@ public class MethodDescriptor
 	
 	private Method method;
 	
+	private String description;
+	
 	public MethodDescriptor( Method method ) throws IncompleteInterfaceException
 	{
 		if (method == null)
 			throw new NullPointerException("The method instance can not be null");
 
 		this.method = method;
-		returnType = method.getReturnType();
+		this.description = "";
+		this.returnType = method.getReturnType();
 		this.parameterList = new LinkedList<ParameterDescriptor>();
 		
 		int c = 0;
 
+		RemoteMethodDescription doc = method.getAnnotation(RemoteMethodDescription.class);
+		if (doc != null) description = doc.value();		
+		
 		Annotation[][] params = method.getParameterAnnotations();
 		Class<?>[] types = method.getParameterTypes();
 		
@@ -86,6 +94,11 @@ public class MethodDescriptor
 	public Class<?> getReturnType()
 	{
 		return returnType;
+	}
+	
+	public String getDescription()
+	{
+		return description;
 	}
 	
 }

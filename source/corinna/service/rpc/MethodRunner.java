@@ -33,7 +33,7 @@ import corinna.exception.InvalidRpcClassException;
 import corinna.exception.InvocationTargetException;
 import corinna.exception.MethodNotFoundException;
 import corinna.exception.ParameterNotFoundException;
-
+import corinna.service.rpc.annotation.Parameter;
 import corinna.util.StringResource;
 
 

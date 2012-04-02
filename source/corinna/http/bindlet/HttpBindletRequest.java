@@ -26,7 +26,7 @@ import javax.bindlet.http.ISession;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
-
+//TODO: promote this class to a concrete request (not a request wrapper)
 public class HttpBindletRequest extends WebBindletRequest implements IHttpBindletRequest
 {
 

@@ -24,7 +24,6 @@ package corinna.network;
  * @since 1.0
  * @version 1.0
  */
-// TODO: move to 'javax.bindlet'
 public interface IProtocol<R, P>
 {
 

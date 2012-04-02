@@ -19,7 +19,6 @@ package corinna.rest.bindlet;
 import javax.bindlet.http.IWebBindletResponse;
 
 
-// TODO: move to "javax.bindlet.rest"
 public interface IRestBindletResponse extends IWebBindletResponse
 {
 	

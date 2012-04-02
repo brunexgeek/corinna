@@ -1,8 +1,6 @@
 package corinna.test;
 
 import javax.wsdl.Definition;
-import javax.wsdl.Port;
-import javax.wsdl.Service;
 import javax.wsdl.Types;
 import javax.wsdl.extensions.schema.Schema;
 import javax.wsdl.factory.WSDLFactory;
@@ -15,8 +13,7 @@ import com.ibm.wsdl.extensions.schema.SchemaImpl;
 
 import corinna.service.rpc.ClassDescriptor;
 import corinna.service.rpc.Parameter;
-import corinna.service.rpc.PublicProcedure;
-import corinna.service.rpc.annotation.Field;
+import corinna.service.rpc.annotation.RemoteMethod;
 import corinna.soap.core.SchemaGenerator;
 import corinna.soap.core.WsdlGenerator;
 
@@ -65,7 +62,7 @@ public class MainTest
 	public static interface ServiceInterface
 	{
 		
-		@PublicProcedure
+		@RemoteMethod
 		public void calculate( 
 			@Parameter(name="a") int a, 
 			@Parameter(name="b") MyPOJO b );

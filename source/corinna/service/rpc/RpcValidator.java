@@ -28,6 +28,8 @@ import corinna.core.IComponentInterface;
 import corinna.exception.InvalidRpcClassException;
 import corinna.exception.InvalidRpcMethodException;
 import corinna.exception.InvalidRpcTypeException;
+import corinna.service.rpc.annotation.Parameter;
+import corinna.service.rpc.annotation.RemoteMethod;
 
 
 /**
@@ -66,7 +68,7 @@ public class RpcValidator
 	public static void validateMethod( Method method ) throws InvalidRpcMethodException,
 		InvalidRpcTypeException
 	{
-		if (!method.isAnnotationPresent(PublicProcedure.class))
+		if (!method.isAnnotationPresent(RemoteMethod.class))
 			throw new InvalidRpcMethodException("The method must be anottated as public procedure");
 
 		// verifica se é um método público
@@ -137,7 +139,7 @@ public class RpcValidator
 		{
 			for (Method current : methods)
 			{
-				if (!current.isAnnotationPresent(PublicProcedure.class)) continue;
+				if (!current.isAnnotationPresent(RemoteMethod.class)) continue;
 
 				validateMethod(current);
 				
