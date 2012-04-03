@@ -50,7 +50,7 @@ public @interface RemoteMethod
 	
 	
 	/**
-	 * Indicates that the method can me invoked remotely.
+	 * Indicates that the method can be invoked remotely.
 	 * 
 	 * @return
 	 */

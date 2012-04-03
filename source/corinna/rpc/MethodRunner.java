@@ -25,7 +25,9 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import corinna.bean.BeanManager;
 import corinna.core.IComponentInterface;
+import corinna.exception.ComponentException;
 import corinna.exception.IncompleteImplementationException;
 import corinna.exception.IncompleteInterfaceException;
 import corinna.exception.InternalException;
@@ -350,15 +352,20 @@ public class MethodRunner implements IMethodRunner
 
 		try
 		{
-			Constructor<?> ctor = getImplementationClass().getConstructor(ARGS_IMPL);
-			impl = (IComponentInterface) ctor.newInstance(getData());
-		} catch (NoSuchMethodException e)
+			//Constructor<?> ctor = getImplementationClass().getConstructor(ARGS_IMPL);
+			//impl = (IComponentInterface) ctor.newInstance(getData());
+			impl = (IComponentInterface) getImplementationClass().newInstance();
+			// inject all referenced service beans
+			BeanManager.getInstance().inject(impl);
+			// initialize the component
+			impl.init(getData());
+		} catch (ComponentException e)
 		{
-			throw new IncompleteImplementationException("Standard constructor not found.");
+			throw new IncompleteImplementationException("Component initialization exception", e);
 		} catch (Exception e)
 		{
-			serverLog.error("Constructor exception", e);
-			throw new InvocationTargetException("Constructor invocation exception", e);
+			serverLog.error("Component instantiation error", e);
+			throw new InvocationTargetException("Component instantiation error", e);
 		}
 
 		return impl;

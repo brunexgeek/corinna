@@ -16,9 +16,15 @@
 
 package corinna.core;
 
+import corinna.exception.ComponentException;
+
 
 public interface IComponentInterface
 {
 
+	public void init( Object data ) throws ComponentException;
+	
+	public void destroy() throws ComponentException;
+	
 	
 }

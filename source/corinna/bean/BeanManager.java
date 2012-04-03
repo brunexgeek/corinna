@@ -16,6 +16,7 @@
 
 package corinna.bean;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,6 +78,34 @@ public class BeanManager
 		beanLock.writeLock();
 		beans.put(bean.getName(), bean);
 		beanLock.writeUnlock();
+	}
+	
+	public void inject( Object object )
+	{
+		if (object == null || object.getClass() == Object.class) return;
+		
+		// iterate in object fields to find anyone that has the BeanInject attribute
+		Field fields[] = object.getClass().getDeclaredFields();
+		for (Field current : fields)
+		{
+			BeanInject att = current.getAnnotation(BeanInject.class);
+			if (att == null) continue;
+			IServiceBean bean = getBean(att.value());
+			//if (!bean.getClass().isAssignableFrom(current.getClass())) continue;
+			try
+			{
+				synchronized (current)
+				{
+					boolean state = current.isAccessible();
+					if (!state) current.setAccessible(true);
+					current.set(object, bean);
+					if (!state) current.setAccessible(false);
+				}
+			} catch (Exception e)
+			{
+				// suppress any error
+			}
+		}
 	}
 	
 }

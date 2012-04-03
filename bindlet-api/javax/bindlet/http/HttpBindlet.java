@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.text.MessageFormat;
 
 import javax.bindlet.Bindlet;
-import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
 
 

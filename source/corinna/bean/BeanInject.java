@@ -27,6 +27,6 @@ import java.lang.annotation.Target;
 public @interface BeanInject
 {
 
-	public String name();
+	public String value();
 
 }

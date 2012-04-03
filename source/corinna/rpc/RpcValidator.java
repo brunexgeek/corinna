@@ -178,14 +178,14 @@ public class RpcValidator
 			throw new InvalidRpcClassException("Both classes must not be null");
 
 		// verifica se possui o construtor que recebe um objeto arbitrário
-		try
+		/*try
 		{
 			implClass.getConstructor(Object.class);
 		} catch (Exception e)
 		{
 			throw new InvalidRpcClassException("Missing implementation constructor in class '"
 				+ implClass.getName() + "'", e);
-		}
+		}*/
 
 		// verifica se a classe de implementação é na verdade uma interface
 		if (implClass.isInterface())

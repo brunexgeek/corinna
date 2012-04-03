@@ -19,6 +19,8 @@ package corinna.exception;
 public class BusyException extends GenericException
 {
 
+	private static final long serialVersionUID = -2807751251844220382L;
+
 	public BusyException()
 	{
 		super();
