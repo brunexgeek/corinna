@@ -22,7 +22,9 @@ import javax.bindlet.IBindletContext;
 import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
 
-public interface IContext<R,P> extends IServiceRequestListener, ILifecycle
+import corinna.network.IAdaptable;
+
+public interface IContext<R,P> extends IServiceRequestListener, ILifecycle, IAdaptable
 {
 
 	public Class<?>[] CONSTRUCTOR_ARGS = { IContextConfig.class, IService.class };

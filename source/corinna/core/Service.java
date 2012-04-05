@@ -144,7 +144,6 @@ public abstract class Service extends Lifecycle implements IService
 		contextsLock.readLock();
 		try
 		{
-			// TODO: criar um "map" indexando por tipo de requisição
 			for (Map.Entry<String,IContext<?, ?>> entry : contexts.entrySet())
 			{
 				IContext<?, ?> context = entry.getValue();

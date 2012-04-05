@@ -27,13 +27,13 @@ public class RestAdapter extends Adapter
 	}
 
 	@Override
-	public Class<?> getResponseType()
+	public Class<?> getOutputResponseType()
 	{
 		return IRestBindletRequest.class;
 	}
 
 	@Override
-	public Class<?> getRequestType()
+	public Class<?> getOutputRequestType()
 	{
 		return IRestBindletResponse.class;
 	}
@@ -71,12 +71,19 @@ public class RestAdapter extends Adapter
 		}
 	}
 
-	@Override
-	public boolean isCompatibleWith( Object request, Object response )
+	/*@Override
+	public boolean evaluate( Object request, Object response )
 	{
-		return HttpRequest.class.isAssignableFrom(request.getClass()) &&
-		       HttpResponse.class.isAssignableFrom(response.getClass());
-	}
+		boolean valid;
+		
+		valid  = HttpRequest.class.isAssignableFrom(request.getClass());
+		valid &= HttpResponse.class.isAssignableFrom(response.getClass());
+		if (!valid) return false;
+		
+		String value = ((HttpRequest)request).getHeader(HttpHeaders.Names.CONTENT_TYPE);
+
+		return (value != null && value.contains("text/html"));
+	}*/
 
 	@Override
 	public RequestEvent<?, ?> translate( Object request, Object response, Channel channel )
@@ -98,4 +105,16 @@ public class RestAdapter extends Adapter
 		return new RestRequestEvent(r, p);
 	}
 
+	@Override
+	public Class<?> getInputRequestType()
+	{
+		return HttpRequest.class;
+	}
+
+	@Override
+	public Class<?> getInputResponseType()
+	{
+		return HttpResponse.class;
+	}
+	
 }

@@ -9,7 +9,6 @@ import javax.xml.soap.SOAPException;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
@@ -65,19 +64,19 @@ public class SoapAdapter extends Adapter
 	}
 
 	@Override
-	public Class<?> getResponseType()
+	public Class<?> getOutputResponseType()
 	{
 		return ISoapBindletResponse.class;
 	}
 
 	@Override
-	public Class<?> getRequestType()
+	public Class<?> getOutputRequestType()
 	{
 		return ISoapBindletRequest.class;
 	}
 
-	@Override
-	public boolean isCompatibleWith( Object request, Object response )
+	/*@Override
+	public boolean evaluate( Object request, Object response )
 	{
 		boolean valid;
 		
@@ -89,7 +88,7 @@ public class SoapAdapter extends Adapter
 
 		return (value != null && value.contains("text/xml")) || 
 		       ((HttpRequest)request).getUri().endsWith("?wsdl");
-	}
+	}*/
 
 	@Override
 	public void onError( RequestEvent<?, ?> event, Channel channel, Throwable exception )
@@ -122,4 +121,16 @@ public class SoapAdapter extends Adapter
 		}
 	}
 
+	@Override
+	public Class<?> getInputRequestType()
+	{
+		return HttpRequest.class;
+	}
+
+	@Override
+	public Class<?> getInputResponseType()
+	{
+		return HttpResponse.class;
+	}
+	
 }

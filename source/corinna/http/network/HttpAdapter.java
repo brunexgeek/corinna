@@ -30,13 +30,13 @@ public class HttpAdapter extends Adapter
 	}
 
 	@Override
-	public Class<?> getResponseType()
+	public Class<?> getOutputResponseType()
 	{
 		return IHttpBindletRequest.class;
 	}
 
 	@Override
-	public Class<?> getRequestType()
+	public Class<?> getOutputRequestType()
 	{
 		return IHttpBindletResponse.class;
 	}
@@ -75,13 +75,6 @@ public class HttpAdapter extends Adapter
 	}
 
 	@Override
-	public boolean isCompatibleWith( Object request, Object response )
-	{
-		return HttpRequest.class.isAssignableFrom(request.getClass()) &&
-		       HttpResponse.class.isAssignableFrom(response.getClass());
-	}
-
-	@Override
 	public RequestEvent<?, ?> translate( Object request, Object response, Channel channel )
 		throws AdapterException
 	{
@@ -100,6 +93,18 @@ public class HttpAdapter extends Adapter
 		IHttpBindletResponse p = new HttpBindletResponse(channel, res);
 		HttpRequestEvent aaa = new HttpRequestEvent(r, p);
 		return aaa;
+	}
+
+	@Override
+	public Class<?> getInputRequestType()
+	{
+		return HttpRequest.class;
+	}
+
+	@Override
+	public Class<?> getInputResponseType()
+	{
+		return HttpResponse.class;
 	}
 
 }

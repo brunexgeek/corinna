@@ -98,7 +98,11 @@ public enum XMLDomainTags
 	
 	ADD_ADAPTER("add-adapter"),
 	
-	UNKNOW(null);
+	UNKNOW(null),
+	
+	ADAPTER_FILTER("filter"), 
+	
+	ADAPTER_FILTERS("filters");
 	
 	private String tag;
 	

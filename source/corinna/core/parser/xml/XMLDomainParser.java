@@ -20,6 +20,7 @@ package corinna.core.parser.xml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,9 +53,11 @@ import corinna.core.ServerConfig;
 import corinna.core.ServiceConfig;
 import corinna.core.parser.IDomainParser;
 import corinna.exception.ParseException;
+import corinna.exception.UnexpectedTagException;
 import corinna.network.AdapterConfig;
 import corinna.network.ConnectorConfig;
 import corinna.network.IAdapter;
+import corinna.network.IAdapterFilter;
 import corinna.network.IConnector;
 import corinna.util.ResourceLoader;
 import corinna.util.conf.ISection;
@@ -184,6 +187,18 @@ public class XMLDomainParser implements IDomainParser
 			Class<?> classRef = Class.forName(entry.getClassName());
 			Constructor<?> ctor = classRef.getConstructor(IAdapter.CONSTRUCTOR_ARGS);
 			IAdapter adapter = (IAdapter)ctor.newInstance( entry.getConfig() );
+			// create the associated filters
+			for (String filterClass : entry.getFilters() )
+			{
+				try
+				{
+					IAdapterFilter filter = createFilter(filterClass);
+					adapter.addFilter(filter);
+				} catch (Exception e)
+				{
+					throw new ParseException("Error creating adapter filter", e);
+				}
+			}
 			// insert the adapter in the connector
 			connector.addAdapter(adapter);
 		} catch (Exception e)
@@ -192,6 +207,18 @@ public class XMLDomainParser implements IDomainParser
 		}
 	}
 	
+	private IAdapterFilter createFilter( String filterClass ) throws Exception
+	{
+		if (filterClass == null || filterClass.isEmpty())
+			throw new NullPointerException("The filter class name can not be null or empty");
+		
+		Class<?> classRef = Class.forName(filterClass);
+		if (!IAdapterFilter.class.isAssignableFrom(classRef))
+			throw new ParseException("The filter class must implement the 'IAdapterFilter' interface");
+		
+		return (IAdapterFilter) classRef.newInstance();
+	}
+
 	protected void createBeans( ) throws ParseException
 	{
 		if (beanList == null) return;
@@ -352,6 +379,34 @@ public class XMLDomainParser implements IDomainParser
 		return output;
 	}
 	
+	/**
+	 * Returns a list containing the class name of all registred adapter filters.
+	 * 
+	 * @param parent
+	 * @return
+	 * @throws ParseException
+	 */
+	private List<String> parseAdapterFilters( Element parent ) throws ParseException
+	{
+		if (parent == null) return null;
+
+		Element element = parent;
+		if (!isTag(parent, XMLDomainTags.ADAPTER_FILTERS))
+		{
+			element = getElementByTag(parent, XMLDomainTags.ADAPTER_FILTERS);
+			if (element == null)
+				return null;
+		}
+
+		NodeList list = getElementsByTag(element, XMLDomainTags.ADAPTER_FILTER);
+		if (list == null || list.getLength() == 0) return null;
+		List<String> filters = new LinkedList<String>();
+		for (int i = 0; i < list.getLength(); ++i)
+			filters.add( ((Element)list.item(i)).getTextContent() );
+		
+		return filters;
+	}
+	
 	private Map<String, AdapterEntry> parseAdapters( Element parent ) throws ParseException
 	{
 		if (!isTag(parent, XMLDomainTags.ADAPTERS)) throw new ParseException("Invalid tag name");
@@ -369,11 +424,17 @@ public class XMLDomainParser implements IDomainParser
 			String adapterClassName = getTagContent(element, XMLDomainTags.ADAPTER_CLASS);
 			// create the configuration object and get the connector parameters
 			AdapterConfig config = new AdapterConfig(adapterName);
+			// parse the adapter parameters
 			parseParameters(element, XMLDomainTags.INIT_PARAMETERS, config);
+			// parse the adapter filters
+			List<String> filters = parseAdapterFilters(element);
 
 			try
 			{
 				AdapterEntry entry = new AdapterEntry(adapterClassName, config);
+				if (filters != null)
+					for (String current : filters) 
+						entry.addFilter(current);
 				// add the current connector in output list
 				output.put(adapterName, entry);
 			} catch (Exception e)
@@ -488,32 +549,6 @@ public class XMLDomainParser implements IDomainParser
 			}
 		}
 		return output;
-	}
-
-	private String getTagContent( Element parent, XMLDomainTags tag, String defaultValue )
-	{
-		Element temp = getElementByTag(parent, tag);
-		if (temp == null)
-			return defaultValue;
-		else
-			return temp.getTextContent();
-	}
-	
-	private String getTagContent( Element parent, XMLDomainTags tag ) 
-		throws ParseException
-	{
-		String value = getTagContent(parent, tag, null);
-		if (value == null)
-			throw new ParseException("The '" + tag + "' tag is required");
-		return value;
-	}
-	
-	private String getElementAttribute( Element element, String attName ) throws ParseException
-	{
-		String value = element.getAttribute(attName);
-		if (value == null || value.isEmpty()) 
-			throw new ParseException("The '" + attName + "' attribute is required");
-		return value;
 	}
 	
 	private void parseParameters( Element parent, XMLDomainTags tag, ISection config ) throws ParseException
@@ -692,7 +727,34 @@ public class XMLDomainParser implements IDomainParser
 		}
 	}
 
-	protected Element getElementByTag( Element parent, XMLDomainTags tag )
+
+	public static String getTagContent( Element parent, XMLDomainTags tag, String defaultValue )
+	{
+		Element temp = getElementByTag(parent, tag);
+		if (temp == null)
+			return defaultValue;
+		else
+			return temp.getTextContent();
+	}
+	
+	public static String getTagContent( Element parent, XMLDomainTags tag ) 
+		throws ParseException
+	{
+		String value = getTagContent(parent, tag, null);
+		if (value == null)
+			throw new ParseException("The '" + tag + "' tag is required");
+		return value;
+	}
+	
+	public static String getElementAttribute( Element element, String attName ) throws ParseException
+	{
+		String value = element.getAttribute(attName);
+		if (value == null || value.isEmpty()) 
+			throw new ParseException("The '" + attName + "' attribute is required");
+		return value;
+	}
+
+	public static Element getElementByTag( Element parent, XMLDomainTags tag )
 	{
 		NodeList list = parent.getElementsByTagName(tag.getTagName());
 		if (list == null) return null;
@@ -704,13 +766,13 @@ public class XMLDomainParser implements IDomainParser
 		return null;
 	}
 
-	protected NodeList getElementsByTag( Element parent, XMLDomainTags tag )
+	public static NodeList getElementsByTag( Element parent, XMLDomainTags tag )
 	{
 		NodeList list = parent.getElementsByTagName(tag.getTagName());
 		return list;
 	}
 
-	protected boolean isTag( Element element, XMLDomainTags tag )
+	public static boolean isTag( Element element, XMLDomainTags tag )
 	{
 		if (element == null || tag == null) return false;
 		return element.getTagName().equalsIgnoreCase(tag.getTagName());

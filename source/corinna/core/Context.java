@@ -25,6 +25,7 @@ import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletContext;
 import javax.bindlet.exception.BindletException;
 
+import corinna.network.IAdapter;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
 
@@ -46,6 +47,10 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 
 	private IContextConfig config = null;
 
+	private Map<String, IAdapter> adapters;
+	
+	private ObjectLocker adaptersLock;
+	
 	public Context( IContextConfig config, IService service )
 	{
 		if (config == null)
@@ -58,6 +63,8 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 		this.reposLock = new ObjectLocker();
 		this.config = config;
 		this.service = service;
+		this.adapters = new HashMap<String, IAdapter>();
+		this.adaptersLock = new ObjectLocker();
 	}
 
 	protected abstract IBindletContext createBindletContext();
@@ -266,6 +273,36 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 		}
 		
 		return sb.toString();
+	}
+
+	@Override
+	public void addAdapter( IAdapter adapter )
+	{
+		if (adapter == null) return;
+		
+		adaptersLock.readLock();
+		try
+		{
+			adapters.put(adapter.getName(), adapter);
+		} finally
+		{
+			adaptersLock.readUnlock();
+		}
+	}
+	
+	@Override
+	public void removeAdapter( String name )
+	{
+		if (name == null || name.isEmpty()) return;
+		
+		adaptersLock.readLock();
+		try
+		{
+			adapters.remove(name);
+		} finally
+		{
+			adaptersLock.readUnlock();
+		}
 	}
 	
 }

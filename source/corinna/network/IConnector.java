@@ -31,7 +31,7 @@ import corinna.core.ILifecycle;
  * @since 1.0
  * @version 1.0
  */
-public interface IConnector extends ILifecycle
+public interface IConnector extends ILifecycle, IAdaptable
 {
 
 	public Class<?>[] CONSTRUCTOR_ARGS = { IConnectorConfig.class };
@@ -51,9 +51,5 @@ public interface IConnector extends ILifecycle
 	public void setParameter( String name, String value );
 
 	public String[] getParameterNames();
-
-	public void addAdapter( IAdapter adapter );
-	
-	public void removeAdapter( String name );
 	
 }

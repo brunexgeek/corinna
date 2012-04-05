@@ -145,7 +145,7 @@ public abstract class Connector extends Lifecycle implements IConnector,
 			for ( Map.Entry<String,IAdapter> entry : adapters.entrySet() )
 			{
 				IAdapter adapter = entry.getValue();
-				if (adapter.isCompatibleWith(request, response))
+				if (adapter.evaluate(request, response))
 					return adapter;
 			}
 		} finally
