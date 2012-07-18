@@ -41,7 +41,7 @@ public class Section implements ISection
 	/**
 	 * Lista contendo as entradas da seção.
 	 */
-	private Map<String, String> items;
+	protected Map<String, String> items;
 	
 	/**
 	 * Lista contendo as sub-seções da seção.
@@ -52,9 +52,9 @@ public class Section implements ISection
 	 * Indica se o conteúdo da seção é somente para leitura (<code>true</code>) ou pode ser 
 	 * modificado (<code>false</code>).
 	 */
-	private Boolean isReadOnly;
+	protected Boolean isReadOnly;
 	
-	private ObjectLocker lock;
+	protected ObjectLocker lock;
 
 	
 	/**
@@ -105,11 +105,41 @@ public class Section implements ISection
 	@Override
 	public void setValue( String key, String value )
 	{
-		lock.writeLock();
-		items.put(key, value);
-		lock.writeUnlock();
-	}
+		if (key == null || key.isEmpty()) return;
 
+		if (key.indexOf('.') < 0)
+		{
+			lock.writeLock();
+			if (value != null)
+				items.put(key, value);
+			else
+				items.remove(key);
+			lock.writeUnlock();
+		}
+		else
+		{
+			String names[] = key.split("\\.");
+			setValue(names, value);
+		}
+	}
+	
+	protected void setValue( String names[], String value )
+	{
+		ISection target = this;
+		ISection parent = this;
+		
+		if (names == null || names.length == 0) return;
+		
+		for (int i = 0; i < names.length-1; i++)
+		{
+			target = parent.getSection(names[i], null);
+			if (target == null) target = parent.addSection(names[i]);
+			parent = target;
+		}
+		
+		parent.setValue(names[names.length-1], value);
+	}
+	
 	@Override
 	public String[] getKeys()
 	{
@@ -211,16 +241,35 @@ public class Section implements ISection
 	}
 
 	@Override
-	public ISection getSection( String section, ISection defaultSection ) 
+	public ISection getSection( String name, ISection defaultSection ) 
 	{
-		lock.readLock();
-		ISection result = sections.get(section);
-		lock.readUnlock();
+		ISection result = this;
+		
+		if (name == null || name.isEmpty()) return defaultSection;
+		
+		if (name.indexOf('.') < 0)
+		{
+			lock.readLock();
+			result = sections.get(name);
+			lock.readUnlock();
+		}
+		else
+		{
+			String names[] = name.split("\\.");
+			
+			for (int i = 0; i < names.length && result != null; i++)
+			{
+				if (names[i].isEmpty()) continue;
+				
+				ISection current = result.getSection(names[i], null);
+				result = (Section) current;
+			}
+		}
 		
 		if (result == null) return defaultSection;
 		return result;
 	}
-
+	
 	@Override
 	public ISection addSection( String section ) 
 	{
@@ -287,6 +336,5 @@ public class Section implements ISection
 		if (result == null) return defaultValue;
 		return result;
 	}
-
 	
 }

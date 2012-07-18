@@ -20,12 +20,17 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import corinna.thread.ObjectLocker;
 
 
 public class BeanManager
 {
 
+	private static final Logger log = LoggerFactory.getLogger(BeanManager.class);
+	
 	private Map<String,IServiceBean> beans;
 	
 	private ObjectLocker beanLock;
@@ -91,7 +96,10 @@ public class BeanManager
 			BeanInject att = current.getAnnotation(BeanInject.class);
 			if (att == null) continue;
 			IServiceBean bean = getBean(att.value());
+			
+			// check if the current field has a compatible type
 			//if (!bean.getClass().isAssignableFrom(current.getClass())) continue;
+			
 			try
 			{
 				synchronized (current)
@@ -100,6 +108,8 @@ public class BeanManager
 					if (!state) current.setAccessible(true);
 					current.set(object, bean);
 					if (!state) current.setAccessible(false);
+					
+					log.debug("Service bean '{}' injected in '{}'", bean.getName(), object.toString() );
 				}
 			} catch (Exception e)
 			{

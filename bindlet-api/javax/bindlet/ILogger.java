@@ -20,7 +20,7 @@ package javax.bindlet;
 public interface ILogger
 {
 
-	public void debug( Throwable cause, String format, Object... values );
+	/*public void debug( Throwable cause, String format, Object... values );
 	
 	public void debug( String format, Object... values );
 	
@@ -32,6 +32,6 @@ public interface ILogger
 	
 	public void warn( Throwable cause, String format, Object... values );
 	
-	public void warn( String format, Object... values );
+	public void warn( String format, Object... values );*/
 	
 }

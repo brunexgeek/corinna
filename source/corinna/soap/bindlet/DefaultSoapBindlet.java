@@ -22,7 +22,8 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.Text;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import corinna.auth.bindlet.IBindletAuthenticator;
 import corinna.rpc.ClassDescriptor;
@@ -36,7 +37,7 @@ import corinna.thread.ObjectLocker;
 public class DefaultSoapBindlet extends SoapBindlet
 {
 	
-	private static Logger log = Logger.getLogger("CorinnaLog");
+	private static Logger log = LoggerFactory.getLogger("CorinnaLog");
 	
 	private static final long serialVersionUID = -5420790590792120345L;
 	
@@ -118,7 +119,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 			runner = new MethodRunner(intfClass, implClass, filter, null);
 		} catch (Exception e)
 		{
-			log.error(e);
+			log.error("Error creating the method runner ", e);
 			throw new BindletException("Error creating the method runner", e);
 		}
 	}
@@ -169,7 +170,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 			result = runner.callMethod(procedure);
 		} catch (Exception e)
 		{
-			log.error(e);
+			log.error("Error while processing POST method", e);
 			res.setException(e);
 		}
 
@@ -181,7 +182,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 			res.setMessage(response);
 		} catch (Exception e)
 		{
-			log.error(e);
+			log.error("Error while processing POST method", e);
 			res.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -231,7 +232,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 			return procedure;
 		} catch (Exception e)
 		{
-			log.error(e);
+			log.error("Error parsing SOAP message", e);
 			return null;
 		}
 	}
@@ -270,10 +271,10 @@ public class DefaultSoapBindlet extends SoapBindlet
 		
 		// create the SOAP method response element
 		SOAPBody body = message.getSOAPBody();
-		QName qname = new QName(namespace, prototype + WsdlGenerator.METHOD_RESPONSE_SUFFIX, "");
+		QName qname = new QName(prototype + "OutputType");
 		SOAPElement element = body.addChildElement(qname);
 		// create the return value element
-		qname = new QName(namespace, WsdlGenerator.PARAMETER_RESULT, "");
+		qname = new QName(WsdlGenerator.PARAMETER_RESULT);
 		SOAPElement carrier = element.addChildElement(qname);
 		carrier.setValue( (result == null) ? "" : result.toString() );
 		

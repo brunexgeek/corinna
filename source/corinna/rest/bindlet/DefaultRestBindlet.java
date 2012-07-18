@@ -20,7 +20,8 @@ package corinna.rest.bindlet;
 import javax.bindlet.IBindletConfig;
 import javax.bindlet.exception.BindletException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import corinna.rpc.IProcedureCall;
 import corinna.rpc.IPrototypeFilter;
@@ -33,7 +34,7 @@ public class DefaultRestBindlet extends RestBindlet
 
 	private static final long serialVersionUID = -579681351761760082L;
 
-	private static final Logger log = Logger.getLogger(DefaultRestBindlet.class);
+	private static final Logger log = LoggerFactory.getLogger(DefaultRestBindlet.class);
 
 	private static final String PARAMETER_INTERFACE = "interfaceClass";
 	

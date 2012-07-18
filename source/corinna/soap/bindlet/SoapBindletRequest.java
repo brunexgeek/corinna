@@ -7,8 +7,9 @@ import javax.bindlet.soap.ISoapBindletRequest;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
-import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import corinna.http.bindlet.WebBindletRequest;
 import corinna.soap.network.SoapUnmarshaller;
@@ -17,7 +18,7 @@ import corinna.soap.network.SoapUnmarshaller;
 public class SoapBindletRequest extends WebBindletRequest implements ISoapBindletRequest
 {
 	
-	private static Logger log = Logger.getLogger(SoapBindletRequest.class);
+	private static Logger log = LoggerFactory.getLogger(SoapBindletRequest.class);
 	
 	private Charset charset = null;
 	
@@ -34,7 +35,7 @@ public class SoapBindletRequest extends WebBindletRequest implements ISoapBindle
 		this.request = request;
 
 		String encoding = getCharacterEncoding();
-		if (encoding != null && !encoding.isEmpty()) charset = Charset.forName(encoding);
+		if (encoding != null && !encoding.isEmpty()) charset = getCharsetByName(encoding);
 		
 		// get the content
 		if ( request.getContent() == null || request.getUri().endsWith(ISoapBindletRequest.URI_WSDL))
@@ -56,6 +57,17 @@ public class SoapBindletRequest extends WebBindletRequest implements ISoapBindle
 	public String getRequestURI()
 	{
 		return request.getUri();
+	}
+	
+	public Charset getCharsetByName( String encoding )
+	{
+		try
+		{
+			return Charset.forName( encoding.toUpperCase() );
+		} catch (Exception e)
+		{
+			return Charset.defaultCharset();
+		}
 	}
 	
 }

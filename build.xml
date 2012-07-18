@@ -11,7 +11,8 @@
 		<path id="core.path">
 			<fileset dir="${global.dir.libs}" includes="**/wsdl4j.jar" />
 			<fileset dir="${global.dir.libs}" includes="**/qname.jar" />
-			<fileset dir="${global.dir.libs}" includes="**/log4j-1.2.16.jar" />
+			<fileset dir="${global.dir.libs}" includes="**/logback-*.jar" />
+			<fileset dir="${global.dir.libs}" includes="**/slf4j-*.jar" />
 			<fileset dir="${global.dir.libs}" includes="**/netty-3.2.7.Final.jar" />
 			<fileset dir="${global.dir.dist}" includes="**/bindlet*.jar" />
 		</path>
@@ -68,7 +69,8 @@
 		<javac destdir="${api.dir.build}" 
 			debug="${compiler.debug}" 
 			deprecation="${compiler.deprecation}" 
-			compiler="${compiler.type}">
+			compiler="${compiler.type}"
+			classpathref="core.path">
 			<src path="${api.dir.source}"/>
 		</javac>
 		<jar destfile="${global.dir.dist}/${api.filename}" update="true" index="true">

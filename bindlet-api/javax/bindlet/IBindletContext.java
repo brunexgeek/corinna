@@ -16,6 +16,8 @@
 
 package javax.bindlet;
 
+import org.slf4j.Logger;
+
 
 
 
@@ -114,7 +116,7 @@ public interface IBindletContext extends IObjectSharing
 	
 	public Class<?> getContextResponseType();
 	
-	public ILogger getLogger();
+	public Logger getLogger();
 	
 	//public void addListener( IBindletContextListener<?,?> listener );
 	

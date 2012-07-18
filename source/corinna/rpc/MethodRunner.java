@@ -23,7 +23,9 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import corinna.bean.BeanManager;
 import corinna.core.IComponentInterface;
@@ -58,7 +60,7 @@ import corinna.util.StringResource;
 public class MethodRunner implements IMethodRunner
 {
 
-	private Logger serverLog = Logger.getLogger(MethodRunner.class);
+	private Logger serverLog = LoggerFactory.getLogger(MethodRunner.class);
 
 	private static final Class<?>[] ARGS_IMPL = new Class<?>[] { Object.class };
 

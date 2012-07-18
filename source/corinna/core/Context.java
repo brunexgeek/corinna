@@ -25,6 +25,7 @@ import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletContext;
 import javax.bindlet.exception.BindletException;
 
+import corinna.bean.BeanManager;
 import corinna.network.IAdapter;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;

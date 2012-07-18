@@ -16,18 +16,19 @@
 
 package corinna.network;
 
-import org.apache.log4j.Logger;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public abstract class StreamHandler implements IDownstreamHandler, IUpstreamHandler
 {
 
-	private static Logger log = Logger.getLogger(StreamHandler.class);
+	private static Logger log = LoggerFactory.getLogger(StreamHandler.class);
 	
 	@Override
 	public void handleDownstream( final ChannelHandlerContext context, final ChannelEvent event )

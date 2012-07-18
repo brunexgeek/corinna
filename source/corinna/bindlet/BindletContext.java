@@ -18,10 +18,11 @@ package corinna.bindlet;
 
 import javax.bindlet.IBindletContext;
 import javax.bindlet.IComponentInformation;
-import javax.bindlet.ILogger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import corinna.core.IContext;
-import corinna.util.ApacheLogger;
 
 
 public abstract class BindletContext<R,P> extends ObjectSharing implements IBindletContext
@@ -29,7 +30,7 @@ public abstract class BindletContext<R,P> extends ObjectSharing implements IBind
 		
 	private IContext<R,P> context;
 
-	private ILogger logger = null;
+	private Logger logger = null;
 	
 	public BindletContext( IContext<R,P> context )
 	{
@@ -58,10 +59,10 @@ public abstract class BindletContext<R,P> extends ObjectSharing implements IBind
 	}
 	
 	@Override
-	public ILogger getLogger()
+	public Logger getLogger()
 	{
 		if (logger  == null)
-			logger = new ApacheLogger(this.getClass());
+			logger = LoggerFactory.getLogger(this.getClass());
 		return logger;
 	}
 	

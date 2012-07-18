@@ -3,7 +3,8 @@ package corinna.network;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import corinna.thread.ObjectLocker;
 
@@ -11,7 +12,7 @@ import corinna.thread.ObjectLocker;
 public abstract class Adapter implements IAdapter
 {
 
-	private static final Logger serverLog = Logger.getLogger(Adapter.class);
+	private static final Logger corinnaLog = LoggerFactory.getLogger(Adapter.class);
 	
 	private IAdapterConfig config;
 	
@@ -55,9 +56,13 @@ public abstract class Adapter implements IAdapter
 		filtersLock.readLock();
 		try
 		{
-			serverLog.trace("Calling adapter filters for '" + getName() + "'");
-			for (IAdapterFilter filter : filters)
-				if (filter.evaluate(request, response)) return true;
+			if (!filters.isEmpty())
+			{
+				corinnaLog.trace("Calling adapter filters for '" + getName() + "'");
+	
+				for (IAdapterFilter filter : filters)
+					if (filter.evaluate(request, response)) return true;
+			}
 		} catch (Throwable e)
 		{
 			// supress any error

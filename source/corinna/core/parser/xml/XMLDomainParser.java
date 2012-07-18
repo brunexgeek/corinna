@@ -20,7 +20,6 @@ package corinna.core.parser.xml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +28,6 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -53,7 +51,6 @@ import corinna.core.ServerConfig;
 import corinna.core.ServiceConfig;
 import corinna.core.parser.IDomainParser;
 import corinna.exception.ParseException;
-import corinna.exception.UnexpectedTagException;
 import corinna.network.AdapterConfig;
 import corinna.network.ConnectorConfig;
 import corinna.network.IAdapter;
@@ -66,7 +63,7 @@ import corinna.util.conf.Section;
 public class XMLDomainParser implements IDomainParser
 {
 
-	private Logger serverLog = Logger.getLogger(XMLDomainParser.class);
+	//private Logger serverLog = LoggerFactory.getLogger(XMLDomainParser.class);
 	
 	private InputStream input;
 

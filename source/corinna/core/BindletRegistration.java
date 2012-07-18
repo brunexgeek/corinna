@@ -12,8 +12,10 @@ import javax.bindlet.IBindletConfig;
 import javax.bindlet.IRecyclable;
 import javax.bindlet.exception.BindletException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import corinna.bean.BeanManager;
 import corinna.thread.ObjectLocker;
 import corinna.util.ObjectPool;
 
@@ -31,7 +33,7 @@ public class BindletRegistration implements IBindletRegistration
 
 	private static final int DEFAULT_CAPACITY = 20;
 
-	private static Logger log = Logger.getLogger(BindletRegistration.class);
+	private static Logger log = LoggerFactory.getLogger(BindletRegistration.class);
 	
 	private IBindletConfig config = null;
 
@@ -196,6 +198,9 @@ public class BindletRegistration implements IBindletRegistration
 			throw new BindletException("Error creating a new instance of bindlet class '"
 				+ bindletClassName + "'", e);
 		}
+				
+		// inject all referenced service beans
+		BeanManager.getInstance().inject(instance);
 		
 		return instance;
 	}

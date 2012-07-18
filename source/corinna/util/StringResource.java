@@ -23,7 +23,9 @@ import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 
 /**
@@ -35,6 +37,8 @@ import org.apache.log4j.Logger;
 public final class StringResource 
 {
 
+	private static final Logger log = LoggerFactory.getLogger(StringResource.class);
+	
 	
 	/**
 	 * Código IETF do idioma padrão.
@@ -205,7 +209,7 @@ public final class StringResource
 				} 
 				catch (IOException e) 
 				{
-					Logger.getLogger(StringResource.class).error(e);
+					log.error("Error setting language", e);
 				}
 			}
 		}
