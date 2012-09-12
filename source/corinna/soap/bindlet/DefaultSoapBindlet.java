@@ -48,10 +48,6 @@ public class DefaultSoapBindlet extends SoapBindlet
 	private static final String PARAMETER_INTERFACE = "interfaceClass";
 	
 	private static final String PARAMETER_IMPLEMENTATION = "implementationClass";
-
-	private static final String PARAM_REQUEST = "_request";
-	
-	private static final String PARAM_RESPONSE = "_response";
 	
 	private MethodRunner runner;
 	

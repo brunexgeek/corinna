@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.bindlet.BindletInputStream;
 import javax.bindlet.http.IWebBindletRequest;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names;
 import org.jboss.netty.handler.codec.http.HttpHeaders.Values;
@@ -146,6 +147,11 @@ public class WebBindletRequest implements IWebBindletRequest
 		return inputStream;
 	}
 
+	public ChannelBuffer getContent()
+	{
+		return request.getContent();		
+	}
+	
 	@Override
 	public String getParameter( String name )
 	{

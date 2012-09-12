@@ -6,17 +6,19 @@ import java.nio.charset.Charset;
 import javax.bindlet.http.HttpBindletInputStream;
 import javax.bindlet.http.IWebBindletRequest;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+
 
 public class BufferedHttpInputStream extends HttpBindletInputStream
 {
 
 	private Boolean isClosed = false;
 	
-	private IWebBindletRequest request;
+	private ChannelBuffer content;
 	
-	public BufferedHttpInputStream( IWebBindletRequest request )
+	public BufferedHttpInputStream( WebBindletRequest request )
 	{
-		this.request = request;
+		this.content = request.getContent();
 	}
 	
 	@Override
@@ -31,78 +33,82 @@ public class BufferedHttpInputStream extends HttpBindletInputStream
 	@Override
 	public byte readByte() throws IOException
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return content.readByte();
 	}
 
 	@Override
 	public int readBytes( byte[] buffer ) throws IOException
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		int length = buffer.length;
+		if (length > content.readableBytes()) length = content.readableBytes();
+		
+		content.readBytes(buffer,0, length);
+		return length;
 	}
 
 	@Override
 	public int readBytes( byte[] buffer, int offset, int length ) throws IOException
 	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void flush() throws IOException
-	{
-		// TODO Auto-generated method stub
-
+		if (length > content.readableBytes()) length = content.readableBytes();
+		
+		content.readBytes(buffer,0, length);
+		return length;
 	}
 
 	@Override
 	public String readString() throws IOException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return readString( Charset.defaultCharset() );
 	}
 
 	@Override
 	public String readString( Charset charset ) throws IOException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		int start = content.readerIndex();
+		while ( content.readableBytes() > 0 && content.readByte() != '\n');
+		
+		int length = content.readerIndex() - start;
+		content.setIndex(start, content.writerIndex());
+		
+		byte[] data = new byte[length];
+		if (length > 0)
+		{
+			content.readBytes(data, 0, length);
+			if (data[length-1] == '\r') data[length-1] = 0;
+			return new String(data, charset);
+		}
+		else
+			return null;
 	}
 
 	@Override
 	public char readChar() throws IOException
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return content.readChar();
 	}
 
 	@Override
 	public int readInt() throws IOException
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return content.readInt();
 	}
 
 	@Override
 	public long readLong() throws IOException
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return content.readLong();
 	}
 
 	@Override
 	public float readFloat() throws IOException
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return content.readFloat();
 	}
 
 	@Override
 	public double readDouble() throws IOException
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return content.readDouble();
 	}
 
 }

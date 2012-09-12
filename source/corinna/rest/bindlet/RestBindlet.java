@@ -22,6 +22,7 @@ import javax.bindlet.exception.BindletException;
 
 import corinna.core.ContextInfo;
 import corinna.rpc.IProcedureCall;
+import corinna.rpc.ProcedureCall;
 
 
 @SuppressWarnings("serial")
@@ -50,7 +51,11 @@ public abstract class RestBindlet extends Bindlet<IRestBindletRequest, IRestBind
 	{
 		try
 		{
-			response.setReturnValue( doCall( request.getProcedureCall() ) );
+			ProcedureCall call = (ProcedureCall) request.getProcedureCall();
+			call.setParameter(PARAM_REQUEST, request);
+			call.setParameter(PARAM_RESPONSE, response);
+			
+			response.setReturnValue( doCall(call) );
 		} catch (Exception e)
 		{
 			response.setReturnValue(null);

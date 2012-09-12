@@ -53,6 +53,10 @@ import javax.bindlet.exception.BindletException;
 public abstract class Bindlet<R, P> implements IBindlet<R, P>, Serializable
 {
 
+	protected static final String PARAM_REQUEST = "_request";
+	
+	protected static final String PARAM_RESPONSE = "_response";
+	
 	private IBindletConfig config = null;
 		
 	/**

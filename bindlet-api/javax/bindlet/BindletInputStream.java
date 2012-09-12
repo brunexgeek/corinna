@@ -34,8 +34,6 @@ public abstract class BindletInputStream extends InputStream implements ICloseab
 	
 	public abstract int readBytes( byte[] buffer, int offset, int length ) throws IOException;
 
-	public abstract void flush() throws IOException;
-
 	/**
 	 * Read UTF-8 characters from the client until found a line end.
 	 * 
