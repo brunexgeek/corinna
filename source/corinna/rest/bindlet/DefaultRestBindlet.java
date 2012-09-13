@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package corinna.rest.bindlet;
 
 
+import javax.bindlet.BindletModel;
+import javax.bindlet.BindletModel.Model;
 import javax.bindlet.IBindletConfig;
 import javax.bindlet.exception.BindletException;
 
@@ -27,8 +29,9 @@ import corinna.rpc.IProcedureCall;
 import corinna.rpc.IPrototypeFilter;
 import corinna.rpc.MethodRunner;
 import corinna.soap.bindlet.SoapPrototypeFilter;
+import corinna.util.StateModel;
 
-
+@BindletModel(Model.STATELESS)
 public class DefaultRestBindlet extends RestBindlet
 {
 
@@ -36,9 +39,9 @@ public class DefaultRestBindlet extends RestBindlet
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultRestBindlet.class);
 
-	private static final String PARAMETER_INTERFACE = "interfaceClass";
+	public static final String PARAMETER_INTERFACE = "interfaceClass";
 	
-	private static final String PARAMETER_IMPLEMENTATION = "implementationClass";
+	public static final String PARAMETER_IMPLEMENTATION = "implementationClass";
 	
 	private MethodRunner runner = null;
 
@@ -66,6 +69,19 @@ public class DefaultRestBindlet extends RestBindlet
 		
 		Class<?> intfClass = loadClass(intfClassName);
 		Class<?> implClass = loadClass(implClassName);
+		
+		// check if the component and the bindlet have a compatible model
+		// TODO: review this code
+		StateModel classModel = intfClass.getClass().getAnnotation(StateModel.class);
+		if (classModel == null)
+			classModel = implClass.getClass().getAnnotation(StateModel.class);
+		BindletModel bindModel = this.getClass().getAnnotation(BindletModel.class);
+		if (classModel != null && bindModel != null)
+		{
+			if (bindModel.value() == BindletModel.Model.STATELESS && 
+			    classModel.value() != BindletModel.Model.STATELESS)
+				throw new BindletException("Both the bindlet and the component should be stateless");
+		}
 		
 		try
 		{

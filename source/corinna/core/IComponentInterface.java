@@ -16,9 +16,13 @@
 
 package corinna.core;
 
+import javax.bindlet.BindletModel.Model;
+
 import corinna.exception.ComponentException;
+import corinna.util.StateModel;
 
 
+@StateModel(Model.STATEFULL)
 public interface IComponentInterface
 {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package corinna.network;
 
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.Channels;
@@ -142,12 +143,19 @@ public abstract class StreamHandler implements IDownstreamHandler, IUpstreamHand
 	public void incomingMessage( ChannelHandlerContext context, MessageEvent event )
 		throws Exception
 	{
-
 	}
 
 	@Override
 	public void incomingChannelEvent( ChannelHandlerContext context, ChannelEvent event )
 		throws Exception
+	{
+	}
+
+	public void onError( RequestEvent<?, ?> event, Channel channel, Throwable exception )
+	{
+	}
+
+	public void onSuccess( RequestEvent<?, ?> event, Channel channel )
 	{
 	}
 	

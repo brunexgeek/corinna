@@ -21,6 +21,7 @@ import java.net.SocketAddress;
 
 import corinna.core.IDomain;
 import corinna.core.ILifecycle;
+import corinna.core.IServer;
 
 
 /**
@@ -31,14 +32,14 @@ import corinna.core.ILifecycle;
  * @since 1.0
  * @version 1.0
  */
-public interface IConnector extends ILifecycle, IAdaptable
+public interface IConnector extends ILifecycle
 {
 
 	public Class<?>[] CONSTRUCTOR_ARGS = { IConnectorConfig.class };
 
-	public IDomain getDomain();
+	public IServer getServer();
 
-	public boolean setDomain( IDomain domain );
+	public boolean setServer( IServer domain );
 
 	public IProtocol<?, ?> getProtocol();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletContext;
 import javax.bindlet.exception.BindletException;
 
-import corinna.bean.BeanManager;
 import corinna.network.IAdapter;
 import corinna.network.RequestEvent;
 import corinna.thread.ObjectLocker;
@@ -204,22 +203,6 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 	{
 		return config;
 	}
-	
-	/*protected boolean isModified()
-	{
-		synchronized (isModified)
-		{
-			return isModified;
-		}
-	}
-
-	protected void setModified( boolean value )
-	{
-		synchronized (isModified)
-		{
-			isModified = value;
-		}
-	}*/
 
 	@Override
 	public IBindletRegistration getBindletRegistration( String name )
@@ -305,5 +288,28 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 			adaptersLock.readUnlock();
 		}
 	}
+
+	@Override
+	public IAdapter getAdapter( Object request, Object response )
+	{
+		if (request == null)
+			throw new NullPointerException("The request can not be null");
+		
+		adaptersLock.readLock();
+		try
+		{
+			for ( Map.Entry<String,IAdapter> entry : adapters.entrySet() )
+			{
+				IAdapter adapter = entry.getValue();
+				if (adapter.evaluate(request, response))
+					return adapter;
+			}
+		} finally
+		{
+			adaptersLock.readUnlock();
+		}
+
+		return null;
+	}	
 	
 }

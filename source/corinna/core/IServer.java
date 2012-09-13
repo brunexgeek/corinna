@@ -16,9 +16,10 @@
 
 package corinna.core;
 
-import java.util.List;
-
-import corinna.util.conf.ISection;
+import corinna.exception.ConnectorInUseException;
+import corinna.network.IConnector;
+import corinna.network.IConnectorListener;
+import corinna.network.IProtocol;
 
 
 
@@ -29,7 +30,7 @@ import corinna.util.conf.ISection;
  * @since 2.0
  * @version 2.0
  */
-public interface IServer extends ILifecycle, IServiceEventListener, IDomainListener
+public interface IServer extends ILifecycle, IConnectorListener, IServiceEventListener
 {
 
 	public static final Class<?>[] CONSTRUCTOR_ARGS = { IServerConfig.class };
@@ -45,6 +46,18 @@ public interface IServer extends ILifecycle, IServiceEventListener, IDomainListe
 	public IService removeService( IService service );
 	
 	public IService removeService( String name );
+	
+	public IConnector getConnector( String name );
+	
+	public IConnector getConnector( IProtocol<?,?> protocol, int index );
+	
+	public void addConnector( IConnector connector ) throws ConnectorInUseException;
+	
+	public void removeConnector( IConnector connector ) throws ConnectorInUseException;
+	
+	public void removeConnector( String name ) throws ConnectorInUseException;
+		
+	public void removeAllConnectors( IProtocol<?,?> protocol );
 	
 	public IDomain getDomain();
 	

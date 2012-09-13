@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.jboss.netty.channel.Channel;
 public interface IStreamHandlerListener
 {
 
-	public void handlerRequestReceived( StreamHandler handler, Object request, Object response, Channel channel ) 
+	public void handlerRequestReceived( StreamHandler handler, RequestEvent<?,?> event, Channel channel ) 
 	throws BindletException, IOException;
 	
 }

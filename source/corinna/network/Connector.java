@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
+import javax.bindlet.IBindletRequest;
 import javax.bindlet.exception.BindletException;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -32,6 +33,7 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
 import corinna.core.IDomain;
+import corinna.core.IServer;
 import corinna.core.Lifecycle;
 import corinna.exception.AdapterException;
 import corinna.exception.LifecycleException;
@@ -53,17 +55,13 @@ public abstract class Connector extends Lifecycle implements IConnector,
 
 	private IConnectorConfig config;
 	
-	private IDomain domain = null;
+	private IServer server = null;
 	
-	private ObjectLocker domainLock;
+	private ObjectLocker serverLock;
 	
 	private Channel channel = null;
 	
 	private Map<String,String> params;
-	
-	private Map<String, IAdapter> adapters;
-	
-	private ObjectLocker adaptersLock;
 	
 	public Connector( IConnectorConfig config )
 	{
@@ -72,15 +70,13 @@ public abstract class Connector extends Lifecycle implements IConnector,
 
 		this.config = config;
 		this.params = new HashMap<String,String>();
-		this.adapters = new HashMap<String, IAdapter>();
-	
+
 		ChannelFactory factory = new NioServerSocketChannelFactory(
 			Executors.newCachedThreadPool(), Executors.newCachedThreadPool(), config.getMaxWorkers());
 		this.bootstrap = new ServerBootstrap(factory);
 		this.bootstrap.setPipelineFactory(this);
 		
-		this.domainLock = new ObjectLocker();
-		this.adaptersLock = new ObjectLocker();
+		this.serverLock = new ObjectLocker();
 	}
 
 	@Override
@@ -90,99 +86,60 @@ public abstract class Connector extends Lifecycle implements IConnector,
 	}
 	
 	@Override
-	public IDomain getDomain( )
+	public IServer getServer( )
 	{
-		domainLock.readLock();
+		serverLock.readLock();
 		try
 		{
-			return domain;
+			return server;
 		} finally
 		{
-			domainLock.readUnlock();
+			serverLock.readUnlock();
 		}
 	}
 	
 	@Override
-	public boolean setDomain( IDomain domain )
+	public boolean setServer( IServer server )
 	{
-		domainLock.writeLock();
+		serverLock.writeLock();
 		try
 		{
-			if (domain != null && this.domain != null) return false;
-			this.domain = domain;
+			if (server != null && this.server != null) return false;
+			this.server = server;
 			return true;
 		} finally
 		{
-			domainLock.writeUnlock();
+			serverLock.writeUnlock();
 		}
 	}
 	
-	protected void dispatchEventToDomain( RequestEvent<?,?> event ) throws BindletException, 
+	protected void dispatchEventToServer( RequestEvent<?,?> event ) throws BindletException, 
 		IOException
 	{
-		if (event == null || domain == null) return;
+		if (event == null || server == null) return;
 		
-		domainLock.readLock();
+		serverLock.readLock();
 		try
 		{
-			domain.connectorRequestReceived(this, event);
+			server.connectorRequestReceived(this, event);
 		} finally
 		{
-			domainLock.readUnlock();
+			serverLock.readUnlock();
 		}
-	}
-	
-	public abstract IAdapter getDefaultAdapter();
-	
-	public IAdapter getAdapter( Object request, Object response )
-	{
-		if (request == null)
-			throw new NullPointerException("The request can not be null");
-		
-		adaptersLock.readLock();
-		try
-		{
-			for ( Map.Entry<String,IAdapter> entry : adapters.entrySet() )
-			{
-				IAdapter adapter = entry.getValue();
-				if (adapter.evaluate(request, response))
-					return adapter;
-			}
-		} finally
-		{
-			adaptersLock.readUnlock();
-		}
-
-		return getDefaultAdapter();
 	}
 	
 	@Override
-	public void handlerRequestReceived( StreamHandler handler, Object request, Object response, Channel channel ) 
+	public void handlerRequestReceived( StreamHandler handler, RequestEvent<?,?> event, Channel channel ) 
 		throws BindletException, IOException
 	{
-		RequestEvent<?, ?> event = null;
-		IAdapter adapter = getAdapter(request, response);
-
-		try
-		{
-			event = adapter.translate(request, response, channel);
-			dispatchEventToDomain(event);
-		} catch (AdapterException e)
-		{
-			throw new BindletException("Error translating request", e);
-		} catch (Exception e)
-		{
-			adapter.onError(event, channel, e);
-			return;
-		}
-		adapter.onSuccess(event, channel);
+		dispatchEventToServer(event);
 	}
 	
 	protected void startConnector() throws LifecycleException
 	{
 		try
 		{
-			if ( getDomain() == null )
+			if ( getServer() == null )
 				throw new NullPointerException("Invalid domain");
 			this.channel = bootstrap.bind(config.getAddress());
 		} catch (Exception e)
@@ -243,36 +200,6 @@ public abstract class Connector extends Lifecycle implements IConnector,
 	public String[] getParameterNames()
 	{
 		return params.keySet().toArray(new String[0]);
-	}
-	
-	@Override
-	public void addAdapter( IAdapter adapter )
-	{
-		if (adapter == null) return;
-		
-		adaptersLock.readLock();
-		try
-		{
-			adapters.put(adapter.getName(), adapter);
-		} finally
-		{
-			adaptersLock.readUnlock();
-		}
-	}
-	
-	@Override
-	public void removeAdapter( String name )
-	{
-		if (name == null || name.isEmpty()) return;
-		
-		adaptersLock.readLock();
-		try
-		{
-			adapters.remove(name);
-		} finally
-		{
-			adaptersLock.readUnlock();
-		}
 	}
 
 	protected IConnectorConfig getConfig()

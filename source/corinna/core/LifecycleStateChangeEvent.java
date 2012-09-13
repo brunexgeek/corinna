@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package corinna.core;
 
 public class LifecycleStateChangeEvent extends TypedEvent<LifecycleEventType> implements ILifecycleEvent
 {
+
+	private static final long serialVersionUID = 1205772085021394530L;
 
 	public LifecycleStateChangeEvent( LifecycleEventType type )
 	{

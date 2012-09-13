@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,13 @@
 
 package corinna.core;
 
-import corinna.exception.ConnectorInUseException;
 import corinna.exception.ServerInUseException;
-import corinna.network.IConnector;
-import corinna.network.IConnectorListener;
-import corinna.network.IProtocol;
 
 
-public interface IDomain extends IConnectorListener, ILifecycle
+public interface IDomain extends ILifecycle
 {
 
 	public String getName();
-	
-	public IConnector getConnector( String name );
-	
-	public IConnector getConnector( IProtocol<?,?> protocol, int index );
-	
-	public void addConnector( IConnector connector ) throws ConnectorInUseException;
-	
-	public void removeConnector( IConnector connector ) throws ConnectorInUseException;
-	
-	public void removeConnector( String name ) throws ConnectorInUseException;
-		
-	public void removeAllConnectors( IProtocol<?,?> protocol );
 	
 	public IServer getServer( String name );
 	

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
-
-import corinna.util.Flag;
 
 
 public class BufferedHttpOutputStream extends HttpBindletOutputStream implements ChannelFutureListener
@@ -61,8 +59,6 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream implements
 	protected Boolean isCommited = false;
 
 	private Long writtenBytes = 0L;
-
-	private Flag isFlushing = new Flag();
 
 	public BufferedHttpOutputStream( WebBindletResponse resp, int bufferSize )
 	{

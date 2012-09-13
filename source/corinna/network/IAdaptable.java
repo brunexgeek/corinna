@@ -8,4 +8,5 @@ public interface IAdaptable
 	
 	public void removeAdapter( String name );
 	
+	public IAdapter getAdapter( Object request, Object response );
 }

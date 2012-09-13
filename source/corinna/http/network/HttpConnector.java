@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package corinna.http.network;
 import java.security.KeyStore;
 import java.security.Security;
 
+import javax.bindlet.BindletModel.Model;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 import javax.net.ssl.KeyManagerFactory;
@@ -34,14 +35,11 @@ import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
 import corinna.exception.ConnectorException;
-import corinna.network.AdapterConfig;
 import corinna.network.Connector;
-import corinna.network.IAdapter;
 import corinna.network.IConnectorConfig;
 import corinna.network.IProtocol;
 import corinna.util.ResourceLoader;
 import corinna.util.StateModel;
-import corinna.util.StateModel.Model;
 
 /**
  * Implements a network connector for HTTP requests.
@@ -74,8 +72,6 @@ public class HttpConnector extends Connector
 
 	private HttpStreamHandler channelHandler;
 	
-	private HttpAdapter httpAdapter;
-	
 	private SSLContext sslContext;
 	
 	private boolean enableSSL = false;
@@ -89,10 +85,7 @@ public class HttpConnector extends Connector
 			this.channelHandler = new HttpStreamHandler(this);
 		else
 			this.channelHandler = null;
-		
-		AdapterConfig adapterConfig = new AdapterConfig("DefaultHttpAdapter");
-		this.httpAdapter = new HttpAdapter(adapterConfig);
-		
+	
 		// check if the SSL is enable
 		enableSSL = (config.getParameter(CONFIG_ENABLE_SSL, "false").equalsIgnoreCase("true"));
 		initSSL();
@@ -169,9 +162,4 @@ public class HttpConnector extends Connector
 		return HttpProtocol.getInstance();
 	}
 
-	@Override
-	public IAdapter getDefaultAdapter()
-	{
-		return httpAdapter;
-	}
 }

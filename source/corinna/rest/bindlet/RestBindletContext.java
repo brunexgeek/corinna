@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package corinna.rest.bindlet;
 
-import corinna.bindlet.BindletContext;
-import corinna.rest.core.RestContext;
+import corinna.http.bindlet.HttpBindletContext;
+import corinna.http.core.HttpContext;
 
 
-public class RestBindletContext extends BindletContext<IRestBindletRequest, IRestBindletResponse>
+public class RestBindletContext extends HttpBindletContext
 {
 
-	public RestBindletContext( RestContext context )
+	public RestBindletContext( HttpContext context )
 	{
 		super(context);
 	}

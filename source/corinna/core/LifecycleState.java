@@ -148,6 +148,25 @@ public enum LifecycleState
 		
 		return true;
 	}
-	
-	
+
+	public boolean isInitializing()
+	{
+		return (this == INITIALIZING) || (this == INITIALIZED);
+	}
+
+	public boolean isStarting()
+	{
+		return (this == STARTING) || (this == STARTED);
+	}
+
+	public boolean isStopping()
+	{
+		return (this == STOPPING) || (this == STOPPED);
+	}
+
+	public boolean isDestroying()
+	{
+		return (this == DESTROYING) || (this == DESTROYED);
+	}
+
 }
