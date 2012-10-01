@@ -112,7 +112,7 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 				else
 				{
 					buffer.setValue("result", "OK");
-					if (returnValue != null) returnValue = "";
+					if (returnValue == null) returnValue = "";
 					buffer.setValue("return", returnValue);
 				}
 

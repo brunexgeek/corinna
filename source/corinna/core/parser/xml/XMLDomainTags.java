@@ -26,83 +26,67 @@ public enum XMLDomainTags
 	
 	SERVERS("servers"),
 
-	SERVER_NAME("server-name"),
+	SERVER_NAME("name"),
 
-	SERVER_CLASS("server-class"),
+	SERVER_CLASS("class"),
 	
 	SERVICES("services"),
 	
 	SERVICE("service"),
 	
-	SERVICE_NAME("service-name"),
+	SERVICE_NAME("name"),
 
-	SERVICE_CLASS("service-class"),
+	SERVICE_CLASS("class"),
+	
+	ADD_SERVICE("add-service"),
 	
 	CONNECTORS("connectors"),
 	
 	CONNECTOR("connector"),
 	
-	CONNECTOR_NAME("connector-name"),
+	CONNECTOR_NAME("name"),
 
-	CONNECTOR_CLASS("connector-class"),
+	CONNECTOR_CLASS("class"),
 	
-	CONNECTOR_HOST_NAME("connector-hostname"),
+	CONNECTOR_HOST_NAME("hostname"),
 	
-	CONNECTOR_PORT("connector-port"),
+	CONNECTOR_PORT("port"),
+	
+	ADD_CONNECTOR("add-connector"),
 	
 	INIT_PARAMETERS("init-parameters"),
 	
-	CONTEXT_PARAMETERS("init-parameters"),
+	UNKNOW(""), 
 	
-	ADD_BINDLET("add-bindlet"),
+	BEANS("beans"), 
 	
-	PARAMETER("parameter"),
+	BEAN("bean"), 
 	
-	PARAMETER_NAME("parameter-name"),
+	BEAN_CLASS("class"), 
 	
-	PARAMETER_VALUE("parameter-value"),
+	CONTEXTS("contexts"), 
 	
-	CONTEXTS("contexts"),
+	BINDLETS("bindlets"), 
 	
-	CONTEXT_NAME("context-name"),
+	ADD_CONTEXT("add-context"), 
 	
-	CONTEXT_CLASS("context-class"),
+	BINDLET("bindlet"), 
 	
-	CONTEXT("context"),
+	BINDLET_CLASS("class"), 
 	
-	BINDLETS("bindlets"),
+	CONTEXT("context"), 
 	
-	BINDLET("bindlet"),
+	CONTEXT_CLASS("class"), 
 	
-	BINDLET_NAME("bindlet-name"),
+	ADD_BINDLET("add-bindlet"), 
 	
-	BINDLET_CLASS("bindlet-class"),
+	CONTEXT_PARAMETERS("init-parameters"), 
 	
-	ADD_CONTEXT("add-context"),
+	PARAMETER("parameter"), 
 	
-	ADD_SERVICE("add-service"),
+	PARAMETER_NAME("name"), 
 	
-	BEANS("beans"),
-	
-	BEAN("bean"),
-		
-	BEAN_NAME("bean-name"),
-	
-	BEAN_CLASS("bean-class"),
-	
-	ADAPTERS("adapters"),
-	
-	ADAPTER("adapter"),
-	
-	ADAPTER_CLASS("adapter-class"),
-	
-	ADD_ADAPTER("add-adapter"),
-	
-	UNKNOW(null),
-	
-	ADAPTER_FILTER("filter"), 
-	
-	ADAPTER_FILTERS("filters");
+	PARAMETER_VALUE("value");
 	
 	private String tag;
 	
@@ -126,6 +110,12 @@ public enum XMLDomainTags
 			if (value != null && current.getTagName().equalsIgnoreCase(tag)) return current;
 		}
 		return UNKNOW;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return tag;
 	}
 	
 }

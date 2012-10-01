@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,12 @@ package corinna.rpc;
 
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import corinna.bean.BeanManager;
 import corinna.core.IComponentInterface;
@@ -61,8 +59,6 @@ public class MethodRunner implements IMethodRunner
 {
 
 	private Logger serverLog = LoggerFactory.getLogger(MethodRunner.class);
-
-	private static final Class<?>[] ARGS_IMPL = new Class<?>[] { Object.class };
 
 	/**
 	 * Tabela que associa os nomes de métodos contidos na interface com suas respectivas

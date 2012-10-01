@@ -1,35 +1,27 @@
 package corinna.soap.bindlet;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import javax.bindlet.BindletOutputStream;
 import javax.bindlet.IBindletConfig;
 import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpStatus;
-import javax.bindlet.soap.ISoapBindletRequest;
-import javax.bindlet.soap.ISoapBindletResponse;
-import javax.bindlet.soap.SoapBindlet;
+import javax.bindlet.http.IHttpBindletRequest;
+import javax.bindlet.http.IHttpBindletResponse;
 import javax.wsdl.Definition;
 import javax.wsdl.WSDLException;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLWriter;
-import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.Text;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import corinna.auth.bindlet.IBindletAuthenticator;
 import corinna.rpc.ClassDescriptor;
+import corinna.rpc.IProcedureCall;
 import corinna.rpc.IPrototypeFilter;
 import corinna.rpc.MethodRunner;
-import corinna.rpc.ProcedureCall;
 import corinna.soap.core.WsdlGenerator;
 import corinna.thread.ObjectLocker;
 
@@ -121,7 +113,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	}
 
 	@Override
-	protected void doWsdl( ISoapBindletRequest req, ISoapBindletResponse response ) throws BindletException, IOException
+	protected void doGet( IHttpBindletRequest req, IHttpBindletResponse response ) throws BindletException, IOException
 	{
 		String resource = req.getResourcePath();
 		if (!resource.equals("/"))
@@ -149,28 +141,21 @@ public class DefaultSoapBindlet extends SoapBindlet
 	}
 
 	@Override
-	protected void doPost( ISoapBindletRequest req, ISoapBindletResponse res ) throws BindletException, 
-		IOException
+	protected Object doCall( IProcedureCall procedure ) throws BindletException
 	{
-		Object result = null;
-		ProcedureCall procedure = parseSoapMessage( req.getMessage() );
-		procedure.setParameter(PARAM_REQUEST, req);
-		procedure.setParameter(PARAM_RESPONSE, res);
-
 		if (log.isTraceEnabled())
-			log.trace("Received method call for '" + procedure + "'");
+			log.trace("Received method call '" + procedure + "'");
 		
 		try
 		{
 			// call the method and generate the SOAP response message
-			result = runner.callMethod(procedure);
+			return runner.callMethod(procedure);
 		} catch (Exception e)
 		{
-			log.error("Error while processing POST method", e);
-			res.setException(e);
+			throw new BindletException( e.getMessage(), e.getCause() );
 		}
 
-		try
+		/*try
 		{
 			SOAPMessage response = createSoapResponse(DEFAULT_NAMESPACE, procedure.getMethodPrototype(), result);
 			res.setChunked(false);
@@ -180,75 +165,10 @@ public class DefaultSoapBindlet extends SoapBindlet
 		{
 			log.error("Error while processing POST method", e);
 			res.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		}*/
 	}
 
-	@SuppressWarnings("rawtypes")
-	protected ProcedureCall parseSoapMessage( SOAPMessage message )
-	{
-		SOAPElement soapMethod = null;
-		
-		if (message == null) return null;
-		
-		try
-		{
-			SOAPBody body = message.getSOAPBody();
-			Iterator it = body.getChildElements();
-			while (it.hasNext())
-			{
-				Object current = it.next();
-				if (current instanceof SOAPElement)
-				{
-					soapMethod = (SOAPElement)current;
-					break;
-				}
-			}
-			if (soapMethod == null) return null;
 
-			// extract the method name from input parameters
-			String soapMethodName = soapMethod.getElementQName().getLocalPart();
-			int pos = soapMethodName.indexOf("InputType");
-			if (pos <= 0) return null;
-			soapMethodName = soapMethodName.substring(0, pos);
-			
-			ProcedureCall procedure = new ProcedureCall(soapMethodName);
-			
-			// find all procedure parameters
-			it = soapMethod.getChildElements();
-			while (it.hasNext())
-			{
-				Object current = it.next();
-				if (current instanceof SOAPElement)
-				{
-					SOAPElement param = (SOAPElement)current;
-					
-					procedure.setParameter(param.getLocalName(), getElementContent(param));
-				}
-			}
-			return procedure;
-		} catch (Exception e)
-		{
-			log.error("Error parsing SOAP message", e);
-			return null;
-		}
-	}
-	
-	@SuppressWarnings("rawtypes")
-	protected String getElementContent( SOAPElement element )
-	{
-		// find all procedure parameters
-		Iterator it = element.getChildElements();
-		while (it.hasNext())
-		{
-			Object current = it.next();
-			if (current instanceof Text)
-			{
-				Text content = (Text)current;
-				return content.getData();
-			}
-		}
-		return null;
-	}
 	
 	protected Class<?> loadClass( String name ) throws BindletException
 	{
@@ -261,23 +181,9 @@ public class DefaultSoapBindlet extends SoapBindlet
 		}
 	}
 	
-	protected SOAPMessage createSoapResponse( String namespace, String prototype, Object result ) throws SOAPException
-	{
-		SOAPMessage message = SoapUtils.createMessage();
-		
-		// create the SOAP method response element
-		SOAPBody body = message.getSOAPBody();
-		QName qname = new QName(prototype + "OutputType");
-		SOAPElement element = body.addChildElement(qname);
-		// create the return value element
-		qname = new QName(WsdlGenerator.PARAMETER_RESULT);
-		SOAPElement carrier = element.addChildElement(qname);
-		carrier.setValue( (result == null) ? "" : result.toString() );
-		
-		return message;
-	}
 
-	protected Definition generateWsdl( ISoapBindletRequest req ) throws BindletException
+
+	protected Definition generateWsdl( IHttpBindletRequest req ) throws BindletException
 	{
 		wsdlLock.writeLock();
 		try
@@ -294,7 +200,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 		}
 	}
 
-	protected Definition getWsdl( ISoapBindletRequest req ) throws BindletException
+	protected Definition getWsdl( IHttpBindletRequest req ) throws BindletException
 	{
 		Definition def = null;
 		
@@ -309,7 +215,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	}
 	
 	@Override
-	protected boolean doAuthentication( ISoapBindletRequest request, ISoapBindletResponse response )
+	protected boolean doAuthentication( IHttpBindletRequest request, IHttpBindletResponse response )
 		throws BindletException, IOException
 	{
 		if (authenticator != null)

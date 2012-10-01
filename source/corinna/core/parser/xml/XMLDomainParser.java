@@ -51,9 +51,7 @@ import corinna.core.ServerConfig;
 import corinna.core.ServiceConfig;
 import corinna.core.parser.IDomainParser;
 import corinna.exception.ParseException;
-import corinna.network.AdapterConfig;
 import corinna.network.ConnectorConfig;
-import corinna.network.IAdapter;
 import corinna.network.IAdapterFilter;
 import corinna.network.IConnector;
 import corinna.util.ResourceLoader;
@@ -67,7 +65,7 @@ public class XMLDomainParser implements IDomainParser
 	
 	private InputStream input;
 
-	List<ConnectorEntry> connectorList = null;
+	Map<String, ConnectorEntry> connectorList = null;
 	
 	List<ServerEntry> serverList = null;
 	
@@ -121,11 +119,11 @@ public class XMLDomainParser implements IDomainParser
 		if (domainName == null || domainName.isEmpty()) domainName = "default";
 		
 		// found the registred adapters
-		element = getElementByTag(root, XMLDomainTags.ADAPTERS);
+		/*element = getElementByTag(root, XMLDomainTags.ADAPTERS);
 		if (element == null)
 			adapterList = null;
 		else
-			adapterList = parseAdapters(element);
+			adapterList = parseAdapters(element);*/
 		
 		// found the registred connectors
 		element = getElementByTag(root, XMLDomainTags.CONNECTORS);
@@ -166,13 +164,13 @@ public class XMLDomainParser implements IDomainParser
 		
 		IDomain domain = new Domain(domainName);
 		createServers(domain);
-		createNetworkConnectors(domain);
+		//createNetworkConnectors(domain);
 		createBeans();
 
 		return domain;
 	}
 
-	protected void createAdapter( IConnector connector, String adapterName ) throws ParseException
+	/*protected void createAdapter( IConnector connector, String adapterName ) throws ParseException
 	{
 		if (adapterList == null) return;
 		try
@@ -202,9 +200,9 @@ public class XMLDomainParser implements IDomainParser
 		{
 			throw new ParseException("Error creating a service instance", e);
 		}
-	}
+	}*/
 	
-	private IAdapterFilter createFilter( String filterClass ) throws Exception
+	/*private IAdapterFilter createFilter( String filterClass ) throws Exception
 	{
 		if (filterClass == null || filterClass.isEmpty())
 			throw new NullPointerException("The filter class name can not be null or empty");
@@ -214,7 +212,7 @@ public class XMLDomainParser implements IDomainParser
 			throw new ParseException("The filter class must implement the 'IAdapterFilter' interface");
 		
 		return (IAdapterFilter) classRef.newInstance();
-	}
+	}*/
 
 	protected void createBeans( ) throws ParseException
 	{
@@ -237,9 +235,9 @@ public class XMLDomainParser implements IDomainParser
 		}
 	}
 	
-	protected void createNetworkConnectors( IDomain domain ) throws ParseException
+	protected void createConnector( IServer server, String connectorName ) throws ParseException
 	{
-		try
+		/*try
 		{
 			for (ConnectorEntry entry : connectorList)
 			{
@@ -248,14 +246,29 @@ public class XMLDomainParser implements IDomainParser
 				Constructor<?> ctor = classRef.getConstructor(IConnector.CONSTRUCTOR_ARGS);
 				IConnector connector = (IConnector)ctor.newInstance( entry.getConfig() );
 				// create the associated adapters
-				for (String adapterName : entry.getAdapters() )
-					createAdapter(connector, adapterName);
+				//for (String adapterName : entry.getAdapters() )
+				//	createAdapter(connector, adapterName);
 				// insert the server in domain
-				domain.addConnector(connector);
+				//domain.addConnector(connector);
 			}
 		} catch (Exception e)
 		{
 			throw new ParseException("Error creating a network connector instance", e);
+		}*/
+		try
+		{
+			// create the requested service
+			ConnectorEntry entry = connectorList.remove(connectorName);
+			if (entry == null)
+				throw new ParseException("Connector '" + connectorName + "' not found.");
+			Class<?> classRef = Class.forName(entry.getClassName());
+			Constructor<?> ctor = classRef.getConstructor(IConnector.CONSTRUCTOR_ARGS);
+			IConnector connector = (IConnector)ctor.newInstance( entry.getConfig() );
+			// insert the service in server
+			server.addConnector(connector);
+		} catch (Exception e)
+		{
+			throw new ParseException("Error creating a connector instance", e);
 		}
 	}
 	
@@ -274,6 +287,9 @@ public class XMLDomainParser implements IDomainParser
 				// create the associated services
 				for (String serviceName : entry.getServices() )
 					createService(server, serviceName);
+				// create the associated connectors
+				for (String connectorName : entry.getConnectors() )
+					createConnector(server, connectorName);
 			}
 		} catch (Exception e)
 		{
@@ -383,7 +399,7 @@ public class XMLDomainParser implements IDomainParser
 	 * @return
 	 * @throws ParseException
 	 */
-	private List<String> parseAdapterFilters( Element parent ) throws ParseException
+	/*private List<String> parseAdapterFilters( Element parent ) throws ParseException
 	{
 		if (parent == null) return null;
 
@@ -402,9 +418,9 @@ public class XMLDomainParser implements IDomainParser
 			filters.add( ((Element)list.item(i)).getTextContent() );
 		
 		return filters;
-	}
+	}*/
 	
-	private Map<String, AdapterEntry> parseAdapters( Element parent ) throws ParseException
+	/*private Map<String, AdapterEntry> parseAdapters( Element parent ) throws ParseException
 	{
 		if (!isTag(parent, XMLDomainTags.ADAPTERS)) throw new ParseException("Invalid tag name");
 
@@ -441,13 +457,13 @@ public class XMLDomainParser implements IDomainParser
 			}
 		}
 		return output;
-	}
+	}*/
 	
-	private List<ConnectorEntry> parseConnectors( Element parent ) throws ParseException
+	private Map<String, ConnectorEntry> parseConnectors( Element parent ) throws ParseException
 	{
 		if (!isTag(parent, XMLDomainTags.CONNECTORS)) throw new ParseException("Invalid tag name");
 
-		List<ConnectorEntry> output = new LinkedList<ConnectorEntry>();
+		Map<String, ConnectorEntry> output = new HashMap<String, ConnectorEntry>();
 		NodeList list = getElementsByTag(parent, XMLDomainTags.CONNECTOR);
 
 		for (int i = 0; i < list.getLength(); ++i)
@@ -470,24 +486,8 @@ public class XMLDomainParser implements IDomainParser
 			try
 			{
 				ConnectorEntry entry = new ConnectorEntry(connectorClassName, config);
-				
-				// found the associated contexts
-				temp = getElementByTag(element, XMLDomainTags.ADAPTERS);
-				if (temp != null)
-				{
-					NodeList binds = getElementsByTag(temp, XMLDomainTags.ADD_ADAPTER);
-					// for each associated context...
-					for (int j = 0; j < binds.getLength(); ++j)
-					{
-						Element current = (Element) binds.item(j);
-						String name = current.getTextContent();
-						if (name == null || name.isEmpty()) continue;
-						entry.addAdapter(name);
-					}
-				}
-				
 				// add the current connector in output list
-				output.add(entry);
+				output.put(connectorName, entry);
 			} catch (Exception e)
 			{
 				throw new ParseException("Error creating server instance for '"
@@ -497,6 +497,30 @@ public class XMLDomainParser implements IDomainParser
 		return output;
 	}
 
+	private void parseList( Element parent, XMLDomainTags listTag, XMLDomainTags itemTag, List<String> list ) throws ParseException
+	{
+		if (parent == null) return;
+		
+		if (!parent.getTagName().equals(listTag.getTagName()))
+		{
+			// found the associated service
+			parent = getElementByTag(parent, listTag);
+			if (parent == null)
+				throw new ParseException("Tag '" + listTag.getTagName()
+					+ "' not found");
+		}
+		
+		NodeList binds = getElementsByTag(parent, itemTag);
+		// for each associated context...
+		for (int j = 0; j < binds.getLength(); ++j)
+		{
+			Element current = (Element) binds.item(j);
+			String name = current.getTextContent();
+			if (name == null || name.isEmpty()) continue;
+			list.add(name);
+		}
+	}
+	
 	private List<ServerEntry> parseServers( Element parent ) throws ParseException
 	{
 		if (!isTag(parent, XMLDomainTags.SERVERS)) throw new ParseException("Invalid tag name");
@@ -507,7 +531,6 @@ public class XMLDomainParser implements IDomainParser
 		for (int i = 0; i < list.getLength(); ++i)
 		{
 			Element element = (Element) list.item(i);
-			Element temp;
 
 			// get the server name
 			String serverName = getElementAttribute(element, "name");
@@ -522,20 +545,9 @@ public class XMLDomainParser implements IDomainParser
 			{
 				ServerEntry entry = new ServerEntry(serverClassName, config);
 
-				// found the associated contexts
-				temp = getElementByTag(element, XMLDomainTags.SERVICES);
-				if (temp == null)
-					throw new ParseException("The '" + XMLDomainTags.SERVICES
-						+ "' tag is required in the service");
-				NodeList binds = getElementsByTag(temp, XMLDomainTags.ADD_SERVICE);
-				// for each associated context...
-				for (int j = 0; j < binds.getLength(); ++j)
-				{
-					Element current = (Element) binds.item(j);
-					String name = current.getTextContent();
-					if (name == null || name.isEmpty()) continue;
-					entry.addService(name);
-				}
+				// add the services and connectos
+				parseList(element, XMLDomainTags.SERVICES, XMLDomainTags.ADD_SERVICE, entry.getServices());
+				parseList(element, XMLDomainTags.CONNECTORS, XMLDomainTags.ADD_CONNECTOR, entry.getConnectors());
 
 				// add the current service in output list
 				output.add(entry);
@@ -705,8 +717,7 @@ public class XMLDomainParser implements IDomainParser
 	{
 		if (parent == null || config == null) return;
 
-		if (!isTag(parent, XMLDomainTags.INIT_PARAMETERS)
-			&& !isTag(parent, XMLDomainTags.CONTEXT_PARAMETERS))
+		if (!isTag(parent, XMLDomainTags.INIT_PARAMETERS))
 			throw new ParseException("Invalid tag name");
 
 		NodeList list = getElementsByTag(parent, XMLDomainTags.PARAMETER);

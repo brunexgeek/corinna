@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
-import javax.bindlet.IBindletRequest;
 import javax.bindlet.exception.BindletException;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -32,10 +31,8 @@ import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
-import corinna.core.IDomain;
 import corinna.core.IServer;
 import corinna.core.Lifecycle;
-import corinna.exception.AdapterException;
 import corinna.exception.LifecycleException;
 import corinna.thread.ObjectLocker;
 

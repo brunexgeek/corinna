@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 
 import corinna.rpc.IPrototypeFilter;
 
-// TODO: mover para 'corinna.rpc.soap'
+// TODO: mover para 'corinna.soap.rpc'
 public class SoapPrototypeFilter implements IPrototypeFilter
 {
 

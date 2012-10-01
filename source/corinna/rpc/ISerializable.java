@@ -23,5 +23,5 @@ public interface ISerializable<T>
 	public T serialize();
 	
 	public void deserialize( T data );
-	
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package corinna.rest.network;
 
+import javax.bindlet.http.IHttpBindletRequest;
+import javax.bindlet.http.IHttpBindletResponse;
+
 import corinna.network.Protocol;
-import corinna.rest.bindlet.IRestBindletRequest;
-import corinna.rest.bindlet.IRestBindletResponse;
 
 
-public final class RestProtocol extends Protocol<IRestBindletRequest, IRestBindletResponse>
+public final class RestProtocol extends Protocol<IHttpBindletRequest, IHttpBindletResponse>
 {
 
 	private static final String PROTOCOL_SCHEME = "http";
@@ -86,13 +87,13 @@ public final class RestProtocol extends Protocol<IRestBindletRequest, IRestBindl
 	@Override
 	public Class<?> getRequestClass()
 	{
-		return IRestBindletRequest.class;
+		return IHttpBindletRequest.class;
 	}
 
 	@Override
 	public Class<?> getResponseClass()
 	{
-		return IRestBindletResponse.class;
+		return IHttpBindletResponse.class;
 	}
 	
 	
