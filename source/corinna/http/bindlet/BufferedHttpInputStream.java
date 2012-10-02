@@ -22,18 +22,24 @@ import java.nio.charset.Charset;
 import javax.bindlet.http.HttpBindletInputStream;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.Channel;
 
-
+//TODO: use this class as a generic buffered input stream
 public class BufferedHttpInputStream extends HttpBindletInputStream
 {
 
 	private Boolean isClosed = false;
 	
-	private ChannelBuffer content;
+	protected ChannelBuffer content = null;
+
+	protected WebBindletRequest request;
+
+	protected Channel channel = null;
 	
 	public BufferedHttpInputStream( WebBindletRequest request )
 	{
 		this.content = request.getContent();
+		this.request = request;
 	}
 	
 	@Override
@@ -126,4 +132,17 @@ public class BufferedHttpInputStream extends HttpBindletInputStream
 		return content.readDouble();
 	}
 
+	@Override
+	public String readText( Charset charset )
+	{
+		if (charset == null) charset = Charset.defaultCharset();
+		return content.toString(charset);
+	}
+	
+	@Override
+	public String readText( )
+	{
+		return content.toString( Charset.defaultCharset() );
+	}
+	
 }

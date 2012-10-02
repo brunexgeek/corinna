@@ -27,7 +27,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 
-
+// TODO: use this class as a generic buffered output stream
 public class BufferedHttpOutputStream extends HttpBindletOutputStream implements ChannelFutureListener
 {
 	

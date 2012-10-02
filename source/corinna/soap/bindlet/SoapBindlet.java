@@ -7,6 +7,7 @@ import java.util.Iterator;
 import javax.bindlet.BindletInputStream;
 import javax.bindlet.BindletOutputStream;
 import javax.bindlet.exception.BindletException;
+import javax.bindlet.http.HttpBindletInputStream;
 import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
@@ -72,9 +73,10 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 		Charset charset = getCharsetByName( request.getCharacterEncoding() );
 		try
 		{
-			//BindletInputStream input = request.getInputStream();
-			//String content = input.readString(charset);
-			String content = ((HttpBindletRequest)request).getContent().toString(charset);
+			// TODO: use 'BindletInputStream' ao invés de 'ChannelBuffer'
+			HttpBindletInputStream input = (HttpBindletInputStream)request.getInputStream();
+			String content = input.readText(charset);
+			//String content = ((HttpBindletRequest)request).getContent().toString(charset);
 			return unmarshaller.unmarshall(content, charset);
 		} catch (Exception e)
 		{

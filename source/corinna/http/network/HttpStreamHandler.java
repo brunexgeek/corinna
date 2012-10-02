@@ -82,7 +82,11 @@ public class HttpStreamHandler extends StreamHandler
 		try
 		{
 			IHttpBindletResponse response = (IHttpBindletResponse) event.getResponse();
+			IHttpBindletRequest request = (IHttpBindletRequest) event.getRequest();
+
 			response.sendError(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
+			// close the connection, if necessary
+			if (!request.isKeepAlive()) channel.close();
 		} catch (Exception e)
 		{
 			// supress any error

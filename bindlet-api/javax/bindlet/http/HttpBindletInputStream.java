@@ -18,6 +18,7 @@ package javax.bindlet.http;
 
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import javax.bindlet.BindletInputStream;
 import javax.bindlet.IBindletRequest;
@@ -106,5 +107,9 @@ public abstract class HttpBindletInputStream extends BindletInputStream
 		}
 		return count > 0 ? count : -1;
 	}
+
+	public abstract String readText( Charset charset );
+	
+	public abstract String readText( );
 	
 }

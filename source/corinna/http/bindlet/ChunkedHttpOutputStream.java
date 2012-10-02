@@ -34,6 +34,7 @@ import org.jboss.netty.handler.codec.http.HttpChunk;
  * 
  * @see IBindletResponse
  */
+//TODO: use this class as a generic chunked output stream
 public class ChunkedHttpOutputStream extends BufferedHttpOutputStream
 {
 

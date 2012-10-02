@@ -1,61 +1,166 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<domain>
-
-	<connectors>
-		<connector name="SOAP-NetworkConnector">
-			<connector-class>corinna.network.soap.SoapNetworkConnctor</connector-class>
-			<connector-address>127.0.0.1:8080</connector-address>
-		</connector>
-	</connectors>
+<domain name="Dummy">
 
 	<servers>
 		<server name="TTS-Server">
-			<server-title>TextToSpeech Server</server-title>
-			<server-class>corinna.core.Server</server-class>
+			<description>TextToSpeech Virtual Server</description>
 			<services>
 				<add-service>TTS-Service</add-service>
 			</services>
+			<connectors>
+				<add-connector>MyNetworkConnector</add-connector>
+			</connectors>
 		</server>
 	</servers>
 
+	<connectors>
+		<connector name="MyNetworkConnector">
+			<description>Network conector description</description>
+			<class>corinna.http.network.HttpConnector</class>
+			<hostname>0.0.0.0</hostname>
+			<port>9090</port>
+			<init-parameters>
+				<parameter>
+					<name>ParameterName</name>
+					<value>ParameterValue</value>
+				</parameter>
+			</init-parameters>
+		</connector>
+	</connectors>
+
 	<services>
 		<service name="TTS-Service">
-			<service-title>TextToSpeech Service</service-title>
-			<service-class>br.com.cpqd.vaas.service.TextToSpeechService
-			</service-class>
+			<description>TextToSpeech Service</description>
+			<class>br.com.cpqd.vaas.service.tts.SpeechService</class>
 			<contexts>
-				<add-context>TTS-SoapContext</add-context>
+				<add-context>TTS-HttpContext</add-context>
 			</contexts>
+			<init-parameters>
+				<parameter>
+					<name>voiceName</name>
+					<value>Rosana</value>
+				</parameter>
+			</init-parameters>
 		</service>
 	</services>
 
 	<contexts>
-		<context name="TTS-SoapContext">
-			<context-title>TTS - SOAP Context</context-title>
-			<context-class>corinna.core.soap.SoapContext</context-class>
+		<context name="TTS-HttpContext">
+			<description>TTS - HTTP Context</description>
+			<class>corinna.http.core.HttpContext</class>
 			<init-parameters>
 				<parameter>
-					<parameter-name>urlMapping</parameter-name>
-					<parameter-value>/vaas</parameter-value>
+					<name>urlMapping</name>
+					<value>/vaas</value>
 				</parameter>
 			</init-parameters>
 			<bindlets>
 				<add-bindlet>TTS-SoapBindlet</add-bindlet>
+				<add-bindlet>TTS-RestBindlet</add-bindlet>
+				<add-bindlet>TTS-AdminBindlet</add-bindlet>
+				<add-bindlet>TTS-DownloaderBindlet</add-bindlet>
 			</bindlets>
 		</context>
 	</contexts>
 
 	<bindlets>
 		<bindlet name="TTS-SoapBindlet">
-			<bindlet-title>TTS SOAP Bindlet</bindlet-title>
-			<bindlet-class>corinna.bindlet.soap.DefaultSoapBindlet</bindlet-class>
+			<description>TTS SOAP Bindlet</description>
+			<class>br.com.cpqd.vaas.service.tts.web.SoapBindlet</class>
 			<init-parameters>
 				<parameter>
-					<parameter-name>urlMapping</parameter-name>
-					<parameter-value>/vaas</parameter-value>
+					<name>urlMapping</name>
+					<value>/soap</value>
+				</parameter>
+				<parameter>
+					<name>interfaceClass</name>
+					<value>br.com.cpqd.vaas.service.tts.ISpeechComponent</value>
+				</parameter>
+				<parameter>
+					<name>implementationClass</name>
+					<value>br.com.cpqd.vaas.service.tts.SpeechComponent</value>
+				</parameter>
+			</init-parameters>
+		</bindlet>
+		<bindlet name="TTS-RestBindlet">
+			<bindlet-title>TTS REST Bindlet</bindlet-title>
+			<bindlet-class>br.com.cpqd.vaas.service.tts.web.RestBindlet</bindlet-class>
+			<init-parameters>
+				<parameter>
+					<name>urlMapping</name>
+					<value>/rest</value>
+				</parameter>
+				<parameter>
+					<name>interfaceClass</name>
+					<value>br.com.cpqd.vaas.service.tts.ISpeechComponent</value>
+				</parameter>
+				<parameter>
+					<name>implementationClass</name>
+					<value>br.com.cpqd.vaas.service.tts.SpeechComponent</value>
+				</parameter>
+			</init-parameters>
+		</bindlet>
+		<bindlet name="TTS-AdminBindlet">
+			<bindlet-title>TTS Admin Bindlet</bindlet-title>
+			<bindlet-class>br.com.cpqd.vaas.service.tts.admin.AdminBindlet</bindlet-class>
+			<init-parameters>
+				<parameter>
+					<name>urlMapping</name>
+					<value>/admin</value>
+				</parameter>
+			</init-parameters>
+		</bindlet>
+		<bindlet name="TTS-DownloaderBindlet">
+			<bindlet-title>TTS Download Bindlet</bindlet-title>
+			<bindlet-class>br.com.cpqd.vaas.service.tts.web.DownloadBindlet</bindlet-class>
+			<init-parameters>
+				<parameter>
+					<name>urlMapping</name>
+					<value>/audio</value>
 				</parameter>
 			</init-parameters>
 		</bindlet>
 	</bindlets>
+
+	<beans>
+		<bean name="TTS-Bean">
+			<description>TTS Service Bean</description>
+			<class>br.com.cpqd.vaas.service.tts.SpeechBean</class>
+			<init-parameters>
+				<parameter>
+					<name>AudioDirectory</name>
+					<value>/tmp</value>
+				</parameter>
+				<parameter>
+					<name>AudioURL</name>
+					<value>http://10.202.22.112:9090/vaas/audio/%s</value>
+				</parameter>
+				<parameter>
+					<name>Cache.Enabled</name>
+					<value>false</value>
+				</parameter>
+				<parameter>
+					<name>Cache.Limit</name>
+					<value>500</value>
+				</parameter>
+				<parameter>
+					<name>NativeLibrary</name>
+					<value>/opt/vaas/libvnproc.so</value>
+				</parameter>
+				<parameter>
+					<name>VoiceLibraries</name>
+					<value>/opt/ctf/libcpqdtf.so</value>
+				</parameter>
+				<parameter>
+					<name>ConverterLibraries</name>
+					<value>/opt/vaas/libvnpmp3.so</value>
+				</parameter>
+				<!--  <parameter>
+					<name>UserDatabase</name>
+					<value>config/users.properties</value>
+				</parameter> -->
+			</init-parameters>
+		</bean>
+	</beans>
 
 </domain>

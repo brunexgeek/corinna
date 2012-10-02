@@ -16,10 +16,8 @@
 
 package corinna.http.bindlet;
 
-import java.io.IOException;
 import java.security.Principal;
 
-import javax.bindlet.BindletInputStream;
 import javax.bindlet.http.Cookie;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.ISession;
@@ -35,13 +33,6 @@ public class HttpBindletRequest extends WebBindletRequest implements IHttpBindle
 	public HttpBindletRequest( HttpRequest request )
 	{
 		super(request);
-	}
-	
-	@Override
-	public BindletInputStream getInputStream() throws IOException
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -120,5 +111,6 @@ public class HttpBindletRequest extends WebBindletRequest implements IHttpBindle
 		// TODO Auto-generated method stub
 		return false;
 	}
+
 
 }
