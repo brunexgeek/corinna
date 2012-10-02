@@ -17,9 +17,6 @@
 package javax.bindlet.http;
 
 
-import javax.bindlet.IBindletRequest;
-
-
 /**
  * 
  * Extends the {@link corinna.service.bindlet.IBindletRequest} interface to provide request

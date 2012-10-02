@@ -85,15 +85,7 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 	private static final String HEADER_LASTMOD = "Last-Modified";
 
-	private static final String COMPONENT_NAME = "HTTP Bindlet";
-
-	private static final String COMPONENT_VERSION = "1.0";
-
-	private static final String COMPONENT_IMPLEMENTOR = "Bruno Ribeiro";
-
-	/*private static IComponentInformation COMPONENT_INFO = new ContextInfo(COMPONENT_NAME,
-		COMPONENT_VERSION, COMPONENT_IMPLEMENTOR);*/
-
+	
 	/**
 	 * Does nothing, because this is an abstract class.
 	 * 

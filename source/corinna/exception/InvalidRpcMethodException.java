@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,11 @@ package corinna.exception;
  */
 public class InvalidRpcMethodException extends RpcException 
 {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4647887939387583391L;
 
 	public InvalidRpcMethodException() 
 	{

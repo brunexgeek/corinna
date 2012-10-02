@@ -25,10 +25,10 @@ import javax.bindlet.exception.BindletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import corinna.rpc.CanonicalPrototypeFilter;
 import corinna.rpc.IProcedureCall;
 import corinna.rpc.IPrototypeFilter;
 import corinna.rpc.MethodRunner;
-import corinna.soap.bindlet.SoapPrototypeFilter;
 import corinna.util.StateModel;
 
 @BindletModel(Model.STATELESS)
@@ -85,7 +85,7 @@ public class DefaultRestBindlet extends RestBindlet
 		
 		try
 		{
-			IPrototypeFilter filter = new SoapPrototypeFilter();
+			IPrototypeFilter filter = new CanonicalPrototypeFilter();
 			runner = new MethodRunner(intfClass, implClass, filter, null);
 		} catch (Exception e)
 		{

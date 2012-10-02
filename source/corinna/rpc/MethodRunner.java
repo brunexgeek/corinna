@@ -104,7 +104,7 @@ public class MethodRunner implements IMethodRunner
 		InvalidRpcClassException
 	{
 		if (filter == null)
-			filter = new SimplePrototypeFilter();
+			filter = new QualifiedPrototypeFilter();
 		
 		// verifica se as classes informadas são válidas para o uso através de RPC
 		RpcValidator.validateInterface(intfClass);

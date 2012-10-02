@@ -17,8 +17,6 @@
 package javax.bindlet.http;
 
 
-import java.security.NoSuchAlgorithmException;
-
 import javax.bindlet.IBindletContext;
 
 

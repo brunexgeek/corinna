@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 
-import javax.bindlet.BindletInputStream;
 import javax.bindlet.BindletOutputStream;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpBindletInputStream;
@@ -22,7 +21,6 @@ import javax.xml.soap.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import corinna.http.bindlet.HttpBindletRequest;
 import corinna.rpc.IProcedureCall;
 import corinna.rpc.ProcedureCall;
 import corinna.soap.core.WsdlGenerator;

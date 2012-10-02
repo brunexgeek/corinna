@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import corinna.auth.bindlet.IBindletAuthenticator;
+import corinna.rpc.CanonicalPrototypeFilter;
 import corinna.rpc.ClassDescriptor;
 import corinna.rpc.IProcedureCall;
 import corinna.rpc.IPrototypeFilter;
@@ -103,7 +104,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 
 		try
 		{
-			IPrototypeFilter filter = new SoapPrototypeFilter();
+			IPrototypeFilter filter = new CanonicalPrototypeFilter();
 			runner = new MethodRunner(intfClass, implClass, filter, null);
 		} catch (Exception e)
 		{

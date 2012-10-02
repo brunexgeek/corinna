@@ -20,11 +20,11 @@ package javax.bindlet.http;
 /**
  * This is the class representing event notifications for changes to sessions within a web
  * application.
- * 
- * @since v 2.3
  */
 public class SessionEvent extends java.util.EventObject
 {
+
+	private static final long serialVersionUID = 4927629962482607929L;
 
 	/** Construct a session event from the given source. */
 	public SessionEvent( ISession source )

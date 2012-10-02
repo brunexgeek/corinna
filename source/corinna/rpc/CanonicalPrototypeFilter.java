@@ -1,11 +1,9 @@
-package corinna.soap.bindlet;
+package corinna.rpc;
 
 import java.lang.reflect.Method;
 
-import corinna.rpc.IPrototypeFilter;
 
-// TODO: mover para 'corinna.soap.rpc'
-public class SoapPrototypeFilter implements IPrototypeFilter
+public class CanonicalPrototypeFilter implements IPrototypeFilter
 {
 
 	@Override

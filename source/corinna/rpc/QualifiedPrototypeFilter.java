@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,13 @@ package corinna.rpc;
 
 import java.lang.reflect.Method;
 
-
-public class SimplePrototypeFilter implements IPrototypeFilter
+/**
+ * Generate a full qualified prototype for a method. The prototype only will contain the characters
+ * allowed by the RFC 3986 (URI) standard.
+ * 
+ * @author Bruno Ribeiro
+ */
+public class QualifiedPrototypeFilter implements IPrototypeFilter
 {
 
 	private static final Class<?>[] TYPE_CLASSES = { Integer.class, Float.class, Long.class,
@@ -56,8 +61,7 @@ public class SimplePrototypeFilter implements IPrototypeFilter
 	{
 		int k;
 
-		for (k = 0; k < TYPE_NAMES.length && !TYPE_CLASSES[k].equals(type); ++k)
-			;
+		for (k = 0; k < TYPE_NAMES.length && !TYPE_CLASSES[k].equals(type); ++k);
 
 		if (k < TYPE_NAMES.length)
 			return TYPE_NAMES[k];

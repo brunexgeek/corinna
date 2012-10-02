@@ -52,7 +52,6 @@ import corinna.core.ServiceConfig;
 import corinna.core.parser.IDomainParser;
 import corinna.exception.ParseException;
 import corinna.network.ConnectorConfig;
-import corinna.network.IAdapterFilter;
 import corinna.network.IConnector;
 import corinna.util.ResourceLoader;
 import corinna.util.conf.ISection;
@@ -469,7 +468,6 @@ public class XMLDomainParser implements IDomainParser
 		for (int i = 0; i < list.getLength(); ++i)
 		{
 			Element element = (Element) list.item(i);
-			Element temp;
 
 			// get the connector name
 			String connectorName = getElementAttribute(element, "name");

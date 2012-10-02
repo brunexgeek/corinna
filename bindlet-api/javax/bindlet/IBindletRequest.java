@@ -17,8 +17,9 @@
 package javax.bindlet;
 
 
-import java.io.BufferedReader;
 import java.io.IOException;
+
+import javax.bindlet.http.HttpBindletInputStream;
 
 
 /**
