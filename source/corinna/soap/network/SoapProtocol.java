@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,10 @@
 
 package corinna.soap.network;
 
-import javax.bindlet.soap.ISoapBindletRequest;
-import javax.bindlet.soap.ISoapBindletResponse;
-
 import corinna.network.Protocol;
 
 
-public class SoapProtocol extends Protocol<ISoapBindletRequest, ISoapBindletResponse>
+public class SoapProtocol extends Protocol
 {
 
 	private static final String PROTOCOL_SCHEME = "http";
@@ -70,18 +67,6 @@ public class SoapProtocol extends Protocol<ISoapBindletRequest, ISoapBindletResp
 	public String getImplementor()
 	{
 		return PROTOCOL_IMPLEMENTOR;
-	}
-
-	@Override
-	public Class<?> getRequestClass()
-	{
-		return ISoapBindletRequest.class;
-	}
-
-	@Override
-	public Class<?> getResponseClass()
-	{
-		return ISoapBindletResponse.class;
 	}
 
 	@Override

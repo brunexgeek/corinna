@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public abstract class Protocol<R,P> implements IProtocol<R,P>
+public abstract class Protocol implements IProtocol
 {
 	
 	private Map<String,Boolean> capabilities;

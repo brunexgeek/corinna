@@ -71,7 +71,6 @@ public class DefaultRestBindlet extends RestBindlet
 		Class<?> implClass = loadClass(implClassName);
 		
 		// check if the component and the bindlet have a compatible model
-		// TODO: review this code
 		StateModel classModel = intfClass.getClass().getAnnotation(StateModel.class);
 		if (classModel == null)
 			classModel = implClass.getClass().getAnnotation(StateModel.class);

@@ -255,7 +255,6 @@ public class Server extends Lifecycle implements IServer
 	 */
 	protected void dispatchEventToServices( RequestEvent<?,?> event ) throws BindletException, IOException
 	{
-		// TODO: this lock will be blocked until the request is complete (we can do something about this?)
 		servicesLock.readLock();
 		try
 		{
@@ -321,7 +320,7 @@ public class Server extends Lifecycle implements IServer
 	 * se o índice especificado não existe, é retornado null.
 	 */
 	@Override
-	public IConnector getConnector( IProtocol<?, ?> protocol, int index )
+	public IConnector getConnector( IProtocol protocol, int index )
 	{
 		if (index < 0 || protocol == null) return null;
 
@@ -409,7 +408,7 @@ public class Server extends Lifecycle implements IServer
 	}
 
 	@Override
-	public void removeAllConnectors( IProtocol<?, ?> protocol )
+	public void removeAllConnectors( IProtocol protocol )
 	{
 
 	}

@@ -21,12 +21,12 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import javax.bindlet.Bindlet;
-import javax.bindlet.BindletInputStream;
-import javax.bindlet.BindletOutputStream;
 import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
+import javax.bindlet.io.BindletInputStream;
+import javax.bindlet.io.BindletOutputStream;
 
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;

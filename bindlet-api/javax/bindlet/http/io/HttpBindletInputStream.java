@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package javax.bindlet.http;
+package javax.bindlet.http.io;
 
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import javax.bindlet.BindletInputStream;
 import javax.bindlet.IBindletRequest;
+import javax.bindlet.io.BindletInputStream;
 
 
 /**

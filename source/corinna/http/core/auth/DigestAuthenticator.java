@@ -134,7 +134,6 @@ public class DigestAuthenticator implements IHttpAuthenticator
 			if (info.isExpired() || !info.checkCount(request.getNonceCount()))
 			{
 				releaseNonce(nonce);
-				// TODO: throw an exception?
 				return false;
 			}
 			

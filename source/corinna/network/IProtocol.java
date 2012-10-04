@@ -24,7 +24,7 @@ package corinna.network;
  * @since 1.0
  * @version 1.0
  */
-public interface IProtocol<R, P>
+public interface IProtocol
 {
 
 	public boolean haveCapability( String capability );
@@ -67,9 +67,5 @@ public interface IProtocol<R, P>
 	 * @return
 	 */
 	public String getLicense();
-	
-	public Class<?> getRequestClass();
-	
-	public Class<?> getResponseClass();
 
 }

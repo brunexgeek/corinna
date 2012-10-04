@@ -24,11 +24,10 @@ import javax.bindlet.http.ISession;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
-//TODO: promote this class to a concrete request (not a request wrapper)
+//TODO: promote this class to a concrete request (not a request wrapper) PS: need to create new pipeline handlers
 public class HttpBindletRequest extends WebBindletRequest implements IHttpBindletRequest
 {
 
-	//private HttpBindletInputStream inputStream;
 
 	public HttpBindletRequest( HttpRequest request )
 	{

@@ -40,7 +40,7 @@ public interface IConnector extends ILifecycle
 
 	public boolean setServer( IServer domain );
 
-	public IProtocol<?, ?> getProtocol();
+	public IProtocol getProtocol();
 
 	public String getName();
 

@@ -23,6 +23,7 @@ import java.text.MessageFormat;
 
 import javax.bindlet.Bindlet;
 import javax.bindlet.exception.BindletException;
+import javax.bindlet.http.io.HttpBindletOutputStream;
 
 
 /**
@@ -741,16 +742,6 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	 * @see corinna.service.bindlet.IBindlet#service
 	 * 
 	 */
-
-	/*
-	 * public void process( IBindletRequest request, IBindletResponse response ) throws
-	 * BindletException, IOException { IHttpBindletRequest req; IHttpBindletResponse res;
-	 * 
-	 * try { req = (IHttpBindletRequest) request; res = (IHttpBindletResponse) response; } catch
-	 * (ClassCastException e) { throw new BindletException("non-HTTP request or response"); }
-	 * service(req, res); }
-	 */
-
 	@Override
 	public void process( IHttpBindletRequest request, IHttpBindletResponse res )
 		throws BindletException, IOException
@@ -758,16 +749,10 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		service(request, res);
 	}
 
-	/*@Override
-	public IComponentInformation getBindletInfo()
-	{
-		return COMPONENT_INFO;
-	}*/
-
 	protected boolean doAuthentication( IHttpBindletRequest request, IHttpBindletResponse response )
 		throws BindletException, IOException
 	{
-		return true;
+		return !isRestricted();
 	}
 
 }

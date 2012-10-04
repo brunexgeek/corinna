@@ -20,7 +20,6 @@ package corinna.rpc;
 import java.util.HashSet;
 
 
-// TODO: move this class to SOAP package
 public final class TypeConverter
 {
 

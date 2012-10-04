@@ -2,13 +2,13 @@ package corinna.soap.bindlet;
 
 import java.io.IOException;
 
-import javax.bindlet.BindletOutputStream;
 import javax.bindlet.IBindletConfig;
 import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
+import javax.bindlet.io.BindletOutputStream;
 import javax.wsdl.Definition;
 import javax.wsdl.WSDLException;
 import javax.wsdl.factory.WSDLFactory;
@@ -25,6 +25,7 @@ import corinna.rpc.IPrototypeFilter;
 import corinna.rpc.MethodRunner;
 import corinna.soap.core.WsdlGenerator;
 import corinna.thread.ObjectLocker;
+import corinna.util.ComponentInformation;
 
 
 public class DefaultSoapBindlet extends SoapBindlet
@@ -41,6 +42,15 @@ public class DefaultSoapBindlet extends SoapBindlet
 	private static final String PARAMETER_INTERFACE = "interfaceClass";
 	
 	private static final String PARAMETER_IMPLEMENTATION = "implementationClass";
+	
+	private static final String COMPONENT_NAME = "SOAP Web Service Bindlet";
+	
+	private static final String COMPONENT_VERSION = "1.0";
+	
+	private static final String COMPONENT_IMPLEMENTOR = "Bruno Ribeiro";
+	
+	private static final IComponentInformation bindletInfo = new ComponentInformation(COMPONENT_NAME,
+		COMPONENT_VERSION, COMPONENT_IMPLEMENTOR);
 	
 	private MethodRunner runner;
 	
@@ -155,18 +165,6 @@ public class DefaultSoapBindlet extends SoapBindlet
 		{
 			throw new BindletException( e.getMessage(), e.getCause() );
 		}
-
-		/*try
-		{
-			SOAPMessage response = createSoapResponse(DEFAULT_NAMESPACE, procedure.getMethodPrototype(), result);
-			res.setChunked(false);
-			res.setContentType("text/xml");
-			res.setMessage(response);
-		} catch (Exception e)
-		{
-			log.error("Error while processing POST method", e);
-			res.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
-		}*/
 	}
 
 
@@ -236,8 +234,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	@Override
 	public IComponentInformation getBindletInfo()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return bindletInfo;
 	}
 
 	

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package javax.bindlet.http;
+package javax.bindlet.http.io;
 
 
-import javax.bindlet.BindletOutputStream;
+import javax.bindlet.io.BindletOutputStream;
 
 
 public abstract class HttpBindletOutputStream extends BindletOutputStream

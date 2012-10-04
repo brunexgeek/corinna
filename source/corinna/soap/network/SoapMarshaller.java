@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2012 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,17 @@ package corinna.soap.network;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import javax.bindlet.soap.ISoapMarshaler;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
 
-public class SoapMarshaller implements ISoapMarshaler
+public class SoapMarshaller
 {
 	
 	public SoapMarshaller( String protocol ) throws SOAPException
 	{
 	}
 	
-	@Override
 	public String marshall( SOAPMessage message ) throws SOAPException, IOException
 	{
 		if (message == null) return null;

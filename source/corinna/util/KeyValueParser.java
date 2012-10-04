@@ -41,7 +41,6 @@ public class KeyValueParser
 					}
 				}
 				if (value.isEmpty() && !config.isAllowEmptyValues()) continue;
-				// TODO: implements 'allowEmptyValues' and quotes remotion
 				
 				output.put(key, value);
 			}

@@ -49,7 +49,7 @@ public interface IServer extends ILifecycle, IConnectorListener, IServiceEventLi
 	
 	public IConnector getConnector( String name );
 	
-	public IConnector getConnector( IProtocol<?,?> protocol, int index );
+	public IConnector getConnector( IProtocol protocol, int index );
 	
 	public void addConnector( IConnector connector ) throws ConnectorInUseException;
 	
@@ -57,7 +57,7 @@ public interface IServer extends ILifecycle, IConnectorListener, IServiceEventLi
 	
 	public void removeConnector( String name ) throws ConnectorInUseException;
 		
-	public void removeAllConnectors( IProtocol<?,?> protocol );
+	public void removeAllConnectors( IProtocol protocol );
 	
 	public IDomain getDomain();
 	

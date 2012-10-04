@@ -6,10 +6,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import javax.bindlet.BindletOutputStream;
-import javax.bindlet.http.HttpBindletOutputStream;
 import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IWebBindletResponse;
+import javax.bindlet.http.io.HttpBindletOutputStream;
+import javax.bindlet.io.BindletOutputStream;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
@@ -20,7 +20,7 @@ import corinna.http.core.HttpUtils;
 import corinna.thread.ObjectLocker;
 
 
-// TODO: promote this class to a concrete response (not a response wrapper)
+// TODO: promote this class to a concrete response (not a response wrapper) PS: need to create new pipeline handlers
 public abstract class WebBindletResponse implements IWebBindletResponse
 {
 

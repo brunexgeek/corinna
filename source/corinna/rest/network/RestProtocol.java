@@ -16,13 +16,10 @@
 
 package corinna.rest.network;
 
-import javax.bindlet.http.IHttpBindletRequest;
-import javax.bindlet.http.IHttpBindletResponse;
-
 import corinna.network.Protocol;
 
 
-public final class RestProtocol extends Protocol<IHttpBindletRequest, IHttpBindletResponse>
+public final class RestProtocol extends Protocol
 {
 
 	private static final String PROTOCOL_SCHEME = "http";
@@ -83,18 +80,5 @@ public final class RestProtocol extends Protocol<IHttpBindletRequest, IHttpBindl
 	{
 		return PROTOCOL_LICENSE;
 	}
-
-	@Override
-	public Class<?> getRequestClass()
-	{
-		return IHttpBindletRequest.class;
-	}
-
-	@Override
-	public Class<?> getResponseClass()
-	{
-		return IHttpBindletResponse.class;
-	}
-	
 	
 }

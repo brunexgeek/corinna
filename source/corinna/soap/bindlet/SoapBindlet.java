@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 
-import javax.bindlet.BindletOutputStream;
 import javax.bindlet.exception.BindletException;
-import javax.bindlet.http.HttpBindletInputStream;
 import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
+import javax.bindlet.http.io.HttpBindletInputStream;
+import javax.bindlet.io.BindletOutputStream;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPConstants;
@@ -71,10 +71,9 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 		Charset charset = getCharsetByName( request.getCharacterEncoding() );
 		try
 		{
-			// TODO: use 'BindletInputStream' ao invés de 'ChannelBuffer'
 			HttpBindletInputStream input = (HttpBindletInputStream)request.getInputStream();
 			String content = input.readText(charset);
-			//String content = ((HttpBindletRequest)request).getContent().toString(charset);
+			input.close();
 			return unmarshaller.unmarshall(content, charset);
 		} catch (Exception e)
 		{
@@ -184,6 +183,8 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 		{
 			SOAPMessage resp = createSoapResponse("", call.getMethodPrototype(), result);
 			String content = marshaller.marshall(resp);
+			
+			response.setContentType("text/xml");
 			
 			BindletOutputStream out = response.getOutputStream();
 			out.writeString(content);

@@ -20,8 +20,6 @@ import java.security.KeyStore;
 import java.security.Security;
 
 import javax.bindlet.BindletModel.Model;
-import javax.bindlet.http.IHttpBindletRequest;
-import javax.bindlet.http.IHttpBindletResponse;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -157,7 +155,7 @@ public class HttpConnector extends Connector
 	}
 
 	@Override
-	public IProtocol<IHttpBindletRequest, IHttpBindletResponse> getProtocol()
+	public IProtocol getProtocol()
 	{
 		return HttpProtocol.getInstance();
 	}

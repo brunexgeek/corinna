@@ -23,18 +23,17 @@ import javax.bindlet.exception.BindletException;
 
 
 /**
- * Used by contexts
+ * Define a listener that receive all requests from a connector.
  * 
- * @author bruno
+ * @author Bruno Ribeiro
  *
- * @param <R>
- * @param <P>
+ * @param <R> Type of the request
+ * @param <P> Type of the response
  */
-// TODO: remover a generalização em benefício do IServer?
 public interface IConnectorListener extends EventListener
 {
 
-	public void connectorRequestReceived( Connector connection, 
+	public void connectorRequestReceived( Connector connector, 
 		RequestEvent<?,?> event ) throws BindletException, IOException;
 	
 }

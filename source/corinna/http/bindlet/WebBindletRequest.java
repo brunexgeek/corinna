@@ -6,8 +6,8 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.bindlet.BindletInputStream;
 import javax.bindlet.http.IWebBindletRequest;
+import javax.bindlet.io.BindletInputStream;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.handler.codec.http.HttpHeaders;

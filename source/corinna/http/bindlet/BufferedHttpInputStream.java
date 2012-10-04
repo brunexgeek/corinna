@@ -19,7 +19,7 @@ package corinna.http.bindlet;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import javax.bindlet.http.HttpBindletInputStream;
+import javax.bindlet.http.io.HttpBindletInputStream;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;

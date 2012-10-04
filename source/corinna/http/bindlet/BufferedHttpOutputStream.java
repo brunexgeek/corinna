@@ -19,7 +19,7 @@ package corinna.http.bindlet;
 
 import java.io.IOException;
 
-import javax.bindlet.http.HttpBindletOutputStream;
+import javax.bindlet.http.io.HttpBindletOutputStream;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -151,22 +151,7 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream implements
 	public void flush() throws IOException
 	{
 		checkClosed();
-	/*	System.out.println("Want to flush...");
-		// wait while a previous flush don't have completed
-		while (!isFlushing.setFlag(false, true))
-		{
-			try
-			{
-				System.out.println("Waiting...");
-				Thread.sleep(1000);
-			} catch (InterruptedException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				System.out.println("Error waiting!");
-			}
-		}
-		System.out.println("Flush started");*/
+
 		if (!isCommited())
 		{
 			response.sendHeaders();
@@ -179,7 +164,7 @@ public class BufferedHttpOutputStream extends HttpBindletOutputStream implements
 		// Note: we need to create a copy of the main buffer because the 'Channel.write' method is
 		//       asynchronous. It's necessary to discover a new method that not require create
 		//       multiple intermediary buffers when writting to output channel.
-		// TODO: optimize this 
+		// TODO: create a pool of ChannelBuffer's that return the objects when ChannelFuture is called
 		ChannelBuffer temp = ChannelBuffers.copiedBuffer(buffer);
 		channel.write(temp);
 		incWrittenBytes(buffer.writerIndex());
