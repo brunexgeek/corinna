@@ -54,5 +54,7 @@ public interface IService extends IServerRequestListener, ILifecycle
 	public void addContext( IContext<?,?> context );
 	
 	public IComponentInformation getServiceInfo();
+
+	public String[] getContextNames();
 	
 }

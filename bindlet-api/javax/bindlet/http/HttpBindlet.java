@@ -617,11 +617,11 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	protected void service( IHttpBindletRequest request, IHttpBindletResponse response )
 		throws BindletException, IOException
 	{
-		String method = request.getHttpMethod();
+		HttpMethod method = request.getHttpMethod();
 
 		if (isRestricted() && !doAuthentication(request, response)) return;
 
-		if (method.equals(METHOD_GET))
+		if (method == HttpMethod.GET)
 		{
 			long lastModified = getLastModified(request);
 			if (lastModified == -1)
@@ -649,7 +649,7 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 		}
 		else
-			if (method.equals(METHOD_HEAD))
+			if (method == HttpMethod.HEAD)
 			{
 				long lastModified = getLastModified(request);
 				maybeSetLastModified(response, lastModified);
@@ -657,31 +657,31 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 			}
 			else
-				if (method.equals(METHOD_POST))
+				if (method == HttpMethod.POST)
 				{
 					doPost(request, response);
 
 				}
 				else
-					if (method.equals(METHOD_PUT))
+					if (method == HttpMethod.PUT)
 					{
 						doPut(request, response);
 
 					}
 					else
-						if (method.equals(METHOD_DELETE))
+						if (method == HttpMethod.DELETE)
 						{
 							doDelete(request, response);
 
 						}
 						else
-							if (method.equals(METHOD_OPTIONS))
+							if (method == HttpMethod.OPTIONS)
 							{
 								doOptions(request, response);
 
 							}
 							else
-								if (method.equals(METHOD_TRACE))
+								if (method == HttpMethod.TRACE)
 								{
 									doTrace(request, response);
 

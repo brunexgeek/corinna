@@ -148,9 +148,17 @@ public abstract class Connector extends Lifecycle implements IConnector,
 	@Override
 	public void start() throws LifecycleException
 	{
+		super.start();
 		startConnector();
 	}
 
+	@Override
+	public void stop() throws LifecycleException
+	{
+		super.stop();
+		stopConnector();
+	}
+	
 	protected void stopConnector() throws LifecycleException
 	{
 		try

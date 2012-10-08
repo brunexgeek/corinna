@@ -294,6 +294,7 @@ public class Server extends Lifecycle implements IServer
 		return sb.toString();
 	}
 
+	
 	@Override
 	public IServerConfig getConfig()
 	{

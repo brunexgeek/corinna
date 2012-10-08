@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.bindlet.http.HttpMethod;
 import javax.bindlet.http.IWebBindletRequest;
 import javax.bindlet.io.BindletInputStream;
 
@@ -127,9 +128,9 @@ public class WebBindletRequest implements IWebBindletRequest
 	}
 
 	@Override
-	public String getHttpMethod()
+	public HttpMethod getHttpMethod()
 	{
-		return request.getMethod().getName();
+		return HttpMethod.valueOf(request.getMethod().getName());
 	}
 
 	@Override

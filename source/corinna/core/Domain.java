@@ -218,5 +218,82 @@ public final class Domain extends Lifecycle implements IDomain
 	{
 		destroyServers();
 	}
+
+	@Override
+	public String dumpHierarchy()
+	{
+		StringBuffer sb = new StringBuffer();
+		sb.append("\nDomain '" + getName() + "'\n");
+		
+		serversLock.readLock();
+		try
+		{
+			for (Map.Entry<String, IServer> entry : servers.entrySet())
+			{
+				IServer server = entry.getValue();
+				String services[] = server.getServiceNames();
+
+				// iterate between the services
+				for (String serviceName : services)
+				{
+					IService service = server.getService(serviceName);
+					String contexts[] = service.getContextNames();
+					
+					// iterate between the contexts
+					for (String contextName : contexts)
+					{
+						IContext<?,?> context = service.getContext(contextName);
+						String bindlets[] = context.getBindletNames();
+						
+						// iterate between the bindlet registrations
+						for (String bindletName : bindlets)
+						{
+							IBindletRegistration registry = context.getBindletRegistration(bindletName);
+							
+							/*sb.append("| ");
+							sb.append( truncate(server.getName(), 20) );
+							sb.append(" | ");
+							sb.append( truncate(service.getName(), 20) );
+							sb.append(" | ");
+							sb.append( truncate(context.getName(), 20) );
+							sb.append(" | ");
+							sb.append( truncate(registry.getBindletName(), 20) );
+							sb.append(" | ");
+							sb.append( truncate(registry.getBindletClassName(), 40) );
+							sb.append(" |\n");*/
+							
+							sb.append("   ");
+							sb.append( registry.getBindletName() );
+							sb.append(" [server='");
+							sb.append( server.getName() );
+							sb.append("'; service='");
+							sb.append( service.getName() );
+							sb.append("'; context='");
+							sb.append( context.getName() );
+							sb.append("'; class='");
+							sb.append( registry.getBindletClassName() );
+							sb.append("']\n");
+						}
+					}
+				}
+			}
+		} finally
+		{
+			serversLock.readUnlock();
+		}
+		
+		return sb.toString();
+	}
+	
+	protected String truncate( String value, int length )
+	{
+		if (length <= 3) return "...";
+		length -= 3;
+		
+		if (value.length() > length)
+			return "..." + value.substring(value.length() - length, value.length());
+		else
+			return String.format("%-" + (length + 3) + "s", value);
+	}
 	
 }

@@ -31,5 +31,7 @@ public interface IDomain extends ILifecycle
 	public IServer removeServer( IServer server ) throws ServerInUseException;
 	
 	public IServer removeServer( String name ) throws ServerInUseException;
+
+	String dumpHierarchy();
 	
 }

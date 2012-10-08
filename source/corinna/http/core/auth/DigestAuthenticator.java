@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.bindlet.http.HttpMethod;
 import javax.bindlet.http.IWebBindletRequest;
 
 import org.jboss.netty.handler.codec.http.HttpHeaders;
@@ -119,7 +120,7 @@ public class DigestAuthenticator implements IHttpAuthenticator
 		return false;
 	}
 
-	public boolean authenticate( String method, AuthorizationRequest request )
+	public boolean authenticate( HttpMethod method, AuthorizationRequest request )
 	{
 		if (request == null) return false;
 		String nonce = request.getNonce();

@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import javax.bindlet.Bindlet;
 import javax.bindlet.exception.BindletException;
+import javax.bindlet.http.HttpMethod;
 import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
@@ -49,7 +50,7 @@ public abstract class SoapBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		if (request == null)
 			response.sendError(HttpStatus.BAD_REQUEST);
 
-		if (request.getHttpMethod().equalsIgnoreCase("GET"))
+		if (request.getHttpMethod() == HttpMethod.GET)
 		{
 			if (request != null && request.getRequestURI().toString().endsWith(WSDL_SUFFIX))
 				doGet(request, response);

@@ -56,5 +56,7 @@ public interface IContext<R,P> extends IServiceRequestListener, ILifecycle
 	public IComponentInformation getContextInfo();
 
 	public IContextConfig getConfig();
+
+	public String[] getBindletNames();
 	
 }

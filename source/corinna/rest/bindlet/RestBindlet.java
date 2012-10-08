@@ -23,13 +23,13 @@ import java.nio.charset.Charset;
 import javax.bindlet.Bindlet;
 import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
+import javax.bindlet.http.HttpMethod;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 import javax.bindlet.io.BindletInputStream;
 import javax.bindlet.io.BindletOutputStream;
 
 import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpMethod;
 
 import corinna.core.ContextInfo;
 import corinna.rpc.IProcedureCall;
@@ -137,17 +137,19 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		String path = request.getResourcePath();
 		if (path == null || path.isEmpty()) return null;
 
+		int end = path.indexOf("?");
+		if (end < 0) end = path.length();
 		int start = path.lastIndexOf("/");
 		if (start + 1 < path.length())
-			return path.substring(start + 1);
+			return path.substring(start + 1, end);
 		else
 			return null;
 	}
 
 	protected String getProcedureParameters( IHttpBindletRequest request )
 	{
-		if (request.getHttpMethod() == HttpMethod.GET.getName()) return request.getQueryString();
-		if (request.getHttpMethod() == HttpMethod.POST.getName())
+		if (request.getHttpMethod() == HttpMethod.GET) return request.getQueryString();
+		if (request.getHttpMethod() == HttpMethod.POST)
 		{
 			// check if the content type is valid for a POST request 
 			String contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE);
@@ -171,7 +173,7 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	{
 		try
 		{
-			if (request.getHttpMethod() == HttpMethod.GET.getName())
+			if (request.getHttpMethod() == HttpMethod.GET)
 				return Charset.forName("UTF-8");
 			else
 				return Charset.forName(request.getCharacterEncoding());

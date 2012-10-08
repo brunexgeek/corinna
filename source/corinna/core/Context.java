@@ -252,5 +252,28 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 		return sb.toString();
 	}
 	
+	@Override
+	public String[] getBindletNames()
+	{
+		reposLock.readLock();
+		
+		String names[] = new String[repos.size()];
+		int i = 0;
+		
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String,IBindletRegistration> entry : repos.entrySet())
+			{
+				names[i] = entry.getKey();
+				++i;
+			}
+		} finally
+		{
+			reposLock.readUnlock();
+		}
+		
+		return names;
+	}
 	
 }

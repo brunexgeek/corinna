@@ -138,14 +138,10 @@ public class SchemaGenerator
 		Class<?> type, boolean isRequired )
 	{
 		String typeName = "";
-		boolean isPrimitive = false;
 		Element element;
 		
 		if (isPrimitive(type))
-		{
 			typeName = PREFIX_XMLSCHEMA + ":" + mapToSchemaType(type);
-			isPrimitive = true;
-		}
 		else
 		if (isEnumeration(type))
 			typeName = generateEnum(context, null, type);

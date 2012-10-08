@@ -280,4 +280,29 @@ public abstract class Service extends Lifecycle implements IService
 		destroyContexts();
 	}
 	
+	
+	@Override
+	public String[] getContextNames()
+	{
+		contextsLock.readLock();
+		
+		String names[] = new String[contexts.size()];
+		int i = 0;
+		
+		try
+		{
+			// itera entre os servidores
+			for (Map.Entry<String,IContext<?,?>> entry : contexts.entrySet())
+			{
+				names[i] = entry.getValue().getName();
+				++i;
+			}
+		} finally
+		{
+			contextsLock.readUnlock();
+		}
+		
+		return names;
+	}
+	
 }

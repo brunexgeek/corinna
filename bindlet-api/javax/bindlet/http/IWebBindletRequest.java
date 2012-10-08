@@ -134,7 +134,7 @@ public interface IWebBindletRequest extends IBindletRequest
 	 *         made
 	 * 
 	 */
-	public String getHttpMethod();
+	public HttpMethod getHttpMethod();
 
 	/**
 	 * Returns the portion of the request URI that indicates the context of the request. The context
