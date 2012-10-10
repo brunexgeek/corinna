@@ -13,7 +13,7 @@
 			<fileset dir="${global.dir.libs}" includes="**/qname.jar" />
 			<fileset dir="${global.dir.libs}" includes="**/logback-*.jar" />
 			<fileset dir="${global.dir.libs}" includes="**/slf4j-*.jar" />
-			<fileset dir="${global.dir.libs}" includes="**/netty-3.2.7.Final.jar" />
+			<fileset dir="${global.dir.libs}" includes="**/netty*Final.jar" />
 			<fileset dir="${global.dir.dist}" includes="**/bindlet*.jar" />
 		</path>
 		

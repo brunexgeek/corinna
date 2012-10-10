@@ -14,11 +14,10 @@ import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 import javax.bindlet.http.io.HttpBindletInputStream;
 import javax.bindlet.io.BindletOutputStream;
-
+import javax.bindlet.rpc.IProcedureCall;
 
 import corinna.core.ContextInfo;
 import corinna.json.core.JSONObject;
-import corinna.rpc.IProcedureCall;
 import corinna.rpc.ProcedureCall;
 
 

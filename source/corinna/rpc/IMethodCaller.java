@@ -18,6 +18,8 @@ package corinna.rpc;
 
 import java.lang.reflect.Method;
 
+import javax.bindlet.rpc.IProcedureCall;
+
 import corinna.exception.IncompleteImplementationException;
 import corinna.exception.IncompleteInterfaceException;
 import corinna.exception.InternalException;

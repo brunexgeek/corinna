@@ -24,15 +24,16 @@ import javax.bindlet.Bindlet;
 import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpMethod;
+import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 import javax.bindlet.io.BindletInputStream;
 import javax.bindlet.io.BindletOutputStream;
+import javax.bindlet.rpc.IProcedureCall;
 
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 
 import corinna.core.ContextInfo;
-import corinna.rpc.IProcedureCall;
 import corinna.rpc.ParameterList;
 import corinna.rpc.ProcedureCall;
 
@@ -42,6 +43,8 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 {
 
 	private static final String MIME_TYPE = "application/x-www-form-urlencoded";
+	
+	public static final String CONFIG_COMPATILIBITY_MODE = "CompatibilityMode"; 
 	
 	private static final String COMPONENT_NAME = "REST Bindlet";
 
@@ -66,6 +69,19 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		Object result = null;
 		Charset charset = Charset.defaultCharset();
 
+		if (request.getHttpMethod() != HttpMethod.GET && request.getHttpMethod() != HttpMethod.POST)
+		{
+			try
+			{
+				response.sendError(HttpStatus.METHOD_NOT_ALLOWED);
+			} catch (IOException e)
+			{
+			}
+			return;
+		}
+
+		if (isRestricted() && !doAuthentication(request, response)) return;
+		
 		// extract a 'ProcedureCall' from the HTTP request
 		try
 		{
@@ -191,22 +207,44 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		// try to get the procedure prototype
 		String proto = getProcedurePrototype(request);
 		String params = getProcedureParameters(request);
-		if (proto == null || params == null || proto.isEmpty())
-			throw new BindletException("Invalid REST procedure call");
+
 		try
 		{
-			// create the procedure call
-			procedureCall = new ProcedureCall(proto);
+			// parse the procedure call parameters
 			ParameterList list = new ParameterList(getProcedureCharset(request));
 			ParameterList.parseString(list, params, "&", "=");
 			String[] keys = list.getParameterNames();
+			// check whether the procedure prototype was obtained
+			if (proto == null)
+			{
+				String option = getInitParameter(CONFIG_COMPATILIBITY_MODE);
+				if (option != null && option.equalsIgnoreCase("true"))
+					proto = (String)list.getParameter("method", null);
+			}
+			// check whether we have a valid prototype
+			if (proto == null)
+				throw new BindletException("Missing procedure prototype");
+			// create the procedure call
+			procedureCall = new ProcedureCall(proto);
 			for (String key : keys)
 				procedureCall.setParameter(key, list.getParameter(key, ""));
-		} catch (Exception e)
+		} catch (BindletException e)
+		{
+			throw e;
+		}
+		catch (Exception e)
 		{
 			throw new BindletException("Error parsing REST procedure call", e);
 		}
 		return procedureCall;
 	}
 
+	public abstract boolean isRestricted();
+	
+	protected boolean doAuthentication( IHttpBindletRequest request, IHttpBindletResponse response )
+	throws BindletException
+	{
+		return !isRestricted();
+	}
+	
 }

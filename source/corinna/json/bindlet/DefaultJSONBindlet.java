@@ -1,8 +1,7 @@
 package corinna.json.bindlet;
 
 import javax.bindlet.exception.BindletException;
-
-import corinna.rpc.IProcedureCall;
+import javax.bindlet.rpc.IProcedureCall;
 
 
 public class DefaultJSONBindlet extends JSONBindlet

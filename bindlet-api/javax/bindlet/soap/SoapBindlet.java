@@ -9,9 +9,7 @@ import javax.bindlet.http.HttpMethod;
 import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
-
-import corinna.rpc.IProcedureCall;
-import corinna.rpc.ProcedureCall;
+import javax.bindlet.rpc.IProcedureCall;
 
 
 @SuppressWarnings("serial")
@@ -64,7 +62,7 @@ public abstract class SoapBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		}	
 	}
 	
-	protected abstract ProcedureCall getProcedureCall( IHttpBindletRequest request, IHttpBindletResponse response );
+	protected abstract IProcedureCall getProcedureCall( IHttpBindletRequest request, IHttpBindletResponse response );
 	
 	public abstract boolean isRestricted();
 

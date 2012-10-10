@@ -22,9 +22,6 @@ import java.io.IOException;
 import javax.bindlet.io.BindletOutputStream;
 import javax.bindlet.io.ICloseable;
 
-import corinna.http.bindlet.ChunkedHttpOutputStream;
-
-
 
 /**
  * Defines an object to assist a servlet in sending a response to the client. The servlet container

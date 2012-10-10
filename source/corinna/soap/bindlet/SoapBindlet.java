@@ -10,6 +10,7 @@ import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 import javax.bindlet.http.io.HttpBindletInputStream;
 import javax.bindlet.io.BindletOutputStream;
+import javax.bindlet.rpc.IProcedureCall;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPConstants;
@@ -21,7 +22,6 @@ import javax.xml.soap.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import corinna.rpc.IProcedureCall;
 import corinna.rpc.ProcedureCall;
 import corinna.soap.core.WsdlGenerator;
 import corinna.soap.network.SoapMarshaller;
@@ -83,7 +83,6 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 	}
 	
 	@SuppressWarnings("rawtypes")
-	@Override
 	protected ProcedureCall getProcedureCall( IHttpBindletRequest request, IHttpBindletResponse response )
 	{
 		SOAPMessage soapMessage = getMessage(request);

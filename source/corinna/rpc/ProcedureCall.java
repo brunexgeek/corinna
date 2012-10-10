@@ -22,6 +22,8 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
+import javax.bindlet.rpc.IProcedureCall;
+
 import corinna.exception.IncompleteInterfaceException;
 import corinna.exception.MethodNotFoundException;
 import corinna.rpc.annotation.Parameter;
