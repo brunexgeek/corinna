@@ -6,7 +6,7 @@ import corinna.core.BasicConfig;
 
 public class ConnectorConfig extends BasicConfig implements IConnectorConfig
 {
-	public static final int DEFAULT_MAX_WORKERS = 8;
+	public static final int DEFAULT_MAX_WORKERS = 150;
 
 	private static final int MIN_WORKERS = 1;
 

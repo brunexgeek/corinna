@@ -38,6 +38,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import corinna.rpc.IBeanObject;
+
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its external
  * form is a string wrapped in curly braces with colons between the names and
@@ -450,7 +452,7 @@ public class JSONObject {
      * @return      The object associated with the key.
      * @throws      JSONException if the key is not found.
      */
-    public Object get(String key) throws JSONException {
+	public Object get(String key) throws JSONException {
         if (key == null) {
             throw new JSONException("Null key.");
         }
@@ -471,7 +473,7 @@ public class JSONObject {
      * @throws      JSONException
      *  if the value is not a Boolean or the String "true" or "false".
      */
-    public boolean getBoolean(String key) throws JSONException {
+	public boolean getBoolean(String key) throws JSONException {
         Object object = this.get(key);
         if (object.equals(Boolean.FALSE) ||
                 (object instanceof String &&
@@ -494,7 +496,7 @@ public class JSONObject {
      * @throws JSONException if the key is not found or
      *  if the value is not a Number object and cannot be converted to a number.
      */
-    public double getDouble(String key) throws JSONException {
+	public double getDouble(String key) throws JSONException {
         Object object = this.get(key);
         try {
             return object instanceof Number
@@ -515,7 +517,7 @@ public class JSONObject {
      * @throws   JSONException if the key is not found or if the value cannot
      *  be converted to an integer.
      */
-    public int getInt(String key) throws JSONException {
+	public int getInt(String key) throws JSONException {
         Object object = this.get(key);
         try {
             return object instanceof Number
@@ -562,7 +564,7 @@ public class JSONObject {
         throw new JSONException("JSONObject[" + quote(key) +
                 "] is not a JSONObject.");
     }
-
+    
 
     /**
      * Get the long value associated with a key.
@@ -572,7 +574,7 @@ public class JSONObject {
      * @throws   JSONException if the key is not found or if the value cannot
      *  be converted to a long.
      */
-    public long getLong(String key) throws JSONException {
+	public long getLong(String key) throws JSONException {
         Object object = this.get(key);
         try {
             return object instanceof Number
@@ -636,7 +638,7 @@ public class JSONObject {
      * @return      A string which is the value.
      * @throws   JSONException if there is no string value for the key.
      */
-    public String getString(String key) throws JSONException {
+	public String getString(String key) throws JSONException {
         Object object = this.get(key);
         if (object instanceof String) {
             return (String)object;
@@ -701,7 +703,7 @@ public class JSONObject {
      *
      * @return An iterator of the keys.
      */
-    public Iterator keys() {
+	public Iterator keys() {
         return this.map.keySet().iterator();
     }
 

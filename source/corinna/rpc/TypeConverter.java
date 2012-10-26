@@ -17,6 +17,7 @@
 package corinna.rpc;
 
 
+import java.lang.reflect.Method;
 import java.util.HashSet;
 
 
@@ -103,6 +104,7 @@ public final class TypeConverter
 			if (current.toString().equals(value)) return current;
 		return null;
 	}
+
 	
 	@SuppressWarnings("unchecked")
 	public static Object convert( Class<?> type, String value )

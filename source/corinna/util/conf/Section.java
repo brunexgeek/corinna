@@ -327,14 +327,48 @@ public class Section implements ISection
 	@Override
 	public String getValue( String key, String defaultValue ) 
 	{
-		if (key == null) return null;
+		/*if (key == null) return null;
 		
 		lock.readLock();
 		String result = items.get(key);
 		lock.readUnlock();
 
 		if (result == null) return defaultValue;
+		return result;*/
+		if (key == null || key.isEmpty()) return defaultValue;
+		
+		String result = defaultValue;
+		
+		if (key.indexOf('.') < 0)
+		{
+			lock.readLock();
+			result = items.get(key);
+			if (result == null) return defaultValue;
+			lock.readUnlock();
+		}
+		else
+		{
+			String names[] = key.split("\\.");
+			result = getValue(names, defaultValue);
+		}
 		return result;
+	}
+
+	protected String getValue( String names[], String defaultValue )
+	{
+		ISection target = this;
+		ISection parent = this;
+		
+		if (names == null || names.length == 0) return defaultValue;
+		
+		for (int i = 0; i < names.length-1; i++)
+		{
+			target = parent.getSection(names[i], null);
+			if (target == null) return defaultValue;
+			parent = target;
+		}
+		
+		return parent.getValue(names[names.length-1], defaultValue);
 	}
 	
 }

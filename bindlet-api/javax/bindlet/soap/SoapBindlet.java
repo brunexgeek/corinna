@@ -45,6 +45,7 @@ public abstract class SoapBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	public final void process( IHttpBindletRequest request, IHttpBindletResponse response )
 		throws BindletException, IOException
 	{
+		response.setContentType("text/xml");
 		if (request == null)
 			response.sendError(HttpStatus.BAD_REQUEST);
 

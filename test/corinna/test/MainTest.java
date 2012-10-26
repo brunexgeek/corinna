@@ -1,21 +1,20 @@
 package corinna.test;
 
+import java.util.UUID;
+
 import javax.wsdl.Definition;
 import javax.wsdl.Types;
 import javax.wsdl.extensions.schema.Schema;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLWriter;
 
 import org.w3c.dom.Element;
 
 import com.ibm.wsdl.extensions.schema.SchemaConstants;
 import com.ibm.wsdl.extensions.schema.SchemaImpl;
 
+import corinna.rpc.BeanObject;
 import corinna.rpc.ClassDescriptor;
-import corinna.rpc.annotation.Parameter;
-import corinna.rpc.annotation.RemoteMethod;
+import corinna.rpc.IBeanObject;
 import corinna.soap.core.SchemaGenerator;
-import corinna.soap.core.WsdlGenerator;
 
 
 public class MainTest
@@ -23,7 +22,7 @@ public class MainTest
 
 	public static void main( String[] args ) throws Exception
 	{
-		WSDLFactory factory = WSDLFactory.newInstance();
+		/*WSDLFactory factory = WSDLFactory.newInstance();
 		
 		ClassDescriptor desc = new ClassDescriptor(ServiceInterface.class);
 		
@@ -32,11 +31,15 @@ public class MainTest
 			"http://vaas.cpqd.com.br/tts.xsd");
 		
 		WSDLWriter wr = factory.newWSDLWriter();
-		wr.writeWSDL(def, System.out);
-
-		
+		wr.writeWSDL(def, System.out);*/
+		MyPOJO A = new MyPOJO( new MyPOJO() );
+		MyPOJO B = new MyPOJO( );
+		A.setActive(true);
+		A.setState(MyEnum.PARADA);
+		IBeanObject bean = new BeanObject(A);
+		bean.populate(B);
 	}
-	
+
 	public static void generateTypes( Definition def, Class<?> classRef, String targetNamespace ) throws Exception
 	{
 		Types types = def.getTypes();
@@ -59,16 +62,6 @@ public class MainTest
 		
 	}
 	
-	public static interface ServiceInterface
-	{
-		
-		@RemoteMethod
-		public void calculate( 
-			@Parameter(name="a") int a, 
-			@Parameter(name="b") MyPOJO b );
-		
-	}
-	
 	public static enum MyEnum
 	{
 		
@@ -80,10 +73,23 @@ public class MainTest
 	
 	public static class MyPOJO
 	{
-		private MyEnum state;
+		private MyEnum state = MyEnum.ANDANDO;
 
-		private boolean active;
+		private boolean active = false;
 	
+		private MyPOJO pojo = null;
+		
+		private String name = UUID.randomUUID().toString();
+		
+		public MyPOJO( MyPOJO pojo )
+		{
+			this.setPojo(pojo);
+		}
+		
+		public MyPOJO( )
+		{
+		}
+		
 		public void setState( MyEnum state )
 		{
 			this.state = state;
@@ -102,6 +108,26 @@ public class MainTest
 		public boolean isActive()
 		{
 			return active;
+		}
+
+		public void setPojo( MyPOJO pojo )
+		{
+			this.pojo = pojo;
+		}
+
+		public MyPOJO getPojo()
+		{
+			return pojo;
+		}
+
+		public void setName( String name )
+		{
+			this.name = name;
+		}
+
+		public String getName()
+		{
+			return name;
 		}
 		
 	}
