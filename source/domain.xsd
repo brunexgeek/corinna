@@ -215,5 +215,4 @@
 		</xs:complexType>
 	</xs:element>
 
-    <xs:element name="NewElement" type="xs:string"></xs:element>
 </xs:schema>

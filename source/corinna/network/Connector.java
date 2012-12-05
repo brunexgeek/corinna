@@ -163,6 +163,7 @@ public abstract class Connector extends Lifecycle implements IConnector,
 	{
 		try
 		{
+			if (this.channel == null) return;
 			ChannelFuture future = this.channel.unbind();
 			future.await();
 			this.channel = null;

@@ -37,7 +37,23 @@ import corinna.core.ContextInfo;
 import corinna.rpc.ParameterList;
 import corinna.rpc.ProcedureCall;
 
-
+/**
+ * Implements an abstract REST bindlet that can receive GET and POST requests.
+ * 
+ * <h2>Parameters</h2>
+ * 
+ * The following parameters can be setted for this bindlet:
+ * 
+ * <dl>
+ *    <dt>CompatibilityMode</dt>
+ *    <dd>defines whether the component should accept that the method name is 
+ *    provided via "method" parameter (GET or POST) rather than be supplied in the URL.</dd>
+ * </dl>
+ * 
+ * @author Bruno Ribeiro <brunoc@cpqd.com.br>
+ * @version 1.0
+ * @since 1.0
+ */
 @SuppressWarnings("serial")
 public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBindletResponse>
 {
@@ -110,7 +126,9 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		if (response.isClosed()) return;
 
 		if (charset == null) charset = Charset.defaultCharset();
-		
+		// TODO: this shouldn't be here!
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		response.addHeader("Access-Control-Allow-Methods", "*");
 		response.setCharacterEncoding(charset);
 		
 		BindletOutputStream out = response.getOutputStream();
