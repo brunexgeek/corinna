@@ -1,5 +1,6 @@
 package corinna.http.core.auth.basic;
 
+import javax.bindlet.IBindletAuthenticator;
 import javax.bindlet.IBindletRequest;
 import javax.bindlet.IBindletResponse;
 import javax.bindlet.http.HttpStatus;
@@ -8,7 +9,6 @@ import javax.bindlet.http.IWebBindletResponse;
 
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 
-import corinna.auth.bindlet.IBindletAuthenticator;
 import corinna.http.core.auth.IUser;
 import corinna.http.core.auth.IUserDatabase;
 import corinna.util.Base64;
@@ -36,13 +36,11 @@ public class BasicBindletAuthenticator implements IBindletAuthenticator
 		if (!(response instanceof IWebBindletResponse)) return false;
 		
 		IWebBindletRequest req = (IWebBindletRequest) request;
-		IWebBindletResponse res = (IWebBindletResponse) response;
 		
 		String value = req.getHeader(HttpHeaders.Names.AUTHORIZATION);
 		if (value != null && authenticate(req)) return true;
 	
-		res.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"vaas.tts\"");
-		res.setStatus(HttpStatus.UNAUTHORIZED);
+		unauthorize(request, response);
 		return false;
 	}
 
@@ -82,6 +80,16 @@ public class BasicBindletAuthenticator implements IBindletAuthenticator
 		boolean result =  user.getPassword().equals(password);
 		if (result) request.setUserName(userName);
 		return result;
+	}
+
+	@Override
+	public void unauthorize( IBindletRequest request, IBindletResponse response )
+	{
+		if (!(response instanceof IWebBindletResponse)) return;
+		IWebBindletResponse res = (IWebBindletResponse) response;
+		
+		res.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"vaas.tts\"");
+		res.setStatus(HttpStatus.UNAUTHORIZED);
 	}
 	
 }

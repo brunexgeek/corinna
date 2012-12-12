@@ -28,6 +28,7 @@ import corinna.soap.network.SoapMarshaller;
 import corinna.soap.network.SoapUnmarshaller;
 
 
+// TODO: merge with "javax.bindlet.soap.SoapBindlet"
 @SuppressWarnings("serial")
 public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 {

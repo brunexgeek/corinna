@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import javax.bindlet.Bindlet;
+import javax.bindlet.IBindletAuthenticator;
 import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpMethod;
@@ -68,8 +69,12 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 	private static final String COMPONENT_IMPLEMENTOR = "Bruno Ribeiro";
 
+	private static final String INIT_PARAM_IS_RESTRICTED = "isRestricted";
+
 	private static IComponentInformation COMPONENT_INFO = new ContextInfo(COMPONENT_NAME,
 		COMPONENT_VERSION, COMPONENT_IMPLEMENTOR);
+
+	private IBindletAuthenticator authenticator = null;
 
 	public RestBindlet() throws BindletException
 	{
@@ -79,7 +84,7 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 	@Override
 	public void process( IHttpBindletRequest request, IHttpBindletResponse response )
-		throws BindletException
+		throws BindletException, IOException
 	{
 		Exception exception = null;
 		Object result = null;
@@ -130,29 +135,27 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		response.addHeader("Access-Control-Allow-Origin", "*");
 		response.addHeader("Access-Control-Allow-Methods", "*");
 		response.setCharacterEncoding(charset);
+
+		ParameterList buffer = new ParameterList(charset);
+
+		if (exception != null)
+		{
+			buffer.setValue("result", "ERROR");
+			buffer.setValue("message", exception.getMessage());
+		}
+		else
+		{
+			buffer.setValue("result", "OK");
+			if (returnValue == null) returnValue = "";
+			buffer.setValue("return", returnValue);
+		}
+		byte[] output = buffer.toString().getBytes(charset);
 		
+		response.setContentLength(output.length);
 		BindletOutputStream out = response.getOutputStream();
 		try
 		{
-			if (!out.isClosed() && out.writtenBytes() == 0)
-			{
-				ParameterList buffer = new ParameterList(charset);
-
-				if (exception != null)
-				{
-					buffer.setValue("result", "ERROR");
-					buffer.setValue("message", exception.getMessage());
-				}
-				else
-				{
-					buffer.setValue("result", "OK");
-					if (returnValue == null) returnValue = "";
-					buffer.setValue("return", returnValue);
-				}
-
-				byte[] output = buffer.toString().getBytes(charset);
-				out.write(output);
-			}
+			if (!out.isClosed() && out.writtenBytes() == 0) out.write(output);
 		} catch (Exception e)
 		{
 			// suprime os erros
@@ -257,12 +260,19 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		return procedureCall;
 	}
 
-	public abstract boolean isRestricted();
+	public boolean isRestricted()
+	{
+		String value = getInitParameter(INIT_PARAM_IS_RESTRICTED);
+		return (authenticator != null && (value != null && value.equalsIgnoreCase("true")));
+	}
 	
 	protected boolean doAuthentication( IHttpBindletRequest request, IHttpBindletResponse response )
-	throws BindletException
+	throws BindletException, IOException
 	{
-		return !isRestricted();
+		if (authenticator != null)
+			return authenticator.authenticate(request, response);
+		else
+			throw new BindletException("No authenticator configured");
 	}
 	
 }

@@ -18,7 +18,6 @@ import javax.wsdl.xml.WSDLWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import corinna.auth.bindlet.IBindletAuthenticator;
 import corinna.rpc.CanonicalPrototypeFilter;
 import corinna.rpc.ClassDescriptor;
 import corinna.rpc.IPrototypeFilter;
@@ -57,8 +56,6 @@ public class DefaultSoapBindlet extends SoapBindlet
 	private Definition wsdl = null;
 	
 	private ObjectLocker wsdlLock = new ObjectLocker();
-	
-	protected IBindletAuthenticator authenticator = null;
 	
 	private Boolean isInitialized = false;
 	
@@ -212,30 +209,11 @@ public class DefaultSoapBindlet extends SoapBindlet
 		else
 			return generateWsdl(req);
 	}
-	
-	@Override
-	protected boolean doAuthentication( IHttpBindletRequest request, IHttpBindletResponse response )
-		throws BindletException, IOException
-	{
-		if (authenticator != null)
-		{
-			return authenticator.authenticate(request, response);
-		}
-		else
-			return false;
-	}
-
-	@Override
-	public boolean isRestricted()
-	{
-		return (authenticator != null);
-	}
 
 	@Override
 	public IComponentInformation getBindletInfo()
 	{
 		return bindletInfo;
 	}
-
 	
 }

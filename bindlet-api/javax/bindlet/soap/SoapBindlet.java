@@ -4,6 +4,7 @@ package javax.bindlet.soap;
 import java.io.IOException;
 
 import javax.bindlet.Bindlet;
+import javax.bindlet.IBindletAuthenticator;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpMethod;
 import javax.bindlet.http.HttpStatus;
@@ -17,6 +18,10 @@ public abstract class SoapBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 {
 
 	private static final String WSDL_SUFFIX = "?wsdl";
+
+	private static final String INIT_PARAM_IS_RESTRICTED = "isRestricted";
+
+	private IBindletAuthenticator authenticator = null;
 
 	public SoapBindlet() throws BindletException
 	{
@@ -34,11 +39,14 @@ public abstract class SoapBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		throws BindletException, IOException
 	{
 	}
-	
+
 	protected boolean doAuthentication( IHttpBindletRequest request, IHttpBindletResponse response )
 		throws BindletException, IOException
 	{
-		return !isRestricted();
+		if (authenticator  != null)
+			return authenticator.authenticate(request, response);
+		else
+			throw new BindletException("No authenticator configured");
 	}
 
 	@Override
@@ -46,25 +54,29 @@ public abstract class SoapBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		throws BindletException, IOException
 	{
 		response.setContentType("text/xml");
-		if (request == null)
-			response.sendError(HttpStatus.BAD_REQUEST);
+		if (request == null) response.sendError(HttpStatus.BAD_REQUEST);
 
 		if (request.getHttpMethod() == HttpMethod.GET)
 		{
-			if (request != null && request.getRequestURI().toString().endsWith(WSDL_SUFFIX))
+			if (request.getRequestURI().toString().endsWith(WSDL_SUFFIX))
 				doGet(request, response);
 			else
-				response.sendError(HttpStatus.BAD_REQUEST);
+				response.sendError(HttpStatus.METHOD_NOT_ALLOWED);
 		}
 		else
 		{
 			if (isRestricted() && !doAuthentication(request, response)) return;
 			doPost(request, response);
-		}	
+		}
 	}
-	
-	protected abstract IProcedureCall getProcedureCall( IHttpBindletRequest request, IHttpBindletResponse response );
-	
-	public abstract boolean isRestricted();
+
+	protected abstract IProcedureCall getProcedureCall( IHttpBindletRequest request,
+		IHttpBindletResponse response );
+
+	public boolean isRestricted()
+	{
+		String value = getInitParameter(INIT_PARAM_IS_RESTRICTED);
+		return (authenticator != null && (value != null && value.equalsIgnoreCase("true")));
+	}
 
 }

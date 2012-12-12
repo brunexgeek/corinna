@@ -21,14 +21,11 @@ import javax.bindlet.BindletModel;
 import javax.bindlet.BindletModel.Model;
 import javax.bindlet.IBindletConfig;
 import javax.bindlet.exception.BindletException;
-import javax.bindlet.http.IHttpBindletRequest;
-import javax.bindlet.http.IHttpBindletResponse;
 import javax.bindlet.rpc.IProcedureCall;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import corinna.auth.bindlet.IBindletAuthenticator;
 import corinna.rpc.CanonicalPrototypeFilter;
 import corinna.rpc.IPrototypeFilter;
 import corinna.rpc.MethodRunner;
@@ -45,8 +42,6 @@ public class DefaultRestBindlet extends RestBindlet
 	public static final String PARAMETER_INTERFACE = "interfaceClass";
 	
 	public static final String PARAMETER_IMPLEMENTATION = "implementationClass";
-	
-	protected IBindletAuthenticator authenticator = null;
 	
 	private MethodRunner runner = null;
 
@@ -121,24 +116,6 @@ public class DefaultRestBindlet extends RestBindlet
 		{
 			throw new BindletException("Error loading class '" + name + "'", e);
 		}
-	}
-	
-	@Override
-	protected boolean doAuthentication( IHttpBindletRequest request, IHttpBindletResponse response )
-		throws BindletException
-	{
-		if (authenticator != null)
-		{
-			return authenticator.authenticate(request, response);
-		}
-		else
-			return false;
-	}
-	
-	@Override
-	public boolean isRestricted()
-	{
-		return (authenticator != null);
 	}
 	
 }

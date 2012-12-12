@@ -19,9 +19,9 @@ package javax.bindlet.http;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.text.MessageFormat;
 
 import javax.bindlet.Bindlet;
+import javax.bindlet.IBindletAuthenticator;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.io.HttpBindletOutputStream;
 
@@ -86,6 +86,9 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 	private static final String HEADER_LASTMOD = "Last-Modified";
 
+	private static final String INIT_PARAM_IS_RESTRICTED = "isRestricted";
+
+	private IBindletAuthenticator authenticator = null;
 	
 	/**
 	 * Does nothing, because this is an abstract class.
@@ -693,17 +696,26 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 									// method was requested, anywhere on this server.
 									//
 
-									String errMsg = "Method not implemented";
-									Object[] errArgs = new Object[1];
-									errArgs[0] = method;
-									errMsg = MessageFormat.format(errMsg, errArgs);
-
 									response.sendError(HttpStatus.NOT_IMPLEMENTED);
 								}
 	}
 
-	public abstract boolean isRestricted();
+	public boolean isRestricted()
+	{
+		String value = getInitParameter(INIT_PARAM_IS_RESTRICTED);
+		return (authenticator != null && (value != null && value.equalsIgnoreCase("true")));
+	}
 
+	protected void setAuthenticator( IBindletAuthenticator authenticator )
+	{
+		this.authenticator = authenticator;
+	}
+	
+	protected IBindletAuthenticator getAuthenticator()
+	{
+		return authenticator;
+	}
+	
 	/**
 	 * Sets the Last-Modified entity header field, if it has not already been set and if the value
 	 * is meaningful. Called before doGet, to ensure that headers are set before response data is
@@ -752,7 +764,10 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	protected boolean doAuthentication( IHttpBindletRequest request, IHttpBindletResponse response )
 		throws BindletException, IOException
 	{
-		return !isRestricted();
+		if (authenticator != null)
+			return authenticator.authenticate(request, response);
+		else
+			throw new BindletException("No authenticator configured");
 	}
 
 }
