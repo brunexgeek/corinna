@@ -79,4 +79,14 @@ public abstract class SoapBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		return (authenticator != null && (value != null && value.equalsIgnoreCase("true")));
 	}
 
+	protected void setAuthenticator( IBindletAuthenticator authenticator )
+	{
+		this.authenticator = authenticator;
+	}
+	
+	protected IBindletAuthenticator getAuthenticator()
+	{
+		return authenticator;
+	}
+	
 }

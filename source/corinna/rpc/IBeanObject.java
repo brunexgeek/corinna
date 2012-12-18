@@ -3,11 +3,8 @@ package corinna.rpc;
 
 import java.util.Iterator;
 
-import com.sun.org.apache.bcel.internal.generic.CASTORE;
-
 import corinna.exception.BeanObjectException;
 import corinna.json.core.JSONException;
-import corinna.json.core.JSONObject;
 
 
 public interface IBeanObject

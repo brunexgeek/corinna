@@ -275,4 +275,14 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 			throw new BindletException("No authenticator configured");
 	}
 	
+	protected void setAuthenticator( IBindletAuthenticator authenticator )
+	{
+		this.authenticator = authenticator;
+	}
+	
+	protected IBindletAuthenticator getAuthenticator()
+	{
+		return authenticator;
+	}
+	
 }

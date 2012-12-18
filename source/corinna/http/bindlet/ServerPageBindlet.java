@@ -2,10 +2,18 @@ package corinna.http.bindlet;
 
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.bindlet.BindletModel;
+import javax.bindlet.BindletModel.Model;
 import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpBindlet;
@@ -14,10 +22,22 @@ import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 import javax.bindlet.io.BindletOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ServerPagesBindlet extends HttpBindlet
+import corinna.exception.JSPCompilerException;
+import corinna.exception.JSPParserException;
+import corinna.http.jsp.IServerPageRender;
+import corinna.http.jsp.JSPGenerator;
+import corinna.thread.ObjectLocker;
+
+
+@BindletModel(Model.STATELESS)
+public class ServerPageBindlet extends HttpBindlet
 {
 
+	private static Logger serverLog = LoggerFactory.getLogger(ServerPageBindlet.class);
+	
 	private static final long serialVersionUID = 773622322084886911L;
 
 	private static final String CONFIG_DOCUMENT_ROOT = "documentRoot";
@@ -29,7 +49,11 @@ public class ServerPagesBindlet extends HttpBindlet
 	private static final String HTTP_FIELD_CONNECTION = "Connection";
 
 	private static final String HTTP_FIELD_SERVER = "Server";
+	
+	private static Map<String, Class<?>>compiledPages = new HashMap<String, Class<?>>();
 
+	private static ObjectLocker lock = new ObjectLocker();
+	
 	/**
 	 * Tempo máximo, em segundos, na qual um cliente deve manter a conexão aberta sem atividade.
 	 * Esse valor é utilizado no campo de cabeçalho HTTP {@link HTTP_FIELD_KEEP_ALIVE}.
@@ -42,7 +66,7 @@ public class ServerPagesBindlet extends HttpBindlet
 	 */
 	private static final int HTTP_KEEP_ALIVE_MAX = 10;
 
-	public ServerPagesBindlet() throws BindletException
+	public ServerPageBindlet() throws BindletException
 	{
 		super();
 	}
@@ -80,17 +104,19 @@ public class ServerPagesBindlet extends HttpBindlet
 			response.sendError(HttpStatus.NOT_FOUND);
 			return;
 		}
-
-		// serverLog.info("Start download of file '" + file.getAbsolutePath() + "'");
+		// obtém a classe responsável por renderizar a página
+		Class<?> classRef = findRender(file);
+		if (classRef == null)
+		{
+			response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
+			return;
+		}
+		//serverLog.info("Requesting page '" + file.getAbsolutePath() + "'");
 
 		BindletOutputStream out = null;
-		InputStream in = null;
-
+				
 		try
 		{
-			in = new FileInputStream(file);
-			int outputLength = (int) file.length();
-
 			// define a data na qual o recurso foi fornecido e a data do recurso em si
 			response.setDateHeader(HTTP_FIELD_DATE, System.currentTimeMillis());
 			// response.setDateHeader( HTTP_FIELD_LAST_MODIFIED, file.lastModified() );
@@ -104,64 +130,25 @@ public class ServerPagesBindlet extends HttpBindlet
 			response.setHeader(HTTP_FIELD_SERVER, "CPqD VaaS");
 
 			// diretiva HTTP para informar o tamanho do conteúdo
-			response.setContentLength(outputLength);
+			//response.setContentLength(outputLength);
 
-			// envia os dados do arquivo (completa ou parcialmente)
+			// prepara para enviar os dados
 			out = response.getOutputStream();
-			sendData(out, in, 0, outputLength);
+			PrintWriter writer = new PrintWriter(out);
+			// processa a página JSP
+			IServerPageRender render = (IServerPageRender) classRef.newInstance();
+			render.render(writer);
+			writer.flush();
+			out.flush();
 		} catch (Exception e)
 		{
 			response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
+			serverLog.error("Internal JSP error", e);
 		} finally
 		{
-			if (in != null) in.close();
-			in = null;
 			if (out != null) out.close();
 			out = null;
 		}
-	}
-
-	private long sendData( BindletOutputStream output, InputStream input, long start, long length )
-		throws IOException
-	{
-		long required, block, counter = 0;
-		int readed = 0;
-		byte buffer[] = new byte[1024];
-
-		if (start < 0 || length < 0)
-			throw new IllegalArgumentException(
-				"The start offset and length must be a positive value");
-		if (start >= length)
-			throw new IllegalArgumentException("The start offset must be less than length");
-
-		// solicita um buffer para a cópia
-		block = buffer.length;
-		counter = length;
-
-		try
-		{
-			// ignora os 'start' bytes iniciais do fluxo
-			input.skip(start);
-
-			while (readed < 0 || counter > 0)
-			{
-				required = (counter > block) ? block : counter;
-
-				// efetua a leitura dos dados
-				readed = input.read(buffer, 0, (int) required);
-				if (readed < 0) break;
-				counter -= readed;
-
-				// envia um bloco de dados
-				output.write(buffer, 0, readed);
-				// serverLog.info("DOWNLOAD: Written %d bytes to client" + readed);
-
-			}
-		} finally
-		{
-		}
-		// serverLog.info("DOWNLOAD: Completed!");
-		return counter;
 	}
 
 	/**
@@ -179,4 +166,52 @@ public class ServerPagesBindlet extends HttpBindlet
 		return file;
 	}
 
+	private Class<?> findRender( File path ) throws BindletException, IOException
+	{
+		Class<?> classRef;
+
+		if (path == null || !path.canRead()) return null;
+
+		String className = path.getAbsolutePath().replaceAll("[^a-zA-Z0-9]", "_");
+		className = "jsp_" + className;
+		
+		// check if we have some class with generated name
+		lock.readLock();
+		try
+		{
+			classRef = compiledPages.get(className);
+			if (classRef != null) return classRef;
+		} catch (Exception e)
+		{
+			classRef = null;
+		} finally 
+		{
+			lock.readUnlock();
+		}
+		
+		// load and process the JSP file
+		try
+		{
+			Reader reader = new FileReader(path);
+			classRef = JSPGenerator.compile(null, className, reader);
+			reader.close();
+		} catch (FileNotFoundException e)
+		{
+			throw new IOException("Error reading JSP page", e);
+		} catch (Exception e)
+		{
+			throw new BindletException("Error processing JSP page", e);
+		}
+		// add the new JSP class to the list and return
+		lock.writeLock();
+		try
+		{
+			compiledPages.put(className, classRef);
+			return classRef;
+		} finally
+		{
+			lock.writeUnlock();
+		}
+	}
+	
 }
