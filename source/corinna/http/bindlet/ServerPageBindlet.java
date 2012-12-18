@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.HashMap;
@@ -25,8 +23,6 @@ import javax.bindlet.io.BindletOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import corinna.exception.JSPCompilerException;
-import corinna.exception.JSPParserException;
 import corinna.http.jsp.IServerPageRender;
 import corinna.http.jsp.JSPGenerator;
 import corinna.thread.ObjectLocker;
@@ -50,7 +46,7 @@ public class ServerPageBindlet extends HttpBindlet
 
 	private static final String HTTP_FIELD_SERVER = "Server";
 	
-	private static Map<String, Class<?>>compiledPages = new HashMap<String, Class<?>>();
+	private static Map<String, PrecompiledClass>compiledPages = new HashMap<String, PrecompiledClass>();
 
 	private static ObjectLocker lock = new ObjectLocker();
 	
@@ -137,6 +133,7 @@ public class ServerPageBindlet extends HttpBindlet
 			PrintWriter writer = new PrintWriter(out);
 			// processa a página JSP
 			IServerPageRender render = (IServerPageRender) classRef.newInstance();
+			render.request = request;
 			render.render(writer);
 			writer.flush();
 			out.flush();
@@ -166,24 +163,26 @@ public class ServerPageBindlet extends HttpBindlet
 		return file;
 	}
 
-	private Class<?> findRender( File path ) throws BindletException, IOException
+	private Class<?> findRender( File file ) throws BindletException, IOException
 	{
-		Class<?> classRef;
+		PrecompiledClass entry = null;
+		Class<?> classRef = null;
 
-		if (path == null || !path.canRead()) return null;
+		if (file == null || !file.canRead()) return null;
 
-		String className = path.getAbsolutePath().replaceAll("[^a-zA-Z0-9]", "_");
+		String className = file.getAbsolutePath().replaceAll("[^a-zA-Z0-9]", "_");
 		className = "jsp_" + className;
+		long date = file.lastModified();
 		
 		// check if we have some class with generated name
 		lock.readLock();
 		try
 		{
-			classRef = compiledPages.get(className);
-			if (classRef != null) return classRef;
+			entry = compiledPages.get(className);
+			if (entry != null && entry.lastModified() == date) return entry.getCompiledClass();
 		} catch (Exception e)
 		{
-			classRef = null;
+			// nothing to do
 		} finally 
 		{
 			lock.readUnlock();
@@ -192,26 +191,53 @@ public class ServerPageBindlet extends HttpBindlet
 		// load and process the JSP file
 		try
 		{
-			Reader reader = new FileReader(path);
-			classRef = JSPGenerator.compile(null, className, reader);
+			Reader reader = new FileReader(file);
+			classRef = JSPGenerator.compile(null, className + date, reader);
 			reader.close();
 		} catch (FileNotFoundException e)
 		{
 			throw new IOException("Error reading JSP page", e);
 		} catch (Exception e)
 		{
+			serverLog.error("Error processing JSP page", e);
 			throw new BindletException("Error processing JSP page", e);
 		}
 		// add the new JSP class to the list and return
 		lock.writeLock();
 		try
 		{
-			compiledPages.put(className, classRef);
+			entry = new PrecompiledClass(classRef, date);
+			compiledPages.put(className, entry);
 			return classRef;
 		} finally
 		{
 			lock.writeUnlock();
 		}
+	}
+	
+	private static class PrecompiledClass
+	{
+		
+		private Class<?> classRef = null;
+		
+		private long modifiedDate = 0;
+		
+		public PrecompiledClass( Class<?> classRef, long date )
+		{
+			this.classRef = classRef;
+			this.modifiedDate = date;
+		}
+		
+		public long lastModified()
+		{
+			return modifiedDate;
+		}
+		
+		public Class<?> getCompiledClass()
+		{
+			return classRef;
+		}
+		
 	}
 	
 }

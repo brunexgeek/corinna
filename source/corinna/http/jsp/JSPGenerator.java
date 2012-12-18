@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -13,8 +14,12 @@ import java.util.StringTokenizer;
 
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
+
+import javax.bindlet.http.IHttpBindletRequest;
+
 import corinna.exception.JSPCompilerException;
 import corinna.exception.JSPParserException;
 
@@ -32,28 +37,47 @@ public class JSPGenerator
 		parser.parse();
 		GeneratorContext context = createContext(parser.elements);
 
-		StringBuilder source = context.out;
 		// write the 'render' method
+		StringBuilder source = context.out;
 		source.append(context.INDENTATION + context.RENDER_METHOD);
 		source.append(context.INDENTATION + "{ ");
 		for (JSPElement element : context.renderSegments)
 			render(context, element);
 		source.append(context.INDENTATION + "}");
+		// create the imports array
+		String imports[] = context.importList.split("[, \t\f\r\n]");
+		
+		return createRenderClass(className, source.toString(), imports);
+	}
 
+	private static Class<?> createRenderClass( String className, String renderCode, String[] imports ) throws JSPCompilerException
+	{
 		try
 		{
-			CtClass parent = ClassPool.getDefault().get("corinna.http.jsp.IServerPageRender");
-			CtClass newClass = ClassPool.getDefault().makeClass(className);
-			newClass.addInterface(parent);
-			CtMethod method = CtNewMethod.make(source.toString(), newClass);
+			ClassPool pool = ClassPool.getDefault();
+			if (pool == null) return null;
+			
+			// import all packages
+			for (String item : imports) pool.importPackage(item);
+			
+			// create the class
+			CtClass parent = pool.get(IServerPageRender.class.getName());
+			CtClass newClass = pool.makeClass(className, parent);
+			// create the "render" method
+			CtMethod method = CtNewMethod.make(renderCode, newClass);
 			newClass.addMethod(method);
-			return newClass.toClass();
+			
+			Class<?> result = newClass.toClass();
+			newClass.detach();
+			pool.clearImportedPackages();
+			
+			return result;
 		} catch (Exception e)
 		{
 			throw new JSPCompilerException("Error compiling JSP", e);
 		}
 	}
-
+	
 	static public void translate( String pkgName, String className, Reader input, Writer output )
 		throws IOException, JSPParserException
 	{
@@ -148,7 +172,7 @@ public class JSPGenerator
 								context.superClassName = attrValue;
 							else
 								if (attrName.equals("import"))
-									context.importList = attrValue;
+									context.importList += " " + attrValue;
 								else
 									if (attrName.equals("render-method"))
 										context.RENDER_METHOD = attrValue;
@@ -216,7 +240,6 @@ public class JSPGenerator
 
 	}
 
-	// --------------------------------------------------------
 
 	static boolean isBlank( StringBuffer buf )
 	{
@@ -237,25 +260,25 @@ public class JSPGenerator
 			switch (c)
 			{
 				case '\b':
-					out.append('\\').append('b');
+					out.append("\\b");
 					break;
 				case '\t':
-					out.append('\\').append('t');
+					out.append("\\t");
 					break;
 				case '\n':
-					out.append('\\').append('n');
+					out.append("\\n");
 					break;
 				case '\f':
-					out.append('\\').append('f');
+					out.append("\\f");
 					break;
 				case '\r':
-					out.append('\\').append('r');
+					out.append("\\r");
 					break;
 				case '\"':
-					out.append('\\').append('\"');
+					out.append("\\\"");
 					break;
 				case '\\':
-					out.append('\\').append('\\');
+					out.append("\\");
 					break;
 				default:
 					out.append(c);
@@ -283,13 +306,13 @@ public class JSPGenerator
 
 		public String EXPR_WRAPPER = "String.valueOf";
 
-		public String INDENTATION = "    ";
+		public String INDENTATION = "\t";
 
 		public boolean WS_GOBBLING = true;
 
 		public String superClassName = null;
 
-		public String importList = null;
+		public String importList = "";
 
 		public List<JSPElement> declarations = new ArrayList<JSPElement>();
 

@@ -2,10 +2,15 @@ package corinna.http.jsp;
 
 import java.io.PrintWriter;
 
+import javax.bindlet.http.IHttpBindletRequest;
 
-public interface IServerPageRender
+
+// TODO: rename to "ServerPageRender"
+public abstract class IServerPageRender
 {
-
-	public void render( PrintWriter out );
+	
+	public IHttpBindletRequest request = null;
+	
+	public abstract void render( PrintWriter out );
 	
 }
