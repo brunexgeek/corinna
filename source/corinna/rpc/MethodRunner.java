@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.bindlet.BindletModel.Model;
 import javax.bindlet.rpc.IProcedureCall;
 
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ import corinna.exception.InvocationTargetException;
 import corinna.exception.MethodNotFoundException;
 import corinna.exception.ParameterNotFoundException;
 import corinna.rpc.annotation.Parameter;
+import corinna.util.StateModel;
 import corinna.util.StringResource;
 
 
@@ -120,12 +122,12 @@ public class MethodRunner implements IMethodRunner
 		this.data = data;
 		registerImplementation(intfClass, implClass);
 
-		// verifica se a implementação do serviço é stateless
-		ServiceImplementation annot = implClass.getAnnotation(ServiceImplementation.class);
-		if (annot != null && annot.isStateless())
+		// verifica se a implementação do serviço é STATELESS
+		StateModel model = (StateModel) ReflectionUtil.getAnnotation(implClass, StateModel.class);
+		if (model != null && model.value() == Model.STATELESS)
 		{
 			implementation = createImplementation();
-			serverLog.debug(StringResource.get(MethodRunner.class, 0, implClass.getName()));
+			serverLog.debug("Created stateless component of '" + implClass.getName() + "'");
 		}
 	}
 

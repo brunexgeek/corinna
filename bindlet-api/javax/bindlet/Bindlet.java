@@ -191,5 +191,5 @@ public abstract class Bindlet<R, P> implements IBindlet<R, P>, Serializable
 		if (config == null) return null;
 		return config.getBindletName();
 	}
-	
+
 }

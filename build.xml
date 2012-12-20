@@ -9,6 +9,7 @@
 		<property file="${basedir}/build.properties" />
 
 		<path id="core.path">
+			<fileset dir="${global.dir.libs}" includes="**/javassist.jar" />
 			<fileset dir="${global.dir.libs}" includes="**/wsdl4j.jar" />
 			<fileset dir="${global.dir.libs}" includes="**/qname.jar" />
 			<fileset dir="${global.dir.libs}" includes="**/logback-*.jar" />

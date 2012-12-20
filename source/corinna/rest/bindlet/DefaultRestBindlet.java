@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import corinna.rpc.CanonicalPrototypeFilter;
 import corinna.rpc.IPrototypeFilter;
 import corinna.rpc.MethodRunner;
+import corinna.rpc.ReflectionUtil;
 import corinna.util.StateModel;
 
 @BindletModel(Model.STATELESS)
@@ -56,6 +57,8 @@ public class DefaultRestBindlet extends RestBindlet
 	{
 		IBindletConfig config = getBindletConfig();
 
+		// TODO: avoid initialize twice
+		
 		// load the interface class name
 		String intfClassName = config.getBindletParameter(PARAMETER_INTERFACE);
 		if (intfClassName == null || intfClassName.isEmpty())
@@ -71,14 +74,14 @@ public class DefaultRestBindlet extends RestBindlet
 		Class<?> implClass = loadClass(implClassName);
 		
 		// check if the component and the bindlet have a compatible model
-		StateModel classModel = intfClass.getClass().getAnnotation(StateModel.class);
+		StateModel classModel = (StateModel) ReflectionUtil.getAnnotation(intfClass, StateModel.class);
 		if (classModel == null)
-			classModel = implClass.getClass().getAnnotation(StateModel.class);
-		BindletModel bindModel = this.getClass().getAnnotation(BindletModel.class);
-		if (classModel != null && bindModel != null)
+			classModel = (StateModel) ReflectionUtil.getAnnotation(implClass, StateModel.class);
+		BindletModel bindModel = (BindletModel) ReflectionUtil.getAnnotation(this.getClass(), BindletModel.class);
+		if (bindModel != null)
 		{
 			if (bindModel.value() == BindletModel.Model.STATELESS && 
-			    classModel.value() != BindletModel.Model.STATELESS)
+			    (classModel == null || classModel.value() != BindletModel.Model.STATELESS))
 				throw new BindletException("Both the bindlet and the component should be stateless");
 		}
 		

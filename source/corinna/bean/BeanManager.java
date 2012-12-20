@@ -109,11 +109,11 @@ public class BeanManager
 					current.set(object, bean);
 					if (!state) current.setAccessible(false);
 					
-					log.debug("Service bean '{}' injected in '{}'", bean.getName(), object.toString() );
+					//log.debug("Service bean '{}' injected in '{}'", bean.getName(), object.toString() );
 				}
 			} catch (Exception e)
 			{
-				// suppress any error
+				log.error("Fail to inject service bean '{}' in '{}'", bean.getName(), object.toString() );
 			}
 		}
 	}

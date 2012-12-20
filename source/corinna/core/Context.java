@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.bindlet.BindletModel.Model;
 import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletContext;
 import javax.bindlet.exception.BindletException;
@@ -108,15 +109,22 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 	protected boolean dispatchEventToBindlet( R request, P response ) throws BindletException,
 		IOException
 	{
-		// find the registration of the bindlet that must process this request
+		// find the registration of the bindlet that should process this request
 		IBindletRegistration reg = getBindletRegistration(request);
 		if (reg == null) return false;
 		IBindlet<R, P> bindlet = (IBindlet<R, P>) reg.createBindlet();
-		// process the request event
-		bindlet.init(reg.getBindletConfig());
+		Model model = bindlet.getBindletModel();
+		
+		// initialize the bindlet only if is not STATELESS, because it's already initialized
+		if (model != Model.STATELESS) bindlet.init(reg.getBindletConfig());
+		// process the request
 		bindlet.process(request, response);
-		bindlet.destroy();
+		// destroy the bindlet only if is not STATELESS
+		if (model != Model.STATELESS) bindlet.destroy();
+		
+		// release the bindlet (do different things depending on the state model)
 		reg.releaseBindlet(bindlet);
+		
 		return true;
 	}
 

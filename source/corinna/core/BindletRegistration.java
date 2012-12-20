@@ -194,6 +194,7 @@ public class BindletRegistration implements IBindletRegistration
 		if (instance == null)
 		{
 			instance = createBindletInstance();
+			instance.init(getBindletConfig());
 			bindletInstanceLock.writeLock();
 			bindletInstance = instance;
 			bindletInstanceLock.writeUnlock();
@@ -215,7 +216,7 @@ public class BindletRegistration implements IBindletRegistration
 				+ bindletClassName + "'", e);
 		}
 	
-		serverLog.trace("Created bindlet instance");
+		serverLog.trace("Created bindlet instance of '" + bindletClass.getName() + "'");
 		
 		// inject all referenced service beans
 		BeanManager.getInstance().inject(instance);

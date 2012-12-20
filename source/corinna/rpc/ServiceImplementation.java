@@ -16,7 +16,7 @@
 
 package corinna.rpc;
 
-
+@Deprecated
 public @interface ServiceImplementation
 {
 

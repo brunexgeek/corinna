@@ -21,8 +21,10 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import javax.bindlet.Bindlet;
+import javax.bindlet.BindletModel;
 import javax.bindlet.IBindletAuthenticator;
 import javax.bindlet.IComponentInformation;
+import javax.bindlet.BindletModel.Model;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpMethod;
 import javax.bindlet.http.HttpStatus;
@@ -37,6 +39,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import corinna.core.ContextInfo;
 import corinna.rpc.ParameterList;
 import corinna.rpc.ProcedureCall;
+import corinna.rpc.ReflectionUtil;
 
 /**
  * Implements an abstract REST bindlet that can receive GET and POST requests.
@@ -283,6 +286,20 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	protected IBindletAuthenticator getAuthenticator()
 	{
 		return authenticator;
+	}
+
+	@Override
+	public Model getBindletModel()
+	{
+		try
+		{
+			BindletModel model = (BindletModel) ReflectionUtil.getAnnotation(this.getClass(), BindletModel.class);
+			if (model == null) return Model.STATEFULL;
+			return model.value();
+		} catch (Exception e)
+		{
+			return Model.STATEFULL;
+		}
 	}
 	
 }

@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import corinna.http.jsp.IServerPageRender;
 import corinna.http.jsp.JSPGenerator;
+import corinna.rpc.ReflectionUtil;
 import corinna.thread.ObjectLocker;
 
 
@@ -238,6 +239,20 @@ public class ServerPageBindlet extends HttpBindlet
 			return classRef;
 		}
 		
+	}
+	
+	@Override
+	public Model getBindletModel()
+	{
+		try
+		{
+			BindletModel model = (BindletModel) ReflectionUtil.getAnnotation(this.getClass(), BindletModel.class);
+			if (model == null) return Model.STATEFULL;
+			return model.value();
+		} catch (Exception e)
+		{
+			return Model.STATEFULL;
+		}
 	}
 	
 }

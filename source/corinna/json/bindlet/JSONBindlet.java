@@ -6,7 +6,9 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import javax.bindlet.Bindlet;
+import javax.bindlet.BindletModel;
 import javax.bindlet.IComponentInformation;
+import javax.bindlet.BindletModel.Model;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpMethod;
 import javax.bindlet.http.HttpStatus;
@@ -19,6 +21,7 @@ import javax.bindlet.rpc.IProcedureCall;
 import corinna.core.ContextInfo;
 import corinna.json.core.JSONObject;
 import corinna.rpc.ProcedureCall;
+import corinna.rpc.ReflectionUtil;
 
 
 @SuppressWarnings("serial")
@@ -187,6 +190,20 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 			throw new BindletException("Error parsing JSON procedure call", e);
 		}
 		return procedureCall;
+	}
+
+	@Override
+	public Model getBindletModel()
+	{
+		try
+		{
+			BindletModel model = (BindletModel) ReflectionUtil.getAnnotation(this.getClass(), BindletModel.class);
+			if (model == null) return Model.STATEFULL;
+			return model.value();
+		} catch (Exception e)
+		{
+			return Model.STATEFULL;
+		}
 	}
 	
 }

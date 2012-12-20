@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 
+import javax.bindlet.BindletModel;
+import javax.bindlet.BindletModel.Model;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IHttpBindletRequest;
@@ -23,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import corinna.rpc.ProcedureCall;
+import corinna.rpc.ReflectionUtil;
 import corinna.soap.core.WsdlGenerator;
 import corinna.soap.network.SoapMarshaller;
 import corinna.soap.network.SoapUnmarshaller;
@@ -194,4 +197,19 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 			response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	@Override
+	public Model getBindletModel()
+	{
+		try
+		{
+			BindletModel model = (BindletModel) ReflectionUtil.getAnnotation(this.getClass(), BindletModel.class);
+			if (model == null) return Model.STATEFULL;
+			return model.value();
+		} catch (Exception e)
+		{
+			return Model.STATEFULL;
+		}
+	}
+	
 }

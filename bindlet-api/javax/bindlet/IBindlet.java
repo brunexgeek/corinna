@@ -19,9 +19,8 @@ package javax.bindlet;
 
 import java.io.IOException;
 
+import javax.bindlet.BindletModel.Model;
 import javax.bindlet.exception.BindletException;
-
-
 
 
 /**
@@ -190,4 +189,6 @@ public interface IBindlet<R, P>
 	 */
 	public String getBindletName();
 
+	public Model getBindletModel();
+	
 }
