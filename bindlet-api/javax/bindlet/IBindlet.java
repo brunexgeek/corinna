@@ -40,8 +40,10 @@ import javax.bindlet.exception.BindletException;
  * constructed through a non-parametrized constructor and then initialized with the
  * <code>init</code> method. All requests received from a network listner are handled by
  * <code>process</code> method. When the bindlet is taken out of service, it's destroyed with the
- * <code>destroy</code> method. The bindlet can be stateless, in this case your instance will be
- * retained for future use.
+ * <code>destroy</code> method. The bindlet can be implemented to work in one of three state models:
+ * statefull, where each request will have your own bindlet instance; recycleable, when your 
+ * instance will be retained for future use; and stateless, to share one instance through all
+ * requests.
  * 
  * @author Bruno Ribeiro
  * @version 1.0
