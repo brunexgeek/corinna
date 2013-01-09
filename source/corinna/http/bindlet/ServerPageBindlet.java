@@ -2,6 +2,7 @@ package corinna.http.bindlet;
 
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import javax.bindlet.io.BindletOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import corinna.http.core.MimeTypeUtil;
 import corinna.http.jsp.IServerPageRender;
 import corinna.http.jsp.JSPGenerator;
 import corinna.rpc.ReflectionUtil;
@@ -79,28 +81,78 @@ public class ServerPageBindlet extends HttpBindlet
 		return null;
 	}
 
-	@Override
-	public void doGet( IHttpBindletRequest request, IHttpBindletResponse response )
+	protected String substringAfter( String text, Character symbol )
+	{
+		if (text == null || text.length() == 0) return null; 
+		int index = text.lastIndexOf(symbol);
+		if (index < 0) return null;
+		if (index + 1 >= text.length() - 1) return null;
+		return text.substring(index+1);
+	}
+	
+	protected String getMimeType( String fileName )
+	{
+		// extract the file name from the path
+		String name = substringAfter(fileName, '\\');
+		if (name == null) name = substringAfter(fileName, '/');
+		if (name == null)
+			return MimeTypeUtil.MIME_APPLICATION_OCTET_STREAM; 
+		// extract the file extension
+		String ext = substringAfter(name, '.');
+		if (ext == null)
+			return MimeTypeUtil.MIME_APPLICATION_OCTET_STREAM;
+		
+		return MimeTypeUtil.getMimeType( ext );
+	}
+	
+	protected void processFile( File file, String mime, IHttpBindletRequest request, IHttpBindletResponse response )
 		throws BindletException, IOException
 	{
-		if (getDocumentRoot() == null)
+		BindletOutputStream out = null;
+		FileInputStream in = null;
+		byte buffer[] = new byte[1024];
+		
+		try
+		{
+			in = new FileInputStream(file);
+			
+			// define a data na qual o recurso foi fornecido e a data do recurso em si
+			response.setDateHeader(HTTP_FIELD_DATE, System.currentTimeMillis());
+			// response.setDateHeader( HTTP_FIELD_LAST_MODIFIED, file.lastModified() );
+			// define o tipo de conteúdo
+			response.setContentType(mime);
+			// define as configurações relativas ao uso de conexões com o servidor
+			response.setHeader(HTTP_FIELD_CONNECTION, "keep-alive");
+			response.setHeader(HTTP_FIELD_KEEP_ALIVE, "timeout=" + HTTP_KEEP_ALIVE_TIMEOUT
+				+ ", max=" + HTTP_KEEP_ALIVE_MAX);
+			// define o nome do servidor (inibe informações do AS)
+			response.setHeader(HTTP_FIELD_SERVER, "CPqD VaaS");
+
+			// diretiva HTTP para informar o tamanho do conteúdo
+			//response.setContentLength(outputLength);
+
+			// prepara para enviar os dados
+			out = response.getOutputStream();
+			int length = 0;
+			while ((length = in.read(buffer)) > 0)
+				out.write(buffer, 0, length);
+			out.flush();
+		} catch (Exception e)
 		{
 			response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
-			return;
-		}
-
-		// limpa o nome para evitar construções que permitam acessar arquivos do sistema que não
-		// estejam no diretório permitido
-		String fileName = request.getResourcePath();
-		fileName = fileName.replace("..", "");
-
-		// localiza o arquivo indicando
-		File file = findFile(fileName);
-		if (file == null || file.length() == 0)
+			serverLog.error("Error sending the content of the file \"" + file.getAbsolutePath() + "\"", e);
+		} finally
 		{
-			response.sendError(HttpStatus.NOT_FOUND);
-			return;
+			if (out != null) in.close();
+			in = null;
+			if (out != null) out.close();
+			out = null;
 		}
+	}
+	
+	protected void processJSP( File file, IHttpBindletRequest request, IHttpBindletResponse response )
+		throws BindletException, IOException
+	{
 		// obtém a classe responsável por renderizar a página
 		Class<?> classRef = findRender(file);
 		if (classRef == null)
@@ -147,6 +199,36 @@ public class ServerPageBindlet extends HttpBindlet
 			if (out != null) out.close();
 			out = null;
 		}
+	}
+	
+	@Override
+	public void doGet( IHttpBindletRequest request, IHttpBindletResponse response )
+		throws BindletException, IOException
+	{
+		if (getDocumentRoot() == null)
+		{
+			response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
+			return;
+		}
+
+		// limpa o nome para evitar construções que permitam acessar arquivos do sistema que não
+		// estejam no diretório permitido
+		String fileName = request.getResourcePath();
+		fileName = fileName.replace("..", "");
+
+		// localiza o arquivo indicando
+		File file = findFile(fileName);
+		if (file == null || file.length() == 0)
+		{
+			response.sendError(HttpStatus.NOT_FOUND);
+			return;
+		}
+		// check whether the current file is a JSP
+		String mime = getMimeType(file.getAbsolutePath());
+		if ( !mime.equals(MimeTypeUtil.MIME_TEXT_JSP) )
+			processFile(file, mime, request, response);
+		else
+			processJSP(file, request, response);
 	}
 
 	/**

@@ -24,7 +24,7 @@ public abstract class BasicConfig implements IBasicConfig
 	@Override
 	public String getParameter( String name ) throws ConfigurationNotFoundException
 	{
-		return section.getValue(name);
+		return section.getString(name);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public abstract class BasicConfig implements IBasicConfig
 	@Override
 	public String getParameter( String name, String defaultValue )
 	{
-		return section.getValue(name, defaultValue);
+		return section.getString(name, defaultValue);
 	}
 
 	@Override

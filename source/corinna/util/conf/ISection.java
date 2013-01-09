@@ -36,7 +36,7 @@ public interface ISection
 	 * @return Instância <code>String</code> representando o valor da entrada.
 	 * @throws ConfigurationNotFoundException se nenhuma entrada foi encontrada. 
 	 */
-	public String getValue( String key ) throws ConfigurationNotFoundException;
+	public Object getValue( String key ) throws ConfigurationNotFoundException;
 	
 	/**
 	 * Retorna o valor de uma entrada a partir de uma chave.
@@ -46,7 +46,7 @@ public interface ISection
 	 *     informada. Pode ser <code>null</code>.
 	 * @return Instância <code>String</code> contendo o valor da entrada ou o valor padrão.
 	 */
-	public String getValue( String key, String defaultValue );
+	public Object getValue( String key, Object defaultValue );
 
 	/**
 	 * Define o valor de uma entrada a partir de uma chave. Se a entrada já existir, seu valor é 
@@ -59,7 +59,7 @@ public interface ISection
 	 * @param key Nome da chave.
 	 * @param value Novo valor da entrada. Use <code>null</code> para remover entradas existentes.
 	 */
-	public void setValue( String key, String value );
+	public void setValue( String key, Object value );
 
 	/**
 	 * Retorna uma valor lógico indicando se existe alguma entrada com a chave especificada.
@@ -167,5 +167,37 @@ public interface ISection
 	 * @return Vetor de {@link ISection}.
 	 */
 	public ISection[] getSections();
+
+	String getString( String key, String defaultValue );
+
+	String getString( String[] names, String defaultValue );
+
+	Boolean getBoolean( String key, Boolean defaultValue );
+
+	String getString( String key ) throws ConfigurationNotFoundException;
+
+	Integer getInteger( String key ) throws ConfigurationNotFoundException;
+
+	Integer getInteger( String key, Integer defaultValue );
+
+	Integer getInteger( String key, Integer defaultValue, Integer minValue, Integer maxValue );
+
+	Long getLong( String key ) throws ConfigurationNotFoundException;
+
+	Long getLong( String key, Long defaultValue );
+
+	Long getLong( String key, Long defaultValue, Long minValue, Long maxValue );
+
+	Double getDouble( String key ) throws ConfigurationNotFoundException;
+
+	Double getDouble( String key, Double defaultValue );
+
+	Float getFloat( String key ) throws ConfigurationNotFoundException;
+
+	Float getFloat( String key, Float defaultValue );
+
+	Boolean getBoolean( String key ) throws ConfigurationNotFoundException;
+
+	void setString( String key, String value );
 	
 }

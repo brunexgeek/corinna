@@ -56,8 +56,6 @@ public class DefaultRestBindlet extends RestBindlet
 	public void init() throws BindletException
 	{
 		IBindletConfig config = getBindletConfig();
-
-		// TODO: avoid initialize twice
 		
 		// load the interface class name
 		String intfClassName = config.getBindletParameter(PARAMETER_INTERFACE);

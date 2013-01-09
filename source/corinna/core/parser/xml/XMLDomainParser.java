@@ -351,7 +351,7 @@ public class XMLDomainParser implements IDomainParser
 			IBindletRegistration bindlet = context.addBindlet(bindletName, entry.getClassName());
 			// insert the bindlet registration parameters
 			for (String param : entry.getConfig().getKeys() )
-				bindlet.setBindletParameter(param, entry.getConfig().getValue(param, ""));
+				bindlet.setBindletParameter(param, entry.getConfig().getString(param, ""));
 		} catch (Exception e)
 		{
 			throw new ParseException("Error creating a bindlet registration", e);
@@ -729,7 +729,7 @@ public class XMLDomainParser implements IDomainParser
 			// get the parameter value
 			String paramValue = getTagContent(element, XMLDomainTags.PARAMETER_VALUE);
 			// create the parameter
-			config.setValue(paramName, paramValue);
+			config.setString(paramName, paramValue);
 		}
 	}
 
