@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.bindlet.BindletModel;
@@ -36,6 +38,8 @@ public class ServerPageBindlet extends HttpBindlet
 {
 
 	private static Logger serverLog = LoggerFactory.getLogger(ServerPageBindlet.class);
+	
+	private static String DEFAULT_PAGES[] = { "index.html", "index.htm", "index.jsp" }; 
 	
 	private static final long serialVersionUID = 773622322084886911L;
 
@@ -65,9 +69,14 @@ public class ServerPageBindlet extends HttpBindlet
 	 */
 	private static final int HTTP_KEEP_ALIVE_MAX = 10;
 
+	private List<String> defaultPages = null;
+	
 	public ServerPageBindlet() throws BindletException
 	{
 		super();
+		// insert all default pages
+		defaultPages = new LinkedList<String>();
+		for (String entry : DEFAULT_PAGES) defaultPages.add(entry);
 	}
 
 	public String getDocumentRoot()
@@ -215,6 +224,8 @@ public class ServerPageBindlet extends HttpBindlet
 		// estejam no diretório permitido
 		String fileName = request.getResourcePath();
 		fileName = fileName.replace("..", "");
+		if (File.separatorChar != '/')
+			fileName = fileName.replace("/", "\\");
 
 		// localiza o arquivo indicando
 		File file = findFile(fileName);
@@ -239,11 +250,24 @@ public class ServerPageBindlet extends HttpBindlet
 	 * @return Instância <code>File</code> associada ao arquivo encontrado. Caso o arquivo não
 	 *         exista ou seja um diretório, retorna <code>null</code>.
 	 */
-	private File findFile( String fileName )
+	private File getFile( String fileName )
 	{
 		File file = new File(getDocumentRoot() + File.separatorChar + fileName);
 		if (!file.exists() || file.isDirectory()) return null;
 		return file;
+	}
+
+	private File findFile( String fileName )
+	{
+		File file = getFile(fileName);
+		if (file != null) return file;
+		
+		for (String name : defaultPages)
+		{
+			file = getFile(fileName + File.separatorChar + name);
+			if (file != null) return file;
+		}
+		return null;
 	}
 
 	private Class<?> findRender( File file ) throws BindletException, IOException
