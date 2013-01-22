@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -14,12 +13,8 @@ import java.util.StringTokenizer;
 
 import javassist.ClassPool;
 import javassist.CtClass;
-import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
-
-import javax.bindlet.http.IHttpBindletRequest;
-
 import corinna.exception.JSPCompilerException;
 import corinna.exception.JSPParserException;
 
@@ -123,6 +118,7 @@ public class JSPGenerator
 		context.out.append("}");
 
 		out.print(context.out.toString());
+		out.close();
 	}
 
 	private static GeneratorContext createContext( List<JSPElement> elements )

@@ -5,7 +5,6 @@ import java.io.IOException;
 import javax.bindlet.IBindletConfig;
 import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
-import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 import javax.bindlet.io.BindletOutputStream;
@@ -58,6 +57,8 @@ public class DefaultSoapBindlet extends SoapBindlet
 	private ObjectLocker wsdlLock = new ObjectLocker();
 	
 	private Boolean isInitialized = false;
+
+	private String wsdlName;
 	
 	public DefaultSoapBindlet( ) throws BindletException
 	{
@@ -123,13 +124,13 @@ public class DefaultSoapBindlet extends SoapBindlet
 	@Override
 	protected void doGet( IHttpBindletRequest req, IHttpBindletResponse response ) throws BindletException, IOException
 	{
-		String resource = req.getResourcePath();
+		/*String resource = req.getResourcePath();
 		if (!resource.equals("/"))
 		{
 			response.sendError(HttpStatus.NOT_FOUND);
 			return;
-		}
-		
+		}*/
+
 		Definition wsdl = getWsdl(req);
 		response.setContentType("text/xml");
 		//response.setContentLength(wsdl.length);
@@ -186,6 +187,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 		{
 			ClassDescriptor desc = new ClassDescriptor(runner.getInterfaceClass());
 			WsdlGenerator wsdlgen = new WsdlGenerator();
+			wsdlName = wsdlgen.getServiceName();
 			return (wsdl = wsdlgen.generateWsdl(desc, req.getRequestURL(), null, null));
 		} catch (Exception e)
 		{
@@ -210,6 +212,15 @@ public class DefaultSoapBindlet extends SoapBindlet
 			return generateWsdl(req);
 	}
 
+	protected String getWsdlName()
+	{
+		wsdlLock.readLock();
+		String value = wsdlName;
+		wsdlLock.readUnlock();
+		
+		return value;
+	}
+	
 	@Override
 	public IComponentInformation getBindletInfo()
 	{

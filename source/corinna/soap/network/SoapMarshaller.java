@@ -22,7 +22,7 @@ import java.io.IOException;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
-
+//TODO: mover para 'soap.core'
 public class SoapMarshaller
 {
 	

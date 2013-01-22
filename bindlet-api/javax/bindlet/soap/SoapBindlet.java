@@ -58,15 +58,18 @@ public abstract class SoapBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 		if (request.getHttpMethod() == HttpMethod.GET)
 		{
-			if (request.getRequestURI().toString().endsWith(WSDL_SUFFIX))
-				doGet(request, response);
-			else
-				response.sendError(HttpStatus.METHOD_NOT_ALLOWED);
+			doGet(request, response);
 		}
 		else
+		if (request.getHttpMethod() == HttpMethod.POST)
 		{
 			if (isRestricted() && !doAuthentication(request, response)) return;
 			doPost(request, response);
+		}
+		else
+		{
+			response.setContentType("text/html");
+			response.sendError(HttpStatus.METHOD_NOT_ALLOWED);
 		}
 	}
 

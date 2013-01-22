@@ -40,7 +40,6 @@ import corinna.exception.MethodNotFoundException;
 import corinna.exception.ParameterNotFoundException;
 import corinna.rpc.annotation.Parameter;
 import corinna.util.StateModel;
-import corinna.util.StringResource;
 
 
 /**

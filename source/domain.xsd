@@ -1,216 +1,197 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema attributeFormDefault="unqualified"
 	elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	targetNamespace="http://www.corinna-framework.org" xmlns:tns="http://www.corinna-framework.org/domain.xsd">
-	<xs:element name="domain">
+	targetNamespace="http://www.corinna-framework.org/schemas/domain.xsd"
+	xmlns:Q1="http://www.corinna-framework.org/schemas/domain.xsd">
+
+	<xs:element name="init-parameters">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="servers">
+				<xs:element maxOccurs="unbounded" minOccurs="0" name="parameter">
 					<xs:complexType>
 						<xs:sequence>
-							<xs:element name="server">
-								<xs:complexType>
-									<xs:sequence>
-										<xs:element type="xs:string" name="description" />
-										<xs:element name="services">
-											<xs:complexType>
-												<xs:sequence>
-													<xs:element type="xs:string" name="add-service" />
-												</xs:sequence>
-											</xs:complexType>
-										</xs:element>
-										<xs:element name="connectors">
-											<xs:complexType>
-												<xs:sequence>
-													<xs:element type="xs:string" name="add-connector" />
-												</xs:sequence>
-											</xs:complexType>
-										</xs:element>
-									</xs:sequence>
-									<xs:attribute type="xs:string" name="name" />
-								</xs:complexType>
-							</xs:element>
-						</xs:sequence>
-					</xs:complexType>
-				</xs:element>
-				<xs:element name="connectors">
-					<xs:complexType>
-						<xs:sequence>
-							<xs:element name="connector">
-								<xs:complexType>
-									<xs:sequence>
-										<xs:element type="xs:string" name="description" />
-										<xs:element type="xs:string" name="class" />
-										<xs:element type="xs:string" name="hostname" />
-										<xs:element type="xs:short" name="port" />
-										<xs:element name="init-parameters">
-											<xs:complexType>
-												<xs:sequence>
-													<xs:element name="parameter">
-														<xs:complexType>
-															<xs:sequence>
-																<xs:element type="xs:string" name="name" />
-																<xs:element type="xs:string" name="value" />
-															</xs:sequence>
-														</xs:complexType>
-													</xs:element>
-												</xs:sequence>
-											</xs:complexType>
-										</xs:element>
-									</xs:sequence>
-									<xs:attribute type="xs:string" name="name" />
-								</xs:complexType>
-							</xs:element>
-						</xs:sequence>
-					</xs:complexType>
-				</xs:element>
-				<xs:element name="services">
-					<xs:complexType>
-						<xs:sequence>
-							<xs:element name="service">
-								<xs:complexType>
-									<xs:sequence>
-										<xs:element type="xs:string" name="description" />
-										<xs:element type="xs:string" name="class" />
-										<xs:element name="contexts">
-											<xs:complexType>
-												<xs:sequence>
-													<xs:element type="xs:string" name="add-context" />
-												</xs:sequence>
-											</xs:complexType>
-										</xs:element>
-										<xs:element name="init-parameters">
-											<xs:complexType>
-												<xs:sequence>
-													<xs:element name="parameter">
-														<xs:complexType>
-															<xs:sequence>
-																<xs:element type="xs:string" name="name" />
-																<xs:element type="xs:string" name="value" />
-															</xs:sequence>
-														</xs:complexType>
-													</xs:element>
-												</xs:sequence>
-											</xs:complexType>
-										</xs:element>
-									</xs:sequence>
-									<xs:attribute type="xs:string" name="name" />
-								</xs:complexType>
-							</xs:element>
-						</xs:sequence>
-					</xs:complexType>
-				</xs:element>
-				<xs:element name="contexts">
-					<xs:complexType>
-						<xs:sequence>
-							<xs:element name="context">
-								<xs:complexType>
-									<xs:sequence>
-										<xs:element type="xs:string" name="description" />
-										<xs:element type="xs:string" name="class" />
-										<xs:element name="init-parameters">
-											<xs:complexType>
-												<xs:sequence>
-													<xs:element name="parameter">
-														<xs:complexType>
-															<xs:sequence>
-																<xs:element type="xs:string" name="name" />
-																<xs:element type="xs:string" name="value" />
-															</xs:sequence>
-														</xs:complexType>
-													</xs:element>
-												</xs:sequence>
-											</xs:complexType>
-										</xs:element>
-										<xs:element name="bindlets">
-											<xs:complexType>
-												<xs:sequence>
-													<xs:element type="xs:string" name="add-bindlet"
-														maxOccurs="unbounded" minOccurs="0" />
-												</xs:sequence>
-											</xs:complexType>
-										</xs:element>
-									</xs:sequence>
-									<xs:attribute type="xs:string" name="name" />
-								</xs:complexType>
-							</xs:element>
-						</xs:sequence>
-					</xs:complexType>
-				</xs:element>
-				<xs:element name="bindlets">
-					<xs:complexType>
-						<xs:sequence>
-							<xs:element name="bindlet" maxOccurs="unbounded"
-								minOccurs="0">
-								<xs:complexType>
-									<xs:sequence>
-										<xs:element type="xs:string" name="description"
-											minOccurs="0" />
-										<xs:element type="xs:string" name="class"
-											minOccurs="0" />
-										<xs:element type="xs:string" name="bindlet-title"
-											minOccurs="0" />
-										<xs:element type="xs:string" name="bindlet-class"
-											minOccurs="0" />
-										<xs:element name="init-parameters">
-											<xs:complexType>
-												<xs:sequence>
-													<xs:element name="parameter" maxOccurs="unbounded"
-														minOccurs="0">
-														<xs:complexType>
-															<xs:sequence>
-																<xs:element type="xs:string" name="name" />
-																<xs:element type="xs:string" name="value" />
-															</xs:sequence>
-														</xs:complexType>
-													</xs:element>
-												</xs:sequence>
-											</xs:complexType>
-										</xs:element>
-									</xs:sequence>
-									<xs:attribute type="xs:string" name="name" use="optional" />
-								</xs:complexType>
-							</xs:element>
-						</xs:sequence>
-					</xs:complexType>
-				</xs:element>
-				<xs:element name="beans">
-					<xs:complexType>
-						<xs:sequence>
-							<xs:element name="bean">
-								<xs:complexType>
-									<xs:sequence>
-										<xs:element type="xs:string" name="description" />
-										<xs:element type="xs:string" name="class" />
-										<xs:element name="init-parameters">
-											<xs:annotation>
-												<xs:documentation><![CDATA[<parameter>
-					<name>UserDatabase</name>
-					<value>config/users.properties</value>
-				</parameter>]]></xs:documentation>
-											</xs:annotation>
-											<xs:complexType>
-												<xs:sequence>
-													<xs:element name="parameter" maxOccurs="unbounded"
-														minOccurs="0">
-														<xs:complexType>
-															<xs:sequence>
-																<xs:element type="xs:string" name="name" />
-																<xs:element type="xs:string" name="value" />
-															</xs:sequence>
-														</xs:complexType>
-													</xs:element>
-												</xs:sequence>
-											</xs:complexType>
-										</xs:element>
-									</xs:sequence>
-									<xs:attribute type="xs:string" name="name" />
-								</xs:complexType>
-							</xs:element>
+							<xs:element maxOccurs="1" minOccurs="1" type="xs:string"
+								name="name" />
+							<xs:element maxOccurs="1" minOccurs="1" type="xs:string"
+								name="value" />
 						</xs:sequence>
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="connector">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="1" minOccurs="1" type="xs:string"
+					name="description" />
+				<xs:element maxOccurs="1" minOccurs="1" type="xs:string"
+					name="class" />
+				<xs:element maxOccurs="1" minOccurs="1" type="xs:string"
+					name="hostname" />
+				<xs:element maxOccurs="1" minOccurs="1" type="xs:short"
+					name="port" />
+				<xs:element maxOccurs="1" minOccurs="0" ref="Q1:init-parameters"></xs:element>
+			</xs:sequence>
+			<xs:attribute type="xs:string" name="name" />
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="connectors">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="unbounded" minOccurs="0"
+					ref="Q1:connector"></xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="server">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="1" minOccurs="1" type="xs:string"
+					name="description" />
+				<xs:element maxOccurs="1" minOccurs="1" name="connectors">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element type="xs:string" name="add-connector" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element maxOccurs="1" minOccurs="1" name="services">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element type="xs:string" name="add-service" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element maxOccurs="1" minOccurs="0" ref="Q1:init-parameters"></xs:element>
+			</xs:sequence>
+			<xs:attribute type="xs:string" name="name" />
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="servers">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="unbounded" minOccurs="0" ref="Q1:server" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="service">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="1" minOccurs="1" type="xs:string"
+					name="description" />
+				<xs:element maxOccurs="1" minOccurs="1" type="xs:string"
+					name="class" />
+				<xs:element maxOccurs="1" minOccurs="1" name="contexts">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element type="xs:string" name="add-context" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element maxOccurs="1" minOccurs="0" ref="Q1:init-parameters"></xs:element>
+			</xs:sequence>
+			<xs:attribute type="xs:string" name="name" />
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="services">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="unbounded" minOccurs="0" ref="Q1:service"></xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="context">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="1" minOccurs="1" type="xs:string"
+					name="description" />
+				<xs:element maxOccurs="1" minOccurs="1" type="xs:string"
+					name="class" />
+				<xs:element maxOccurs="1" minOccurs="1" name="bindlets">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element type="xs:string" name="add-bindlet"
+								maxOccurs="unbounded" minOccurs="0" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element maxOccurs="1" minOccurs="0" ref="Q1:init-parameters"></xs:element>
+			</xs:sequence>
+			<xs:attribute type="xs:string" name="name" />
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="contexts">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="unbounded" minOccurs="0" ref="Q1:context"></xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="bean">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="1" minOccurs="1" type="xs:string"
+					name="description" />
+				<xs:element maxOccurs="1" minOccurs="1" type="xs:string"
+					name="class" />
+				<xs:element maxOccurs="1" minOccurs="0" ref="Q1:init-parameters"></xs:element>
+			</xs:sequence>
+			<xs:attribute type="xs:string" name="name" />
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="beans">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="unbounded" minOccurs="0" ref="Q1:bean"></xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="bindlet">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element type="xs:string" name="description"
+					minOccurs="0" />
+				<xs:element type="xs:string" name="class" minOccurs="0" />
+				<xs:element type="xs:string" name="bindlet-title"
+					minOccurs="0" />
+				<xs:element type="xs:string" name="bindlet-class"
+					minOccurs="0" />
+				<xs:element maxOccurs="1" minOccurs="0" ref="Q1:init-parameters"></xs:element>
+			</xs:sequence>
+			<xs:attribute type="xs:string" name="name" use="optional" />
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="bindlets">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="unbounded" minOccurs="0" ref="Q1:bindlet"></xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="domain">
+		<xs:complexType>
+			<xs:all>
+				<xs:element minOccurs="1" maxOccurs="1" ref="Q1:servers"></xs:element>
+				<xs:element minOccurs="1" maxOccurs="1" ref="Q1:connectors"></xs:element>
+				<xs:element minOccurs="1" maxOccurs="1" ref="Q1:services"></xs:element>
+				<xs:element minOccurs="1" maxOccurs="1" ref="Q1:contexts"></xs:element>
+				<xs:element minOccurs="1" maxOccurs="1" ref="Q1:bindlets"></xs:element>
+				<xs:element minOccurs="1" maxOccurs="1" ref="Q1:beans"></xs:element>
+			</xs:all>
 			<xs:attribute type="xs:string" name="name" />
 		</xs:complexType>
 	</xs:element>

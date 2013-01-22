@@ -174,19 +174,60 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 		return message;
 	}
 
+	protected SOAPMessage createSoapFault( String namespace, Exception error ) throws SOAPException
+	{
+		Throwable t = error;
+		String text = "";
+		SOAPMessage message = SoapUtils.createMessage();
+		
+		while (t != null && t.getCause() != null)
+		{
+			t = t.getCause();
+		}
+		if (t != null) text = t.getMessage(); 
+		
+		// create the SOAP method response element
+		SOAPBody body = message.getSOAPBody();
+		QName qname = new QName("fault");
+		SOAPElement element = body.addChildElement(qname);
+		// create the 'faultcode' element
+		qname = new QName("faultcode");
+		SOAPElement sub = element.addChildElement(qname);
+		sub.setValue("client");
+		// create the 'faultstring' element
+		qname = new QName("faultstring");
+		sub = element.addChildElement(qname);
+		sub.setValue(text);
+		
+		return message;
+	}
 	
 	protected void doPost( IHttpBindletRequest request, IHttpBindletResponse response )
 	throws BindletException, IOException
 	{
-		// extract the SOAP message from request content
-		IProcedureCall call = getProcedureCall(request, response);
-		Object result = doCall(call);
+		SOAPMessage resp = null;
 		
 		try
 		{
-			SOAPMessage resp = createSoapResponse("", call.getMethodPrototype(), result);
-			String content = marshaller.marshall(resp);
+			// extract the SOAP message from request content
+			IProcedureCall call = getProcedureCall(request, response);
+			Object result = doCall(call);
+			resp = createSoapResponse("", call.getMethodPrototype(), result);
+		} catch (Exception e)
+		{
+			try
+			{
+				resp = createSoapFault("", e);
+			} catch (SOAPException e1)
+			{
+				response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
+				return;
+			}
+		}
 			
+		try
+		{
+			String content = marshaller.marshall(resp);	
 			response.setContentType("text/xml");
 			
 			BindletOutputStream out = response.getOutputStream();
