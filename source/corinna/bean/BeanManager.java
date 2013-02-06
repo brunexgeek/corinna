@@ -97,24 +97,32 @@ public class BeanManager
 			if (att == null) continue;
 			IServiceBean bean = getBean(att.value());
 			
-			// check if the current field has a compatible type
-			//if (!bean.getClass().isAssignableFrom(current.getClass())) continue;
-			
 			try
 			{
 				synchronized (current)
 				{
 					boolean state = current.isAccessible();
 					if (!state) current.setAccessible(true);
-					current.set(object, bean);
+					boolean result = trySetField(object, current, bean);
+					if (!result) trySetField(object, current, null);
 					if (!state) current.setAccessible(false);
-					
-					//log.debug("Service bean '{}' injected in '{}'", bean.getName(), object.toString() );
 				}
 			} catch (Exception e)
 			{
 				log.error("Fail to inject service bean '{}' in '{}'", bean.getName(), object.toString() );
 			}
+		}
+	}
+	
+	private boolean trySetField( Object object, Field field, Object value )
+	{
+		try
+		{
+			field.set(object, value);
+			return true;
+		} catch (Exception e)
+		{
+			return false;
 		}
 	}
 	

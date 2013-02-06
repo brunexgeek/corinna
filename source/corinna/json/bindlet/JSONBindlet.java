@@ -7,8 +7,9 @@ import java.util.Iterator;
 
 import javax.bindlet.Bindlet;
 import javax.bindlet.BindletModel;
-import javax.bindlet.IComponentInformation;
+import javax.bindlet.IBindletAuthenticator;
 import javax.bindlet.BindletModel.Model;
+import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpMethod;
 import javax.bindlet.http.HttpStatus;
@@ -19,11 +20,19 @@ import javax.bindlet.io.BindletOutputStream;
 import javax.bindlet.rpc.IProcedureCall;
 
 import corinna.core.ContextInfo;
+import corinna.http.core.HttpUtils;
 import corinna.json.core.JSONObject;
-import corinna.rpc.ProcedureCall;
+import corinna.json.core.JSONProcedureCall;
+import corinna.json.exception.JSONRPCErrorCode;
+import corinna.json.exception.JSONRPCException;
 import corinna.rpc.ReflectionUtil;
 
 
+/**
+ * Implementation of a bindlet for JSON-RPC protocol.
+ * 
+ * @author Bruno Ribeiro
+ */
 @SuppressWarnings("serial")
 public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBindletResponse>
 {
@@ -36,9 +45,13 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 	private static final String JSON_CONTENT_TYPE = "application/json";
 
+	private static final String INIT_PARAM_IS_RESTRICTED = "isRestricted";
+	
 	private static IComponentInformation COMPONENT_INFO = new ContextInfo(COMPONENT_NAME,
 		COMPONENT_VERSION, COMPONENT_IMPLEMENTOR);
 
+	private IBindletAuthenticator authenticator = null;
+	
 	public JSONBindlet() throws BindletException
 	{
 		super();
@@ -48,7 +61,7 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 	@Override
 	public void process( IHttpBindletRequest request, IHttpBindletResponse response )
-		throws BindletException
+		throws BindletException, IOException
 	{
 		// check whether we have a valid request
 		if (request.getHttpMethod() != HttpMethod.POST && request.getHttpMethod() != HttpMethod.GET)
@@ -63,14 +76,17 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 			return;
 		}
 		
+		if (isRestricted() && !doAuthentication(request, response)) return;
+		
 		Exception exception = null;
 		Object result = null;
 		Charset charset = Charset.defaultCharset();
+		JSONProcedureCall call = null;
 		
 		try
 		{
 			charset = getCharset(request);
-			ProcedureCall call = (ProcedureCall) getProcedureCall(request);
+			call = getProcedureCall(request);
 			call.setParameter(PARAM_REQUEST, request);
 			call.setParameter(PARAM_RESPONSE, response);
 			result = doCall(call);
@@ -81,7 +97,7 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 		try
 		{
-			setResponse(response, charset, result, exception);
+			setResponse(response, charset, result, exception, (call == null) ? null : call.getId());
 		} catch (IOException e)
 		{
 			throw new BindletException("Error writing the JSON response", e);
@@ -95,7 +111,7 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	}
 
 	public void setResponse( IHttpBindletResponse response, Charset charset, Object returnValue,
-		Exception exception ) throws IOException
+		Exception exception, Object id ) throws IOException
 	{
 		if (response.isClosed()) return;
 
@@ -110,17 +126,22 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 			if (!out.isClosed() && out.writtenBytes() == 0)
 			{
 				JSONObject json = new JSONObject();
+				json.put("jsonrpc", "2.0");
+				json.put("id", id);
 
 				if (exception != null)
 				{
-					json.put("result", "ERROR");
-					json.put("message", exception.getMessage());
+					JSONObject error = new JSONObject();
+					error.put("code", -32000);
+					error.put("message", exception.getMessage());
+					
+					json.put("error", error);
+					
 				}
 				else
 				{
-					json.put("result", "OK");
 					if (returnValue == null) returnValue = "";
-					json.put("return", returnValue);
+					json.put("result", returnValue);
 				}
 				// TODO: handle the NullPointerException of "json.toString()" 
 				byte[] output = json.toString().getBytes(charset);
@@ -137,10 +158,12 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	{
 		try
 		{
-			if (request.getHttpMethod() == HttpMethod.GET)
-				return Charset.forName("UTF-8");
-			else
-				return Charset.forName(request.getCharacterEncoding());
+			// check whether we have a valid request charset
+			String value = request.getCharacterEncoding();
+			if ( Charset.isSupported(value) ) return Charset.forName(value);
+			// check whether we have a valid HTTP field "Accept-Charset"
+			value = request.getHeader("Accept-Charset");
+			return HttpUtils.getAcceptableCharset(value);
 		} catch (Exception e)
 		{
 			return Charset.defaultCharset();
@@ -148,46 +171,44 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 	}
 	
-	protected String getPrototype( IHttpBindletRequest request )
+	protected JSONProcedureCall getProcedureCall( IHttpBindletRequest request ) throws JSONRPCException
 	{
-		String path = request.getResourcePath();
-		if (path == null || path.isEmpty()) return null;
-
-		int end = path.indexOf("?");
-		if (end < 0) end = path.length();
-		int start = path.lastIndexOf("/");
-		if (start + 1 < path.length())
-			return path.substring(start + 1, end);
-		else
-			return null;
-	}
-	
-	protected IProcedureCall getProcedureCall( IHttpBindletRequest request ) throws BindletException
-	{
-		ProcedureCall procedureCall;
+		JSONProcedureCall procedureCall;
 		try
 		{
 			Charset charset = getCharset(request);
 			HttpBindletInputStream is = (HttpBindletInputStream) request.getInputStream();
 
 			// try to extract the procedure from request body
-			String proto = getPrototype(request);
 			String content = is.readText(charset);
-			if (content == null || content.isEmpty()) content = "{}";
+			if (content == null || content.isEmpty())
+				throw new JSONRPCException(JSONRPCErrorCode.INVALID_REQUEST);
 			JSONObject json = new JSONObject(content);
+			// get the method name
+			String method = json.optString("method");
+			if (method == null || method.isEmpty())
+				throw new JSONRPCException(JSONRPCErrorCode.INVALID_REQUEST);
 			// create the procedure call
-			procedureCall = new ProcedureCall(proto);
-			@SuppressWarnings("rawtypes")
-			Iterator keys = json.keys();
-	        while (keys.hasNext())
-	        {
-	        	String key = keys.next().toString();
-	        	String value = json.getString(key);
-				procedureCall.setParameter(key, value);
-	        }
+			procedureCall = new JSONProcedureCall(method);
+			procedureCall.setId(json.opt("id"));
+			JSONObject params = json.optJSONObject("params");
+			if (params != null)
+			{
+				Iterator<String> keys = params.keys();
+				// TODO: fill java beans when not primitive types are used
+		        while (keys.hasNext())
+		        {
+		        	String key = keys.next().toString();
+		        	String value = json.getString(key);
+					procedureCall.setParameter(key, value);
+		        }
+			}
+		} catch (JSONRPCException e)
+		{
+			throw e;
 		} catch (Exception e)
 		{
-			throw new BindletException("Error parsing JSON procedure call", e);
+			throw new JSONRPCException(JSONRPCErrorCode.PARSE_ERROR);
 		}
 		return procedureCall;
 	}
@@ -204,6 +225,31 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		{
 			return Model.STATEFULL;
 		}
+	}
+	
+	public boolean isRestricted()
+	{
+		String value = getInitParameter(INIT_PARAM_IS_RESTRICTED);
+		return (authenticator != null && (value != null && value.equalsIgnoreCase("true")));
+	}
+	
+	protected boolean doAuthentication( IHttpBindletRequest request, IHttpBindletResponse response )
+	throws BindletException, IOException
+	{
+		if (authenticator != null)
+			return authenticator.authenticate(request, response);
+		else
+			throw new BindletException("No authenticator configured");
+	}
+	
+	protected void setAuthenticator( IBindletAuthenticator authenticator )
+	{
+		this.authenticator = authenticator;
+	}
+	
+	protected IBindletAuthenticator getAuthenticator()
+	{
+		return authenticator;
 	}
 	
 }

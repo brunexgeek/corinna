@@ -17,9 +17,12 @@
 package corinna.http.core;
 
 
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -239,6 +242,35 @@ public class HttpUtils
 			sb.append(current);
 		}
 		return sb.toString();
+	}
+	
+	// TODO: consider the quality value
+	public static List<Charset> getAcceptableCharsets( String acceptCharset )
+	{
+		List<Charset> list = new LinkedList<Charset>();
+		
+		String[] values = acceptCharset.split(",|;| ");
+		for (String charsetName : values)
+		{
+			if (!Charset.isSupported(charsetName)) continue;
+			list.add( Charset.forName(charsetName) );
+		}
+		
+		if (list.size() == 0) list.add( Charset.forName("ISO-8859-1") );
+		return list;
+	}
+	
+	// TODO: consider the quality value
+	public static Charset getAcceptableCharset( String acceptCharset )
+	{
+		String[] values = acceptCharset.split(",|;| ");
+		for (String charsetName : values)
+		{
+			if (!Charset.isSupported(charsetName)) continue;
+			return Charset.forName(charsetName);
+		}
+		
+		return Charset.forName("ISO-8859-1");
 	}
 	
 }
