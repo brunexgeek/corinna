@@ -36,6 +36,19 @@ public class BeanObject implements IBeanObject
 	}
 
 	@Override
+	public void set( String key, Object value )
+	{
+		if (key == null) return;
+		entries.put(key, value);
+	}
+	
+	@Override
+	public void setString( String key, String value )
+	{
+		set(key, value);
+	}
+	
+	@Override
 	public boolean getBoolean( String key ) throws BeanObjectException
 	{
 		Object object = this.get(key);
@@ -283,7 +296,7 @@ public class BeanObject implements IBeanObject
 		}
 	}
 	
-	public boolean isPrimitive( Class<?> classRef )
+	public static boolean isPrimitive( Class<?> classRef )
 	{
 		if (classRef == Long.class) return true;
 		if (classRef == Integer.class) return true;

@@ -25,6 +25,7 @@ import corinna.json.core.JSONObject;
 import corinna.json.core.JSONProcedureCall;
 import corinna.json.exception.JSONRPCErrorCode;
 import corinna.json.exception.JSONRPCException;
+import corinna.rpc.BeanObject;
 import corinna.rpc.ReflectionUtil;
 
 
@@ -128,21 +129,20 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 				JSONObject json = new JSONObject();
 				json.put("jsonrpc", "2.0");
 				json.put("id", id);
-
+				
 				if (exception != null)
 				{
 					JSONObject error = new JSONObject();
 					error.put("code", -32000);
 					error.put("message", exception.getMessage());
-					
-					json.put("error", error);
-					
+					json.put("error", error);					
 				}
 				else
 				{
-					if (returnValue == null) returnValue = "";
+					//if (returnValue == null) returnValue = "";
 					json.put("result", returnValue);
 				}
+				
 				// TODO: handle the NullPointerException of "json.toString()" 
 				byte[] output = json.toString().getBytes(charset);
 				out.write(output);
@@ -199,10 +199,20 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		        while (keys.hasNext())
 		        {
 		        	String key = keys.next().toString();
-		        	String value = json.getString(key);
+		        	Object value = params.opt(key);
+		        	
+		        	if (value instanceof JSONObject)
+		        		value = JSONObject.toJavaBean((JSONObject) value);
+		        	else
+		        	if (!BeanObject.isPrimitive(value.getClass()))
+		        		throw new JSONRPCException(JSONRPCErrorCode.INVALID_PARAMS);
+		        	
 					procedureCall.setParameter(key, value);
 		        }
 			}
+			else
+			if (!json.isNull("params"))
+				throw new JSONRPCException(JSONRPCErrorCode.INVALID_PARAMS);
 		} catch (JSONRPCException e)
 		{
 			throw e;

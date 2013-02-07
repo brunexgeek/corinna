@@ -93,5 +93,9 @@ public interface IBeanObject
 	public void populate( Object destination );
 	
 	public void extract(  Object source );
+
+	void setString( String key, String value );
+	
+	void set( String key, Object value );
 	
 }

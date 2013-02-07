@@ -41,8 +41,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import corinna.rpc.IBeanObject;
-
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its external
  * form is a string wrapped in curly braces with colons between the names and
@@ -97,7 +95,7 @@ import corinna.rpc.IBeanObject;
  * @author JSON.org
  * @version 2012-07-02
  */
-public class JSONObject {
+public class JSONObject extends JSONJavaBean {
 
     /**
      * JSONObject.NULL is equivalent to the value that JavaScript calls null,
