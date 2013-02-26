@@ -211,7 +211,7 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 		
 		// create the SOAP method response element
 		SOAPBody body = message.getSOAPBody();
-		QName qname = new QName(prototype + "OutputType");
+		QName qname = new QName(namespace, prototype + "OutputType");
 		SOAPElement element = body.addChildElement(qname);
 		// create the return value element
 		SoapUtils.generateElement(element, WsdlGenerator.PARAMETER_RESULT, result);
@@ -257,7 +257,7 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 			// extract the SOAP message from request content
 			IProcedureCall call = getProcedureCall(request, response);
 			Object result = doCall(call);
-			resp = createSoapResponse("", call.getMethodPrototype(), result);
+			resp = createSoapResponse(getXMLSchemaNamespace(), call.getMethodPrototype(), result);
 		} catch (Exception e)
 		{
 			try
@@ -283,6 +283,8 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 			response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	public abstract String getXMLSchemaNamespace();
 	
 	@Override
 	public Model getBindletModel()

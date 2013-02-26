@@ -63,8 +63,6 @@ public class WsdlGenerator
 
 	public static final String DEFAULT_WSDL = "service.wsdl";
 
-	private URL endpointUrl;
-
 	private String serviceName = "ServiceName";
 
 	private String serviceDescription = "Service description";
@@ -73,13 +71,38 @@ public class WsdlGenerator
 
 	private Document document;
 
-	public WsdlGenerator() throws WSDLException
+	private WsdlContext context = null;
+	
+	public WsdlGenerator( ClassDescriptor classDesc, String endpointUrl ) throws WSDLException
 	{
-		wsdlFactory = WSDLFactory.newInstance();
+		this(classDesc, endpointUrl, null, null);
+	}
+	
+	public WsdlGenerator( ClassDescriptor classDesc, String endpointUrl, String wsdlNamespace, String schemaNamespace ) throws WSDLException
+	{
+		if (classDesc == null)
+			throw new IllegalArgumentException("The class descriptor can not be null");
+		
+		// initialize internal parameters
+		context = new WsdlContext();
+		context.wsdlDef = null;
+		context.classDesc = classDesc;
+		context.wsdlNamespace = wsdlNamespace;
+		context.schemaNamespace = schemaNamespace;
+		context.extensionReg = new ExtensionRegistry();
+		context.endpointUrl = endpointUrl;
+		if (!endpointUrl.endsWith("/")) context.endpointUrl = endpointUrl + "/";
 
+		if (wsdlNamespace == null)
+			context.wsdlNamespace = context.endpointUrl + classDesc.getName() + "/WSDL";
+		if (schemaNamespace == null)
+			context.schemaNamespace = context.endpointUrl + classDesc.getName() + "/XSD";
+		
 		// used to create the documentation elements
 		try
 		{
+			wsdlFactory = WSDLFactory.newInstance();
+			
 			DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
 			document = docBuilder.newDocument();
@@ -90,32 +113,21 @@ public class WsdlGenerator
 		}
 	}
 
-	public Definition generateWsdl( ClassDescriptor classDesc, String endpointUrl,
-		String wsdlNamespace, String schemaNamespace ) throws Exception
+	public Definition generateWsdl( ) throws Exception
 	{
-		if (!endpointUrl.endsWith("/")) endpointUrl += "/";
-		if (wsdlNamespace == null) wsdlNamespace = endpointUrl + classDesc.getName() + ".wsdl";
-		if (schemaNamespace == null) schemaNamespace = endpointUrl + classDesc.getName() + ".xsd";
-
 		Definition wsdlDef = wsdlFactory.newDefinition();
 
-		wsdlDef.setTargetNamespace(wsdlNamespace);
-		wsdlDef.setQName(new QName(classDesc.getName()));
+		wsdlDef.setTargetNamespace(context.wsdlNamespace);
+		wsdlDef.setQName(new QName(context.classDesc.getName()));
 		wsdlDef.addNamespace("soap", SOAPConstants.NS_URI_SOAP);
-		wsdlDef.addNamespace("types", schemaNamespace);
-		wsdlDef.addNamespace("lns", wsdlNamespace);
+		wsdlDef.addNamespace("types", context.schemaNamespace);
+		wsdlDef.addNamespace("lns", context.wsdlNamespace);
 		wsdlDef.addNamespace("xsd", SchemaConstants.NS_URI_XSD_2001);
 
-		WsdlContext context = new WsdlContext();
 		context.wsdlDef = wsdlDef;
-		context.classDesc = classDesc;
-		context.wsdlNamespace = wsdlNamespace;
-		context.schemaNamespace = schemaNamespace;
-		context.endpointUrl = endpointUrl;
-		context.extensionReg = new ExtensionRegistry();
-
+		
 		generateWsdlTypes(context);
-		generateWsdlMethods(context, classDesc);
+		generateWsdlMethods(context, context.classDesc);
 		generateWsdlService(context);
 
 		return wsdlDef;
@@ -174,9 +186,9 @@ public class WsdlGenerator
 		}
 
 		// create the operation documentation
-		Element docRoot = document.createElementNS(context.wsdlNamespace, "documentation");
+		Element docRoot = document.createElementNS("http://schemas.xmlsoap.org/wsdl/", "documentation");
 		docRoot.setPrefix("wsdl");
-		docRoot.setTextContent(methodDesc.getDescription());
+		docRoot.setTextContent("asd" + methodDesc.getDescription());
 		// create the operation
 		Operation operation = createOperation(context, methodName, inputMessage, outputMessage);
 		operation.setDocumentationElement(docRoot);
@@ -322,16 +334,6 @@ public class WsdlGenerator
 			return "string";
 	}
 
-	public void setEndpointUrl( URL endpointUrl )
-	{
-		this.endpointUrl = endpointUrl;
-	}
-
-	public URL getEndpointUrl()
-	{
-		return endpointUrl;
-	}
-
 	public void setServiceName( String serviceName )
 	{
 		this.serviceName = serviceName;
@@ -372,5 +374,17 @@ public class WsdlGenerator
 		public PortType portType = null;
 
 	}
-
+	
+	public static String getXMLSchemaNamespace( Class<?> classRef )
+	{
+		if (classRef == null) return null;
+		return classRef.getName() + "/XSD";
+	}
+	
+	public static String getWSDLNamespace( Class<?> classRef )
+	{
+		if (classRef == null) return null;
+		return classRef.getName() + "/WSDL";
+	}
+	
 }

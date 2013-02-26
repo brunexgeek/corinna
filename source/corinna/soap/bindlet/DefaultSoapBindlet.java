@@ -41,6 +41,12 @@ public class DefaultSoapBindlet extends SoapBindlet
 	
 	private static final String PARAMETER_IMPLEMENTATION = "implementationClass";
 	
+	private static final String PARAMETER_XMLSCHEMA_NAMESPACE = "XMLSchemaNamespace";
+	
+	private static final String PARAMETER_WSDL_NAMESPACE = "WSDLNamespace";
+	
+	private static final String PARAMETER_ENDPOINT = "endpointUrl";
+	
 	private static final String COMPONENT_NAME = "SOAP Web Service Bindlet";
 	
 	private static final String COMPONENT_VERSION = "1.0";
@@ -59,6 +65,12 @@ public class DefaultSoapBindlet extends SoapBindlet
 	private Boolean isInitialized = false;
 
 	private String wsdlName;
+
+	private String schemaNamespace = null;
+
+	private String wsdlNamespace = null;
+	
+	private String endpointUrl = null;
 	
 	public DefaultSoapBindlet( ) throws BindletException
 	{
@@ -106,7 +118,15 @@ public class DefaultSoapBindlet extends SoapBindlet
 		if (implClassName == null || implClassName.isEmpty())
 			throw new BindletException("The implementation class must be specified through " +
 				"bindlet configuration key '" + PARAMETER_IMPLEMENTATION + "'");
-		
+		// load the XML Schema and WSDL namespaces
+		schemaNamespace = config.getBindletParameter(PARAMETER_XMLSCHEMA_NAMESPACE);
+		wsdlNamespace = config.getBindletParameter(PARAMETER_WSDL_NAMESPACE);
+		// load the endpoint URL
+		endpointUrl = config.getBindletParameter(PARAMETER_ENDPOINT);
+		if (implClassName == null || implClassName.isEmpty())
+			throw new BindletException("The endpoint URL must be specified through " +
+				"bindlet configuration key '" + PARAMETER_ENDPOINT + "'");
+
 		Class<?> intfClass = loadClass(intfClassName);
 		Class<?> implClass = loadClass(implClassName);
 
@@ -186,9 +206,9 @@ public class DefaultSoapBindlet extends SoapBindlet
 		try
 		{
 			ClassDescriptor desc = new ClassDescriptor(runner.getInterfaceClass());
-			WsdlGenerator wsdlgen = new WsdlGenerator();
+			WsdlGenerator wsdlgen = new WsdlGenerator( desc, endpointUrl, wsdlNamespace , schemaNamespace );
 			wsdlName = wsdlgen.getServiceName();
-			return (wsdl = wsdlgen.generateWsdl(desc, req.getRequestURL(), null, null));
+			return (wsdl = wsdlgen.generateWsdl());
 		} catch (Exception e)
 		{
 			throw new BindletException("Error generating WSDL", e);
@@ -225,6 +245,12 @@ public class DefaultSoapBindlet extends SoapBindlet
 	public IComponentInformation getBindletInfo()
 	{
 		return bindletInfo;
+	}
+
+	@Override
+	public String getXMLSchemaNamespace()
+	{
+		return schemaNamespace;
 	}
 	
 }

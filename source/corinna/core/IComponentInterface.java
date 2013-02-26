@@ -19,6 +19,7 @@ package corinna.core;
 import javax.bindlet.BindletModel.Model;
 
 import corinna.exception.ComponentException;
+import corinna.rpc.annotation.RemoteMethod;
 import corinna.util.StateModel;
 
 
@@ -26,8 +27,10 @@ import corinna.util.StateModel;
 public interface IComponentInterface
 {
 
+	@RemoteMethod(export=false)
 	public void init( Object data ) throws ComponentException;
 	
+	@RemoteMethod(export=false)
 	public void destroy() throws ComponentException;
 	
 	
