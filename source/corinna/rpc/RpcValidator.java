@@ -74,12 +74,12 @@ public class RpcValidator
 		// verifica se é um método público
 		if (!Modifier.isPublic(method.getModifiers()))
 			throw new InvalidRpcMethodException("The method access modifier must be public");
-		// verifica se é um método de instância
+		// verifica se é um método dinâmico
 		if (Modifier.isStatic(method.getModifiers()))
 			throw new InvalidRpcMethodException("The method can not be static");
 		// métodos RPC devem retornar um tipo primitivo ou uma instância 'KeyValueList'
-		if ( !TypeConverter.isSupportedType( method.getReturnType() ) )
-			throw new InvalidRpcTypeException("The method return type is not supported");
+		/*if ( !TypeConverter.isSupportedType( method.getReturnType() ) )
+			throw new InvalidRpcTypeException("The method return type is not supported");*/
 		
 		Annotation[][] paramAnnots = method.getParameterAnnotations();
 		Class<?>[] paramTypes = method.getParameterTypes();
@@ -103,9 +103,9 @@ public class RpcValidator
 			if (!parameter.required() && paramTypes[i].isPrimitive())
 				throw new InvalidRpcMethodException("The parameter " + i
 					+ " of the method " + method.getName() + " can not be optional");
-			if ( !TypeConverter.isSupportedType(paramTypes[i]) )
+			/*if ( !TypeConverter.isSupportedType(paramTypes[i]) )
 				throw new InvalidRpcTypeException("The parameter " + i
-					+ " of the method " + method.getName() + " has an unsupported type");
+					+ " of the method " + method.getName() + " has an unsupported type");*/
 		}
 	}
 
@@ -128,7 +128,7 @@ public class RpcValidator
 			throw new InvalidRpcClassException("The interface class must be an interface");
 		if (!IComponentInterface.class.isAssignableFrom(intfClass))
 			throw new InvalidRpcClassException(
-				"The interface class must extends 'IServiceInterface'");
+				"The interface class must extends 'IComponentInterface'");
 
 		Method[] methods = intfClass.getMethods();
 		String name = "";

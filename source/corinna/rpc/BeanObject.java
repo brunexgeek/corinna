@@ -228,7 +228,7 @@ public class BeanObject implements IBeanObject
 		try
 		{
 			classRef.getMethod("set" + key, returnType);
-			return key;
+			return Character.toLowerCase( key.charAt(0) ) + key.substring(1);
 		} catch (Exception e)
 		{
 			return null;
@@ -246,6 +246,7 @@ public class BeanObject implements IBeanObject
 		}
 	}
 	
+	// TODO: optimize string manipulation
 	protected String extractPOJOSetterSuffix( Class<?> classRef, Method method )
 	{
 		if (method == null) return null;
@@ -268,7 +269,7 @@ public class BeanObject implements IBeanObject
 		if (getter == null)
 			getter = getMethod(classRef, "is" + key);
 		if (getter != null && getter.getReturnType() == returnType)
-			return key;
+			return Character.toLowerCase( key.charAt(0) ) + key.substring(1);
 		else
 			return null;
 	}

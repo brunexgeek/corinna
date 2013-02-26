@@ -29,23 +29,36 @@ public class SchemaGenerator
 		Short.class, int.class, float.class, long.class, double.class, boolean.class, 
 		byte.class, short.class, URL.class, Date.class, Calendar.class };
 
-	private static final String TYPE_NAMES[] = { "int", "float", "long", "string", 
-		"double", "boolean", "byte", "short", "int", "float", 
+	private static final String TYPE_NAMES[] = { "integer", "float", "long", "string", 
+		"double", "boolean", "byte", "short", "integer", "float", 
 		"long", "double", "boolean", "byte", "short", "string", "datetime", "datetime" };
 
 	private static final String PREFIX_XMLSCHEMA = "xsd";
 
 	private static final String PREFIX_TYPES = "types";
+
+	private static final String TYPE_SUFFIX = "Type";
 	
 	private Document document;
+	
+	private Map<Class<?>, String> types = null;
 	
 	public SchemaGenerator() throws Exception 
 	{
 		DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
 		document = docBuilder.newDocument();
+		types = new HashMap<Class<?>, String>();
 	}
 	
+	/**
+	 * Generate an XML Schema that provide the methods from the specified class.
+	 * 
+	 * @param classDesc
+	 * @param targetNamespace
+	 * @return
+	 * @throws Exception
+	 */
 	public Element generateSchema( ClassDescriptor classDesc, String targetNamespace ) throws Exception
 	{
         // create a schema context with all informations needed to generate the XML Schema
@@ -54,7 +67,7 @@ public class SchemaGenerator
 		context.classRef = classDesc.getType();
 		context.classDesc  = classDesc;
         
-		Element root = createElement(context, SchemaConstants.ELEM_SCHEMA);
+		Element root = createElement(context, null, SchemaConstants.ELEM_SCHEMA);
         root.setAttribute("targetNamespace", targetNamespace);
         root.setAttribute("xmlns:" + PREFIX_TYPES, targetNamespace);
 		context.schemaElement = root;
@@ -78,11 +91,6 @@ public class SchemaGenerator
 		return element;
 	}
 	
-	protected Element createElement( SchemaContext context, String name )
-	{
-		return createElement(context, null, name);
-	}
-	
 	protected boolean isPrimitive( Class<?> classRef )
 	{
 		int k = 0;
@@ -96,15 +104,6 @@ public class SchemaGenerator
 	protected boolean isEnumeration( Class<?> classRef )
 	{
 		return classRef.isEnum();
-	}
-	
-	protected void generatePrimitive( SchemaContext context, Element parent, String name, Class<?> classRef )
-	{
-		Element element = createElement(context, parent, "element");
-		element.setAttribute("name", name);
-		element.setAttribute("type", PREFIX_XMLSCHEMA + ":" + mapToSchemaType(classRef));
-		element.setAttribute("minOccurs", "0");
-		element.setAttribute("maxOccurs", "1");
 	}
 	
 	protected void generateMethod( SchemaContext context, Element schemaElement, MethodDescriptor method )
@@ -121,7 +120,7 @@ public class SchemaGenerator
 			ParameterDescriptor param = method.getParameter(c);
 			if (!param.isPublic()) continue;
 			
-			createElementField(context, sequence, param.getName(), param.getType(), 
+			createElement(context, sequence, param.getName(), param.getType(), 
 				param.isRequired());
 		}
 		
@@ -131,23 +130,28 @@ public class SchemaGenerator
 		element = createElement(context, element, "complexType");
 		sequence = createElement(context, element, "sequence");
 		
-		createElementField(context, sequence, "result", method.getReturnType(), true);
+		createElement(context, sequence, "result", method.getReturnType(), true);
 	}
 	
-	private Element createElementField( SchemaContext context, Element parent, String name,
+	/**
+	 * Create a XML Schema 'element' for the given type. If necessary, a XML complex type will be
+	 * created to store all type data.
+	 * 
+	 * @param context
+	 * @param parent
+	 * @param name
+	 * @param type
+	 * @param isRequired
+	 * @return
+	 */
+	private Element createElement( SchemaContext context, Element parent, String name,
 		Class<?> type, boolean isRequired )
 	{
-		String typeName = "";
 		Element element;
-		
-		if (isPrimitive(type))
-			typeName = PREFIX_XMLSCHEMA + ":" + mapToSchemaType(type);
-		else
-		if (isEnumeration(type))
-			typeName = generateEnum(context, null, type);
-		else
-			typeName = PREFIX_TYPES + ":" + generateBean(context, null, type);
 
+		String typeName = getTypeName(context, type);		
+
+		// create the element referencing the generated/infered type
 		element = createElement(context, parent, "element");
 		element.setAttribute("type", typeName);
 		element.setAttribute("nillable", isRequired? "false" : "true");
@@ -168,7 +172,7 @@ public class SchemaGenerator
 			return null;
 	}
 	
-	protected String generateBean( SchemaContext context, String name, Class<?> classRef )
+	protected String generateBeanType( SchemaContext context, String name, Class<?> classRef )
 	{
 		if (classRef == null)
 			throw new IllegalArgumentException("The schema element can not be null");
@@ -176,10 +180,13 @@ public class SchemaGenerator
 			throw new IllegalArgumentException("The schema context can not be null");
 
 		Map<String,Class<?>> fields = extractBeanFields(classRef);
+		String pojoName = classRef.getSimpleName() + "POJOType";
 		
-		Element element = createElement(context, context.schemaElement, "element");
-		element.setAttribute("name", classRef.getSimpleName() + "Type");
-		element = createElement(context, element, "complexType");
+		//Element element = createElement(context, context.schemaElement, "element");
+		//element.setAttribute("name", pojoName);
+		//element = createElement(context, element, "complexType");
+		Element element = createElement(context, context.schemaElement, "complexType");
+		element.setAttribute("name", pojoName);
 		element = createElement(context, element, "sequence");
 		
 		for (Map.Entry<String,Class<?>> current : fields.entrySet())
@@ -189,19 +196,19 @@ public class SchemaGenerator
 			
 			// check if the field type is a enumeration
 			if (isPrimitive(type))
-				typeName = mapToSchemaType(type);
+				typeName = PREFIX_XMLSCHEMA + ":" + mapToSchemaType(type);
 			else
 			if (isEnumeration(type))
-				typeName = generateEnum(context, null, type);
+				typeName = generateEnumType(context, null, type);
 			else
-				typeName = generateBean(context, null, type);
+				typeName = generateBeanType(context, null, type);
 				
 			Element temp = createElement(context, element, "element");
 			temp.setAttributeNS(SchemaConstants.NS_URI_XSD_2001, "name", current.getKey());
 			temp.setAttributeNS(SchemaConstants.NS_URI_XSD_2001, "type", typeName);
 		}
 		
-		return classRef.getName() + "Type";
+		return pojoName;
 	}
 	
 	/**
@@ -212,48 +219,58 @@ public class SchemaGenerator
 	 * @param type
 	 * @return
 	 */
-	/*protected String getTypeName( SchemaContext context, Class<?> type )
+	protected String getTypeName( SchemaContext context, Class<?> type )
 	{
+		// check whether the given class type is a primitive
 		if (isPrimitive(type))
-			return mapToSchemaType(type);
+			return PREFIX_XMLSCHEMA + ":" + mapToSchemaType(type);
 		else
+		// check whether the given class type is an enumeration
 		if (isEnumeration(type))
-			return generateEnum(context, type);
+			return generateEnumType(context, null, type);
 		else
-			return generateBean(context, type);
-	}*/
+			return PREFIX_TYPES + ":" + generateBeanType(context, null, type);
+	}
 	
-	protected String generateEnum( SchemaContext context, String name, Class<?> classRef )
+	protected String generateEnumType( SchemaContext context, String name, Class<?> classRef )
 	{
 		if (classRef == null)
 			throw new IllegalArgumentException("The schema element can not be null");
 		if (context == null)
 			throw new IllegalArgumentException("The schema context can not be null");
 		
+		// build the full qualified type name
 		String typeName = name;
-		if (typeName == null) typeName = classRef.getSimpleName() + "Type";
-		Object values[] = classRef.getEnumConstants();
+		if (typeName == null) typeName = classRef.getSimpleName() + TYPE_SUFFIX;
+		typeName = PREFIX_TYPES + ":" + typeName;
 		
 		Element element = createElement(context, context.schemaElement, "simpleType");
 		element.setAttribute("name", typeName);
 		element = createElement(context, element, "restriction");
 		element.setAttribute("base", PREFIX_XMLSCHEMA + ":" + mapToSchemaType(String.class));
-		
+
+		// insert all valid names of the enumeration
+		Object values[] = classRef.getEnumConstants();
 		for (Object current : values)
 		{
 			Element temp = createElement(context, element, "enumeration");
 			temp.setAttributeNS(SchemaConstants.NS_URI_XSD_2001, "value", current.toString());
 		}
+				
+		// register the new type
+		types.put(classRef, typeName);
 		
-		return PREFIX_TYPES + ":" + typeName;
+		return typeName;
 	}
 	
+	// TODO: use the 'BeanObject' logic to extract POJO fields
 	protected Map<String,Class<?>> extractBeanFields( Class<?> classRef )
 	{
 		Map<String, Class<?>> output = new HashMap<String, Class<?>>();
 				
 		Method[] methods = classRef.getMethods();
 		
+		// TODO: using 'getDeclaredFields', inherited fields will not found
 		for (Field field : classRef.getDeclaredFields())
 		{
 			String fieldName = null;

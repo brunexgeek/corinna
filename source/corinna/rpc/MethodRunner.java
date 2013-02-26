@@ -198,9 +198,6 @@ public class MethodRunner implements IMethodRunner
 	{
 		if (prototype == null) return null;
 
-		// NOT NECESSARY CAUSE WE HAVE PROTOTYPE FILTERS
-		//if (prototype.indexOf('.') < 0) prototype = getInterfaceClass().getName() + "." + prototype;
-
 		return procedures.get(prototype);
 	}
 
@@ -243,10 +240,6 @@ public class MethodRunner implements IMethodRunner
 		IncompleteInterfaceException
 	{
 		Method methodRef;
-
-		// NOT NECESSARY CAUSE WE HAVE PROTOTYPE FILTERS
-		//if (methodPrototype.indexOf('.') < 0)
-		//	methodPrototype = getInterfaceClass().getName() + "." + methodPrototype;
 		
 		methodRef = procedures.get(methodPrototype);
 		if (methodRef == null)
@@ -255,7 +248,6 @@ public class MethodRunner implements IMethodRunner
 		// verifica se o objeto de implementação existe (consequentemente pode ser reusado)
 		IComponentInterface impl = getImplementation();
 
-		// procura o construtor padrão
 		try
 		{
 			return methodRef.invoke(impl, values);
@@ -324,7 +316,7 @@ public class MethodRunner implements IMethodRunner
 				args[c] = value;
 			else
 			if (value != null)
-				args[c] = TypeConverter.convert(types[c], value.toString());
+				args[c] = TypeConverter.convert(types[c], value);
 			else
 			{
 				if ( annotation.required() )

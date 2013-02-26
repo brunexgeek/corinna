@@ -107,6 +107,7 @@ public final class TypeConverter
 
 	
 	@SuppressWarnings("unchecked")
+	@Deprecated
 	public static Object convert( Class<?> type, String value )
 	{
 		if (type.equals(Integer.class) || type.equals(int.class)) return toInteger(value);
@@ -122,5 +123,62 @@ public final class TypeConverter
 		throw new ClassCastException("Unsupported type '" + type.getName() + "'");
 	}
 
+	public static Object toJavaBean( Class<?> type, BeanObject value )
+	{
+		Object object;
 
+		try
+		{
+			object = type.newInstance();
+		} catch (Exception e)
+		{
+			return null;
+		}
+		
+		value.populate(object);
+		return object;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Object convert( Class<?> type, Object value )
+	{
+		if (value instanceof BeanObject)
+			return toJavaBean(type, (BeanObject)value);
+		
+		String text = value.toString();
+		
+		if (type.equals(Integer.class) || type.equals(int.class)) return toInteger(text);
+		if (type.equals(Long.class) || type.equals(long.class)) return toLong(text);
+		if (type.equals(Float.class) || type.equals(float.class)) return toFloat(text);
+		if (type.equals(Double.class) || type.equals(double.class)) return toDouble(text);
+		if (type.equals(Byte.class) || type.equals(byte.class)) return toByte(text);
+		if (type.equals(Short.class) || type.equals(short.class)) return toShort(text);
+		if (type.equals(Boolean.class) || type.equals(boolean.class)) return toBoolean(text);
+		if (type.equals(String.class)) return text;
+		if (type.isEnum()) return toEnum((Class<Enum<?>>)type, text);
+
+		throw new ClassCastException("Unsupported type '" + type.getName() + "'");
+	}
+	
+	/**
+	 * Check whether the specified class type represents a primitive value.
+	 * 
+	 * @param type Type to check.
+	 * @return
+	 */
+	public static boolean isPrimitive( Class<?> type )
+	{
+		if (type == null) return false;
+		
+		boolean valid = TYPES_SET.contains(type);
+		valid |= Enum.class.isAssignableFrom(type);
+		return valid;
+	}
+		
+	public static boolean isPrimitive( Object value )
+	{
+		if (value == null) return false;
+		return isPrimitive(value.getClass());
+	}
+	
 }

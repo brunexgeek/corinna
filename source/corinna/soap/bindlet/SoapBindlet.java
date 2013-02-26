@@ -24,8 +24,12 @@ import javax.xml.soap.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import corinna.rpc.BeanObject;
+import corinna.rpc.POJOUtil;
 import corinna.rpc.ProcedureCall;
 import corinna.rpc.ReflectionUtil;
+import corinna.rpc.RpcValidator;
+import corinna.rpc.TypeConverter;
 import corinna.soap.core.WsdlGenerator;
 import corinna.soap.network.SoapMarshaller;
 import corinna.soap.network.SoapUnmarshaller;
@@ -124,9 +128,14 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 				Object current = it.next();
 				if (current instanceof SOAPElement)
 				{
+					Object value;
 					SOAPElement param = (SOAPElement)current;
 					
-					procedure.setParameter(param.getLocalName(), getElementContent(param));
+					if (isElementPOJO(param))
+						value = getElementPOJO(param);
+					else
+						value = getElementContent(param);
+					procedure.setParameter(param.getLocalName(), value);
 				}
 			}
 			
@@ -139,6 +148,43 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 			serverLog.error("Error parsing SOAP message", e);
 			return null;
 		}
+	}
+
+	protected boolean isElementPOJO( SOAPElement element )
+	{
+		
+        for (Iterator iter = element.getChildElements(); iter.hasNext();) 
+        {
+            Object child = iter.next();
+            if (child instanceof SOAPElement) return true;
+        }
+        
+        return false;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	protected BeanObject getElementPOJO( SOAPElement element )
+	{
+		BeanObject object = new BeanObject();
+		
+		// find all procedure parameters
+		Iterator it = element.getChildElements();
+		while (it.hasNext())
+		{
+			Object current = it.next();
+			if (current instanceof SOAPElement)
+			{
+				SOAPElement field = (SOAPElement) current;
+				String fieldName = field.getElementName().getLocalName();
+				Object value;
+				if (isElementPOJO(field))
+					value = getElementPOJO(field);
+				else
+					value = getElementContent(field);
+				object.set(fieldName, value);
+			}
+		}
+		return object;
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -158,6 +204,7 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 		return null;
 	}
 
+		
 	protected SOAPMessage createSoapResponse( String namespace, String prototype, Object result ) throws SOAPException
 	{
 		SOAPMessage message = SoapUtils.createMessage();
@@ -167,9 +214,7 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 		QName qname = new QName(prototype + "OutputType");
 		SOAPElement element = body.addChildElement(qname);
 		// create the return value element
-		qname = new QName(WsdlGenerator.PARAMETER_RESULT);
-		SOAPElement carrier = element.addChildElement(qname);
-		carrier.setValue( (result == null) ? "" : result.toString() );
+		SoapUtils.generateElement(element, WsdlGenerator.PARAMETER_RESULT, result);
 		
 		return message;
 	}
