@@ -196,7 +196,10 @@ public class SchemaGenerator
 		if (pojoName != null) return pojoName;
 		
 		Map<String,Class<?>> fields = extractBeanFields(classRef);
-		pojoName = classRef.getSimpleName() + SUFFIX_TYPE;
+		pojoName = PREFIX_TYPES + ":" + classRef.getSimpleName() + SUFFIX_TYPE;
+		
+		// register the new type (insert before complete the job to avoid infinite recursion)
+		types.put(classRef, pojoName);
 		
 		//Element element = createElement(context, context.schemaElement, "element");
 		//element.setAttribute("name", pojoName);
@@ -209,6 +212,7 @@ public class SchemaGenerator
 		{
 			String typeName = null;
 			Class<?> type = current.getValue();
+			boolean isPOJO = false;
 			
 			// check if the field type is a enumeration
 			if (isPrimitive(type))
@@ -217,11 +221,16 @@ public class SchemaGenerator
 			if (isEnumeration(type))
 				typeName = generateEnumType(context, null, type);
 			else
+			{
 				typeName = generateBeanType(context, null, type);
-				
+				isPOJO = true;
+			}
+
 			Element temp = createElement(context, element, "element");
 			temp.setAttributeNS(SchemaConstants.NS_URI_XSD_2001, "name", current.getKey());
 			temp.setAttributeNS(SchemaConstants.NS_URI_XSD_2001, "type", typeName);
+			// TODO: create a new annotation to be used in a POJO setter that defines if that POJO field can be null (only valid for non primitive types)
+			temp.setAttributeNS(SchemaConstants.NS_URI_XSD_2001, "nillable", (isPOJO) ? "true" : "false");
 		}
 		
 		// register the new type
@@ -248,7 +257,7 @@ public class SchemaGenerator
 		if (isEnumeration(type))
 			return generateEnumType(context, null, type);
 		else
-			return PREFIX_TYPES + ":" + generateBeanType(context, null, type);
+			return generateBeanType(context, null, type);
 	}
 	
 	protected String generateEnumType( SchemaContext context, String name, Class<?> classRef )

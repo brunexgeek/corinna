@@ -180,9 +180,20 @@ public class BindletRegistration implements IBindletRegistration
 		if (bindlet == null)
 			return createBindletInstance();
 		else
+		{
+			serverLog.trace("Reclycling bindlet instance of the '" + bindletClass.getName() + "' class");
 			return bindlet;
+		}
 	}
 	
+	/**
+	 * Returns a reusable instance of the bindlet. If the reusable instance is already not created, this method
+	 * call {@link #createBindletInstance()} to create it and preserve the reference to the new instance for
+	 * future use.
+	 * 
+	 * @return
+	 * @throws BindletException
+	 */
 	protected IBindlet<?,?> getBindletInstance() throws BindletException
 	{
 		IBindlet<?,?> instance;
@@ -191,18 +202,35 @@ public class BindletRegistration implements IBindletRegistration
 		instance = bindletInstance;
 		bindletInstanceLock.readUnlock();
 		
-		if (instance == null)
+		if (instance != null) 
 		{
-			instance = createBindletInstance();
-			instance.init(getBindletConfig());
-			bindletInstanceLock.writeLock();
-			bindletInstance = instance;
-			bindletInstanceLock.writeUnlock();
+			serverLog.trace("Reusing bindlet instance of the '" + bindletClass.getName() + "' class");
+			return instance;
 		}
 		
-		return instance;
+		bindletInstanceLock.writeLock();
+		try
+		{
+			if (bindletInstance == null)
+			{
+				instance = createBindletInstance();
+				instance.init(getBindletConfig());
+				bindletInstance = instance;
+			}
+			return bindletInstance;
+		} finally
+		{
+			bindletInstanceLock.writeUnlock();
+		}		
 	}
 	
+	/**
+	 * Create an instance of the bindlet. The method also invokes {@link BeanManager#inject} 
+	 * giving the created bindlet instance to inject any necessary service bean.
+	 * 
+	 * @return
+	 * @throws BindletException
+	 */
 	protected IBindlet<?,?> createBindletInstance() throws BindletException
 	{
 		IBindlet<?,?> instance;
@@ -216,7 +244,7 @@ public class BindletRegistration implements IBindletRegistration
 				+ bindletClassName + "'", e);
 		}
 	
-		serverLog.trace("Created bindlet instance of '" + bindletClass.getName() + "'");
+		serverLog.trace("Created bindlet instance of the '" + bindletClass.getName() + "' class");
 		
 		// inject all referenced service beans
 		BeanManager.getInstance().inject(instance);

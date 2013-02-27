@@ -22,7 +22,16 @@ import javax.bindlet.IBindletConfig;
 import javax.bindlet.exception.BindletException;
 
 
-
+/**
+ * <p>Basic interface for a bindlet registration object. A bindlet registration is responsible to
+ * store all necessary informations to create bindlet instances. The interface define the {@link #createBindlet()} 
+ * method whereby a container object (probably an object that extends {@link Context} class) can create or reuse 
+ * bindlet instances to process incoming requests.</p>
+ * 
+ * <p>All operations in this class must be thread-safe.</p>
+ * 
+ * @author Bruno Ribeiro
+ */
 public interface IBindletRegistration
 {
 
@@ -62,12 +71,12 @@ public interface IBindletRegistration
 	 * Returns a bindlet instance according to the following conditions:
 	 * 
 	 * <ul>
-	 * <li>If the bindlet is stateless, all calls for this method will be return the same bindlet
+	 * <li>If the bindlet is stateless, all calls for this method will return the same bindlet
 	 * instance;</li>
-	 * <li>If the bindlet is recyclable, one or more calls for this method will be return the same
+	 * <li>If the bindlet is recyclable, one or more calls for this method will return the same
 	 * bindlet instance, but is garanteed that the returned instance can be used as if it were
 	 * statefull;</li>
-	 * <li>If the bindlet is statefull, every call for this method will be return a new instance of
+	 * <li>If the bindlet is statefull, every call for this method will return a new instance of
 	 * the bindlet.</li>
 	 * </ul>
 	 */

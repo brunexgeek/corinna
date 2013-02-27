@@ -133,7 +133,6 @@ public class HttpConnector extends Connector
 	@Override
 	public ChannelPipeline getPipeline() throws Exception
 	{
-		// create the default stateless pipeline for all channels
 		ChannelPipeline pipeline = Channels.pipeline();
 		
 		if (enableSSL)

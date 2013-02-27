@@ -40,64 +40,61 @@ import com.ibm.wsdl.extensions.soap.SOAPOperationImpl;
 
 import corinna.rpc.ClassDescriptor;
 import corinna.rpc.MethodDescriptor;
+import corinna.thread.ObjectLocker;
 
-
+/**
+ * 
+ * @author Bruno Ribeiro
+ * @since 1.0
+ */
 public class WsdlGenerator
 {
 
-	private static final Class<?>[] TYPE_CLASSES = { Integer.class, Float.class, Long.class,
-			String.class, Double.class, Boolean.class, Byte.class, Short.class, int.class,
-			float.class, long.class, double.class, boolean.class, byte.class, short.class };
-
-	private static final String TYPE_NAMES[] = { "int", "float", "long", "string", "double",
-			"boolean", "byte", "short", "int", "float", "long", "double", "boolean", "byte",
-			"short" };
-
-	public static final String PARAMETER_RESULT = "result";
-
-	//public static final String SUFFIX_MESSAGE_RESPONSE = "Response";
-
-	public static final String DEFAULT_SCHEMA = "service.xsd";
-
-	public static final String DEFAULT_WSDL = "service.wsdl";
+	public static final String RETURN_VALUE_NAME = "result";
 
 	private static final String SUFFIX_PORTTYPE = "PortType";
 
 	private static final String SUFFIX_BINDING = "Binding";
 
-	private static final String SUFFIX_INPUT = SchemaGenerator.SUFFIX_INPUT;//"Input";
+	private static final String SUFFIX_INPUT = SchemaGenerator.SUFFIX_INPUT;
 
-	private static final String SUFFIX_OUTPUT = SchemaGenerator.SUFFIX_OUTPUT;//"Output";
-	
+	private static final String SUFFIX_OUTPUT = SchemaGenerator.SUFFIX_OUTPUT;
+
 	private static final String SUFFIX_MESSAGE = SchemaGenerator.SUFFIX_MESSAGE;
-	
+
 	public static final String SUFFIX_INPUT_MESSAGE = SUFFIX_INPUT + SUFFIX_MESSAGE;
-	
+
 	public static final String SUFFIX_OUTPUT_MESSAGE = SUFFIX_OUTPUT + SUFFIX_MESSAGE;
 
+	private static final String SUFFIX_SERVICE = "Service";
+	
+	private static final String SUFFIX_PORT = "Port";
+	
 	private static final String NAMESPACE_WSDL = SOAPConstants.NS_URI_SOAP;
 
 	private static final String NAMESPACE_XSD = SchemaConstants.NS_URI_XSD_2001;
-	
+
 	private static final String NAMESPACE_SOAP = "http://schemas.xmlsoap.org/soap/http";
 
-	private static final String SUFFIX_SERVICE = "Service";
-
+	/**
+	 * Prefix for the standard SOAP schema namespace.
+	 */
 	private static final String PREFIX_SOAP = "soap";
 
 	/**
-	 * Prefix for the generated XML Schema.
+	 * Prefix for the generated XML Schema namespace.
 	 */
 	private static final String PREFIX_LOCAL_XSD = "types";
 
 	/**
-	 * Prefix for the generated WSDL.
+	 * Prefix for the generated WSDL namespace.
 	 */
 	private static final String PREFIX_LOCAL_WSDL = "lns";
 
+	/**
+	 * Prefix for the standard XSD schema namespace.
+	 */
 	private static final String PREFIX_XSD = "xsd";
-
-	private static final String SUFFIX_PORT = "Port";
 
 	private String serviceName = "ServiceName";
 
@@ -107,38 +104,45 @@ public class WsdlGenerator
 
 	private Document document;
 
-	private WsdlContext context = null;
+	private ClassDescriptor classDescriptor = null;
 	
+	private Definition wsdlDefinition = null;
+	
+	private String localWSDLNamespace = null;
+	
+	private String localXMLSchemaNamespace = null;
+	
+	private String endpointURL = null;
+	
+	private ObjectLocker wsdlLock = new ObjectLocker();
+
 	public WsdlGenerator( ClassDescriptor classDesc, String endpointUrl ) throws WSDLException
 	{
 		this(classDesc, endpointUrl, null, null);
 	}
-	
-	public WsdlGenerator( ClassDescriptor classDesc, String endpointUrl, String wsdlNamespace, String schemaNamespace ) throws WSDLException
+
+	public WsdlGenerator( ClassDescriptor classDesc, String endpointURL, String wsdlNamespace,
+		String schemaNamespace ) throws WSDLException
 	{
 		if (classDesc == null)
 			throw new IllegalArgumentException("The class descriptor can not be null");
-		
-		// initialize internal parameters
-		context = new WsdlContext();
-		context.wsdlDef = null;
-		context.classDesc = classDesc;
-		context.wsdlNamespace = wsdlNamespace;
-		context.schemaNamespace = schemaNamespace;
-		context.extensionReg = new ExtensionRegistry();
-		context.endpointUrl = endpointUrl;
-		if (!endpointUrl.endsWith("/")) context.endpointUrl = endpointUrl + "/";
 
-		if (wsdlNamespace == null)
-			context.wsdlNamespace = getWSDLNamespace(endpointUrl, classDesc);
-		if (schemaNamespace == null)
-			context.schemaNamespace = getXMLSchemaNamespace(endpointUrl, classDesc);
-		
-		// used to create the documentation elements
+		// initialize internal parameters
+		classDescriptor = classDesc;
+		localWSDLNamespace = wsdlNamespace;
+		localXMLSchemaNamespace = schemaNamespace;
+		this.endpointURL = endpointURL;
+		if (!endpointURL.endsWith("/")) this.endpointURL = endpointURL + "/";
+
+		// generate the local WSDL namespace
+		if (wsdlNamespace == null) localWSDLNamespace = getWSDLNamespace();
+		// generate the local XML schema namespace
+		if (schemaNamespace == null) localXMLSchemaNamespace = getXMLSchemaNamespace();
+
 		try
 		{
 			wsdlFactory = WSDLFactory.newInstance();
-			
+
 			DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
 			document = docBuilder.newDocument();
@@ -149,30 +153,57 @@ public class WsdlGenerator
 		}
 	}
 
-	public Definition generateWsdl( ) throws Exception
+	public Definition generateWsdl() throws Exception
 	{
-		Definition wsdlDef = wsdlFactory.newDefinition();
-
-		wsdlDef.setTargetNamespace(context.wsdlNamespace);
-		wsdlDef.setQName(new QName(context.classDesc.getName()));
-		wsdlDef.addNamespace(PREFIX_SOAP, NAMESPACE_WSDL);
-		wsdlDef.addNamespace(PREFIX_LOCAL_XSD, context.schemaNamespace);
-		wsdlDef.addNamespace(PREFIX_LOCAL_WSDL, context.wsdlNamespace);
-		wsdlDef.addNamespace(PREFIX_XSD, NAMESPACE_XSD);
-
-		context.wsdlDef = wsdlDef;
+		Definition result;
 		
-		generateWsdlTypes(context);
-		generateWsdlMethods(context, context.classDesc);
-		generateWsdlService(context);
+		wsdlLock.readLock();
+		result = wsdlDefinition;
+		wsdlLock.readUnlock();
 
-		return wsdlDef;
+		if (result != null) return result;
+		
+		wsdlLock.writeLock();
+		try
+		{
+			result = wsdlFactory.newDefinition();
+		
+			result.setTargetNamespace(localWSDLNamespace);
+			result.setQName(new QName(classDescriptor.getName()));
+			result.addNamespace(PREFIX_SOAP, NAMESPACE_WSDL);
+			result.addNamespace(PREFIX_LOCAL_XSD, localXMLSchemaNamespace);
+			result.addNamespace(PREFIX_LOCAL_WSDL, localWSDLNamespace);
+			result.addNamespace(PREFIX_XSD, NAMESPACE_XSD);
+		
+			WsdlContext context = new WsdlContext();
+			context.wsdlDef = null;
+			context.classDesc = classDescriptor;
+			context.wsdlNamespace = localWSDLNamespace;
+			context.schemaNamespace = localXMLSchemaNamespace;
+			context.extensionReg = new ExtensionRegistry();
+			context.endpointUrl = endpointURL;
+			context.wsdlDef = result;
+		
+			generateWsdlTypes(context);
+			generateWsdlMethods(context, context.classDesc);
+			generateWsdlService(context);
+			
+			wsdlDefinition = result;
+			context.wsdlDef = null;
+
+			return result;
+		} finally
+		{
+			wsdlLock.writeUnlock();
+		}
 	}
 
 	/**
-	 * Generate a XML Schema defining all types in the given class descriptor to be used in the WSDL messages.
+	 * Generate a XML Schema defining all types in the given class descriptor to be used in the WSDL
+	 * messages.
 	 * 
-	 * @param context The context information object.
+	 * @param context
+	 *            The context information object.
 	 * @throws Exception
 	 */
 	protected void generateWsdlTypes( WsdlContext context ) throws Exception
@@ -180,7 +211,6 @@ public class WsdlGenerator
 		SchemaGenerator ps = new SchemaGenerator();
 		Element root = ps.generateSchema(context.classDesc, context.schemaNamespace);
 
-		// TODO: try to remove the specified reference for the 'SchemaImpl' from third-part package
 		Schema schema = new SchemaImpl();
 		schema.setElement(root);
 		schema.setElementType(SchemaConstants.Q_ELEM_XSD_2001);
@@ -191,12 +221,15 @@ public class WsdlGenerator
 	}
 
 	/**
-	 * Generate all WSDL entries required to export each method in the given class descriptor. For each
-	 * method found will be called the {@link #generateMethod} method.
+	 * Generate all WSDL entries required to export each method in the given class descriptor. For
+	 * each method found will be called the {@link #generateMethod} method.
 	 * 
-	 * @param context The context information object.
-	 * @param methodDesc Class descriptor that contains the methods information.
-	 * @throws WSDLException whether an exception occurs while generating the method entries on the WSDL.
+	 * @param context
+	 *            The context information object.
+	 * @param methodDesc
+	 *            Class descriptor that contains the methods information.
+	 * @throws WSDLException
+	 *             whether an exception occurs while generating the method entries on the WSDL.
 	 */
 	protected void generateWsdlMethods( WsdlContext context, ClassDescriptor classDesc )
 		throws WSDLException
@@ -208,13 +241,36 @@ public class WsdlGenerator
 			generateMethod(context, current);
 	}
 
+	protected void generateWsdlService( WsdlContext context )
+	{
+		String serviceName = context.classDesc.getName() + SUFFIX_SERVICE;
+		String bindingName = serviceName + SUFFIX_BINDING;
+
+		SOAPAddress soapAd = new SOAPAddressImpl();
+		soapAd.setLocationURI(context.endpointUrl);
+
+		Port port = context.wsdlDef.createPort();
+		port.setBinding(context.wsdlDef.getBinding(new QName(context.wsdlNamespace, bindingName)));
+		port.addExtensibilityElement(soapAd);
+		port.setName(serviceName + SUFFIX_PORT);
+
+		Service service = context.wsdlDef.createService();
+		service.addPort(port);
+		service.setQName(new QName(serviceName));
+
+		context.wsdlDef.addService(service);
+	}
+	
 	/**
-	 * Generate all WSDL entries required to export the given method. That entries can includes the 
+	 * Generate all WSDL entries required to export the given method. That entries can includes the
 	 * parameters and return value messages, the operation and the operation binding.
 	 * 
-	 * @param context The context information object.
-	 * @param methodDesc Method descriptor that contains the method information.
-	 * @throws WSDLException whether an exception occurs while generating the method entries on the WSDL.
+	 * @param context
+	 *            The context information object.
+	 * @param methodDesc
+	 *            Method descriptor that contains the method information.
+	 * @throws WSDLException
+	 *             whether an exception occurs while generating the method entries on the WSDL.
 	 */
 	protected void generateMethod( WsdlContext context, MethodDescriptor methodDesc )
 		throws WSDLException
@@ -365,37 +421,18 @@ public class WsdlGenerator
 		return operation;
 	}
 
-	protected void generateWsdlService( WsdlContext context )
-	{
-		String serviceName = context.classDesc.getName() + SUFFIX_SERVICE;
-		String bindingName = serviceName + SUFFIX_BINDING;
-
-		SOAPAddress soapAd = new SOAPAddressImpl();
-		soapAd.setLocationURI(context.endpointUrl);
-
-		Port port = context.wsdlDef.createPort();
-		port.setBinding(context.wsdlDef.getBinding(new QName(context.wsdlNamespace, bindingName)));
-		port.addExtensibilityElement(soapAd);
-		port.setName(serviceName + SUFFIX_PORT);
-
-		Service service = context.wsdlDef.createService();
-		service.addPort(port);
-		service.setQName(new QName(serviceName));
-
-		context.wsdlDef.addService(service);
-	}
-
-	public static String getTypeName( Class<?> type )
+	/*public static String getTypeName( Class<?> type )
 	{
 		int k;
 
-		for (k = 0; k < TYPE_NAMES.length && !TYPE_CLASSES[k].equals(type); ++k);
+		for (k = 0; k < TYPE_NAMES.length && !TYPE_CLASSES[k].equals(type); ++k)
+			;
 
 		if (k < TYPE_NAMES.length)
 			return TYPE_NAMES[k];
 		else
 			return "string";
-	}
+	}*/
 
 	public void setServiceName( String serviceName )
 	{
@@ -417,6 +454,40 @@ public class WsdlGenerator
 		return serviceDescription;
 	}
 
+
+	/**
+	 * Returns the XML schema namespace for the generated WSDL. If no namespace was given by the
+	 * constructor, this method will return a automatic generated namespace (supposedly unique).
+	 * 
+	 * @return
+	 */
+	public String getXMLSchemaNamespace( )
+	{
+		if (localXMLSchemaNamespace != null) return localXMLSchemaNamespace;
+		if (endpointURL == null || classDescriptor == null) return "MyXSD";
+		return endpointURL + classDescriptor.getName() + ".xsd";
+	}
+
+	/**
+	 * Returns the WSDL namespace for the generated WSDL. If no namespace was given by the
+	 * constructor, this method will return a automatic generated namespace (supposedly unique).
+	 * 
+	 * @return
+	 */
+	public String getWSDLNamespace( )
+	{
+		if (localWSDLNamespace != null) return localWSDLNamespace;
+		if (endpointURL == null || classDescriptor == null) return "MyWSDL";
+		return endpointURL + classDescriptor.getName() + ".wsdl";
+	}
+
+	
+	/**
+	 * Store all necessary informations to generate a WSDL. This class is used to allow the
+	 * {@link WsdlGenerator} class can be static (although the current implementation be statefull).
+	 * 
+	 * @author Bruno Ribeiro
+	 */
 	protected class WsdlContext
 	{
 
@@ -437,19 +508,5 @@ public class WsdlGenerator
 		public PortType portType = null;
 
 	}
-	
-	public static String getXMLSchemaNamespace( String endpointUrl, ClassDescriptor classDesc )
-	{
-		if (endpointUrl == null || classDesc == null) return null;
-		if (!endpointUrl.endsWith("/")) endpointUrl = endpointUrl + "/";
-		return endpointUrl + classDesc.getName() + "/XSD";
-	}
-	
-	public static String getWSDLNamespace( String endpointUrl, ClassDescriptor classDesc )
-	{
-		if (endpointUrl == null || classDesc == null) return null;
-		if (!endpointUrl.endsWith("/")) endpointUrl = endpointUrl + "/";
-		return endpointUrl + classDesc.getName() + "/WSDL";
-	}
-	
+
 }

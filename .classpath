@@ -10,6 +10,6 @@
 	<classpathentry kind="lib" path="lib/slf4j-api-1.6.6.jar"/>
 	<classpathentry kind="lib" path="lib/javassist.jar"/>
 	<classpathentry kind="lib" path="lib/wsdl4j.jar"/>
-	<classpathentry kind="lib" path="lib/netty-3.5.8.Final.jar"/>
+	<classpathentry kind="lib" path="lib/netty-3.5.8.Final.jar" sourcepath="lib/netty-3.5.8.Final-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

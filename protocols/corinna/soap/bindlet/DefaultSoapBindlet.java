@@ -34,10 +34,6 @@ public class DefaultSoapBindlet extends SoapBindlet
 	
 	private static final long serialVersionUID = -5420790590792120345L;
 	
-	protected static final String DEFAULT_ENDPOINT = "http://localhost:8080";
-	
-	protected static final String DEFAULT_NAMESPACE = DEFAULT_ENDPOINT + "/" + WsdlGenerator.DEFAULT_SCHEMA;
-	
 	private static final String PARAMETER_INTERFACE = "interfaceClass";
 	
 	private static final String PARAMETER_IMPLEMENTATION = "implementationClass";
@@ -46,7 +42,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	
 	private static final String PARAMETER_WSDL_NAMESPACE = "WSDLNamespace";
 	
-	private static final String PARAMETER_ENDPOINT = "endpointUrl";
+	private static final String PARAMETER_ENDPOINT = "endpointURL";
 	
 	private static final String COMPONENT_NAME = "SOAP Web Service Bindlet";
 	
@@ -67,11 +63,11 @@ public class DefaultSoapBindlet extends SoapBindlet
 
 	private String wsdlName;
 
-	private String schemaNamespace = null;
+	private String localXMLSchemaNamespace = null;
 
-	private String wsdlNamespace = null;
+	private String localWSDLNamespace = null;
 	
-	private String endpointUrl = null;
+	private String endpointURL = null;
 	
 	public DefaultSoapBindlet( ) throws BindletException
 	{
@@ -81,9 +77,10 @@ public class DefaultSoapBindlet extends SoapBindlet
 	 * Change the initialization state to specified value and return <code>true</code> if no actions
 	 * must be done (the previous value are the same) or <code>false</code> otherwise.
 	 * 
-	 * @param value
+	 * @param value 
 	 * @return
 	 */
+	// TODO: what this means?
 	private boolean setInitialized( boolean value )
 	{
 		synchronized (isInitialized)
@@ -120,10 +117,10 @@ public class DefaultSoapBindlet extends SoapBindlet
 			throw new BindletException("The implementation class must be specified through " +
 				"bindlet configuration key '" + PARAMETER_IMPLEMENTATION + "'");
 		// load the XML Schema and WSDL namespaces
-		schemaNamespace = config.getBindletParameter(PARAMETER_XMLSCHEMA_NAMESPACE);
-		wsdlNamespace = config.getBindletParameter(PARAMETER_WSDL_NAMESPACE);
+		localXMLSchemaNamespace = config.getBindletParameter(PARAMETER_XMLSCHEMA_NAMESPACE);
+		localWSDLNamespace = config.getBindletParameter(PARAMETER_WSDL_NAMESPACE);
 		// load the endpoint URL
-		endpointUrl = config.getBindletParameter(PARAMETER_ENDPOINT);
+		endpointURL = config.getBindletParameter(PARAMETER_ENDPOINT);
 		if (implClassName == null || implClassName.isEmpty())
 			throw new BindletException("The endpoint URL must be specified through " +
 				"bindlet configuration key '" + PARAMETER_ENDPOINT + "'");
@@ -209,8 +206,8 @@ public class DefaultSoapBindlet extends SoapBindlet
 		try
 		{
 			ClassDescriptor desc = new ClassDescriptor(runner.getInterfaceClass());
-			schemaNamespace = WsdlGenerator.getXMLSchemaNamespace(endpointUrl, desc);
-			WsdlGenerator wsdlgen = new WsdlGenerator( desc, endpointUrl, wsdlNamespace , schemaNamespace );
+			WsdlGenerator wsdlgen = new WsdlGenerator( desc, endpointURL, localWSDLNamespace , localXMLSchemaNamespace );
+			localXMLSchemaNamespace = wsdlgen.getXMLSchemaNamespace();
 			wsdlName = wsdlgen.getServiceName();
 			return (wsdl = wsdlgen.generateWsdl());
 		} catch (Exception e)
@@ -255,7 +252,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	@Override
 	public String getXMLSchemaNamespace()
 	{
-		return schemaNamespace;
+		return localXMLSchemaNamespace;
 	}
 	
 }

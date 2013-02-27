@@ -13,6 +13,7 @@ import corinna.rpc.BeanObject;
 import corinna.rpc.TypeConverter;
 
 
+// TODO: move this class to 'corinna.soap.core' package
 public class SoapUtils
 {
 
@@ -35,9 +36,9 @@ public class SoapUtils
 	 * content of the generated element will be <code>value.toString</code>. If the value is a object ({@link BeanObject} or
 	 * POJO), the content of the generated element will be the content of their fields.
 	 *  
-	 * @param parent
-	 * @param name
-	 * @param value
+	 * @param parent The SOAP element that will be the parent of the new element.
+	 * @param name The tag name used when the value is a primitive. 
+	 * @param value The value that will be inserted on the new element.
 	 * @return
 	 * @throws SOAPException
 	 */

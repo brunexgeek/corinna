@@ -17,6 +17,9 @@
 package corinna.http.bindlet;
 
 
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.bindlet.http.Cookie;
 import javax.bindlet.http.IHttpBindletResponse;
 
@@ -30,6 +33,8 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 public class HttpBindletResponse extends WebBindletResponse implements IHttpBindletResponse
 {
 
+	private List<Cookie> cookies = new LinkedList<Cookie>();
+	
 	public HttpBindletResponse( Channel channel, HttpVersion version )
 	{
 		super(channel, new DefaultHttpResponse(version, HttpResponseStatus.OK));
@@ -43,21 +48,28 @@ public class HttpBindletResponse extends WebBindletResponse implements IHttpBind
 	@Override
 	public void addCookie( Cookie cookie )
 	{
-		// TODO: implements the cokie support
+		if (cookie != null) cookies.add(cookie);
 	}
 
 	@Override
 	public String encodeURL( String url )
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return url;
 	}
 
 	@Override
 	public String encodeRedirectURL( String url )
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return url;
 	}
 
+	@Override
+	protected void update()
+	{
+		super.update();
+		for (Cookie entry : cookies)
+			// TODO: write all cookie attributes in response header
+			response.addHeader("Set-Cookie", entry.getName() + "=" + entry.getValue() );
+	}
+	
 }

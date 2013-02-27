@@ -1,5 +1,7 @@
 package corinna.network;
 
+import javax.bindlet.exception.BindletException;
+
 import corinna.rpc.ProcedureCall;
 
 
@@ -11,8 +13,9 @@ public interface IProtocolHandler<R, P>
 	 *  
 	 * @param request
 	 * @return
+	 * @throws BindletException 
 	 */
-	public ProcedureCall readRequest( R request );
+	public ProcedureCall readRequest( R request ) throws BindletException;
 	
 	/**
 	 * Write a RPC response containing the given return value.
@@ -20,6 +23,6 @@ public interface IProtocolHandler<R, P>
 	 * @param returnValue
 	 * @return
 	 */
-	public P writeResponse( Object returnValue );
+	public void writeResponse( P response, Object returnValue ) throws BindletException;
 	
 }

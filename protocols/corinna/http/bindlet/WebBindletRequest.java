@@ -150,7 +150,7 @@ public class WebBindletRequest implements IWebBindletRequest
 
 	public ChannelBuffer getContent()
 	{
-		return request.getContent();		
+		return request.getContent();
 	}
 	
 	@Override

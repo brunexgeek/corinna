@@ -216,7 +216,7 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 		QName qname = new QName(namespace, prototype + WsdlGenerator.SUFFIX_OUTPUT_MESSAGE);
 		SOAPElement element = body.addChildElement(qname);
 		// create the return value element
-		SoapUtils.generateElement(element, WsdlGenerator.PARAMETER_RESULT, result);
+		SoapUtils.generateElement(element, WsdlGenerator.RETURN_VALUE_NAME, result);
 		
 		return message;
 	}

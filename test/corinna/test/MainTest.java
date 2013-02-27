@@ -5,16 +5,20 @@ import java.util.UUID;
 import javax.wsdl.Definition;
 import javax.wsdl.Types;
 import javax.wsdl.extensions.schema.Schema;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLWriter;
 
 import org.w3c.dom.Element;
 
 import com.ibm.wsdl.extensions.schema.SchemaConstants;
 import com.ibm.wsdl.extensions.schema.SchemaImpl;
 
-import corinna.rpc.BeanObject;
 import corinna.rpc.ClassDescriptor;
-import corinna.rpc.IBeanObject;
+import corinna.rpc.annotation.Parameter;
+import corinna.rpc.annotation.RemoteComponent;
+import corinna.rpc.annotation.RemoteMethod;
 import corinna.soap.core.SchemaGenerator;
+import corinna.soap.core.WsdlGenerator;
 
 
 public class MainTest
@@ -22,22 +26,21 @@ public class MainTest
 
 	public static void main( String[] args ) throws Exception
 	{
-		/*WSDLFactory factory = WSDLFactory.newInstance();
+		WSDLFactory factory = WSDLFactory.newInstance();
 		
-		ClassDescriptor desc = new ClassDescriptor(ServiceInterface.class);
+		ClassDescriptor desc = new ClassDescriptor(MyPOJO.class);
 		
-		WsdlGenerator wgen = new WsdlGenerator();
-		Definition def = wgen.generateWsdl(desc, "http://vaas.cpqd.com.br/vaas/soap/", "http://vaas.cpqd.com.br/tts.wsdl",
-			"http://vaas.cpqd.com.br/tts.xsd");
+		WsdlGenerator wgen = new WsdlGenerator(desc, "http://fuck.com");
+		Definition def = wgen.generateWsdl();
 		
 		WSDLWriter wr = factory.newWSDLWriter();
-		wr.writeWSDL(def, System.out);*/
-		MyPOJO A = new MyPOJO( new MyPOJO() );
+		wr.writeWSDL(def, System.out);
+		/*MyPOJO A = new MyPOJO( new MyPOJO() );
 		MyPOJO B = new MyPOJO( );
 		A.setActive(true);
 		A.setState(MyEnum.PARADA);
 		IBeanObject bean = new BeanObject(A);
-		bean.populate(B);
+		bean.populate(B);*/
 	}
 
 	public static void generateTypes( Definition def, Class<?> classRef, String targetNamespace ) throws Exception
@@ -71,6 +74,7 @@ public class MainTest
 		
 	}
 	
+	@RemoteComponent(name="MyPOJOService")
 	public static class MyPOJO
 	{
 		private MyEnum state = MyEnum.ANDANDO;
@@ -90,41 +94,49 @@ public class MainTest
 		{
 		}
 		
-		public void setState( MyEnum state )
+		@RemoteMethod()
+		public void setState( @Parameter(name="state")MyEnum state )
 		{
 			this.state = state;
 		}
 
+		@RemoteMethod()
 		public MyEnum getState()
 		{
 			return state;
 		}
 
-		public void setActive( boolean active )
+		@RemoteMethod()
+		public void setActive( @Parameter(name="active")boolean active )
 		{
 			this.active = active;
 		}
 
+		@RemoteMethod()
 		public boolean isActive()
 		{
 			return active;
 		}
 
-		public void setPojo( MyPOJO pojo )
+		@RemoteMethod()
+		public void setPojo( @Parameter(name="pojo")MyPOJO pojo )
 		{
 			this.pojo = pojo;
 		}
 
+		@RemoteMethod()
 		public MyPOJO getPojo()
 		{
 			return pojo;
 		}
-
-		public void setName( String name )
+		
+		@RemoteMethod()
+		public void setName( @Parameter(name="name")String name )
 		{
 			this.name = name;
 		}
 
+		@RemoteMethod()
 		public String getName()
 		{
 			return name;
