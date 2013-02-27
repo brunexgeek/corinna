@@ -74,7 +74,7 @@ public abstract class SoapBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	}
 
 	protected abstract IProcedureCall getProcedureCall( IHttpBindletRequest request,
-		IHttpBindletResponse response );
+		IHttpBindletResponse response ) throws BindletException;
 
 	public boolean isRestricted()
 	{

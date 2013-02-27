@@ -28,6 +28,8 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import corinna.http.bindlet.HttpBindletRequest;
 import corinna.http.bindlet.HttpBindletResponse;
@@ -40,6 +42,8 @@ import corinna.util.StateModel;
 public class HttpStreamHandler extends StreamHandler
 {
 
+	Logger log = LoggerFactory.getLogger(HttpStreamHandler.class);
+	
 	private HttpConnector connector;
 	
 	public HttpStreamHandler( HttpConnector connector )
@@ -79,6 +83,8 @@ public class HttpStreamHandler extends StreamHandler
 	@Override
 	public void onError( RequestEvent<?,?> event, Channel channel, Throwable exception )
 	{
+		log.error("Error processing HTTP request", exception);
+		
 		try
 		{
 			IHttpBindletResponse response = (IHttpBindletResponse) event.getResponse();
@@ -89,7 +95,7 @@ public class HttpStreamHandler extends StreamHandler
 			if (!request.isKeepAlive()) channel.close();
 		} catch (Exception e)
 		{
-			// supress any error
+			log.error("Error sending HTTP error information", e);
 		}
 	}
 

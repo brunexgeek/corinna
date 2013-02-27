@@ -1,8 +1,6 @@
 package corinna.soap.core;
 
 
-import java.net.URL;
-
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
 import javax.wsdl.BindingOperation;
@@ -57,11 +55,49 @@ public class WsdlGenerator
 
 	public static final String PARAMETER_RESULT = "result";
 
-	public static final String METHOD_RESPONSE_SUFFIX = "Response";
+	//public static final String SUFFIX_MESSAGE_RESPONSE = "Response";
 
 	public static final String DEFAULT_SCHEMA = "service.xsd";
 
 	public static final String DEFAULT_WSDL = "service.wsdl";
+
+	private static final String SUFFIX_PORTTYPE = "PortType";
+
+	private static final String SUFFIX_BINDING = "Binding";
+
+	private static final String SUFFIX_INPUT = SchemaGenerator.SUFFIX_INPUT;//"Input";
+
+	private static final String SUFFIX_OUTPUT = SchemaGenerator.SUFFIX_OUTPUT;//"Output";
+	
+	private static final String SUFFIX_MESSAGE = SchemaGenerator.SUFFIX_MESSAGE;
+	
+	public static final String SUFFIX_INPUT_MESSAGE = SUFFIX_INPUT + SUFFIX_MESSAGE;
+	
+	public static final String SUFFIX_OUTPUT_MESSAGE = SUFFIX_OUTPUT + SUFFIX_MESSAGE;
+
+	private static final String NAMESPACE_WSDL = SOAPConstants.NS_URI_SOAP;
+
+	private static final String NAMESPACE_XSD = SchemaConstants.NS_URI_XSD_2001;
+	
+	private static final String NAMESPACE_SOAP = "http://schemas.xmlsoap.org/soap/http";
+
+	private static final String SUFFIX_SERVICE = "Service";
+
+	private static final String PREFIX_SOAP = "soap";
+
+	/**
+	 * Prefix for the generated XML Schema.
+	 */
+	private static final String PREFIX_LOCAL_XSD = "types";
+
+	/**
+	 * Prefix for the generated WSDL.
+	 */
+	private static final String PREFIX_LOCAL_WSDL = "lns";
+
+	private static final String PREFIX_XSD = "xsd";
+
+	private static final String SUFFIX_PORT = "Port";
 
 	private String serviceName = "ServiceName";
 
@@ -94,9 +130,9 @@ public class WsdlGenerator
 		if (!endpointUrl.endsWith("/")) context.endpointUrl = endpointUrl + "/";
 
 		if (wsdlNamespace == null)
-			context.wsdlNamespace = context.endpointUrl + classDesc.getName() + "/WSDL";
+			context.wsdlNamespace = getWSDLNamespace(endpointUrl, classDesc);
 		if (schemaNamespace == null)
-			context.schemaNamespace = context.endpointUrl + classDesc.getName() + "/XSD";
+			context.schemaNamespace = getXMLSchemaNamespace(endpointUrl, classDesc);
 		
 		// used to create the documentation elements
 		try
@@ -119,10 +155,10 @@ public class WsdlGenerator
 
 		wsdlDef.setTargetNamespace(context.wsdlNamespace);
 		wsdlDef.setQName(new QName(context.classDesc.getName()));
-		wsdlDef.addNamespace("soap", SOAPConstants.NS_URI_SOAP);
-		wsdlDef.addNamespace("types", context.schemaNamespace);
-		wsdlDef.addNamespace("lns", context.wsdlNamespace);
-		wsdlDef.addNamespace("xsd", SchemaConstants.NS_URI_XSD_2001);
+		wsdlDef.addNamespace(PREFIX_SOAP, NAMESPACE_WSDL);
+		wsdlDef.addNamespace(PREFIX_LOCAL_XSD, context.schemaNamespace);
+		wsdlDef.addNamespace(PREFIX_LOCAL_WSDL, context.wsdlNamespace);
+		wsdlDef.addNamespace(PREFIX_XSD, NAMESPACE_XSD);
 
 		context.wsdlDef = wsdlDef;
 		
@@ -133,11 +169,18 @@ public class WsdlGenerator
 		return wsdlDef;
 	}
 
+	/**
+	 * Generate a XML Schema defining all types in the given class descriptor to be used in the WSDL messages.
+	 * 
+	 * @param context The context information object.
+	 * @throws Exception
+	 */
 	protected void generateWsdlTypes( WsdlContext context ) throws Exception
 	{
 		SchemaGenerator ps = new SchemaGenerator();
 		Element root = ps.generateSchema(context.classDesc, context.schemaNamespace);
 
+		// TODO: try to remove the specified reference for the 'SchemaImpl' from third-part package
 		Schema schema = new SchemaImpl();
 		schema.setElement(root);
 		schema.setElementType(SchemaConstants.Q_ELEM_XSD_2001);
@@ -147,6 +190,14 @@ public class WsdlGenerator
 		context.wsdlDef.setTypes(types);
 	}
 
+	/**
+	 * Generate all WSDL entries required to export each method in the given class descriptor. For each
+	 * method found will be called the {@link #generateMethod} method.
+	 * 
+	 * @param context The context information object.
+	 * @param methodDesc Class descriptor that contains the methods information.
+	 * @throws WSDLException whether an exception occurs while generating the method entries on the WSDL.
+	 */
 	protected void generateWsdlMethods( WsdlContext context, ClassDescriptor classDesc )
 		throws WSDLException
 	{
@@ -157,6 +208,14 @@ public class WsdlGenerator
 			generateMethod(context, current);
 	}
 
+	/**
+	 * Generate all WSDL entries required to export the given method. That entries can includes the 
+	 * parameters and return value messages, the operation and the operation binding.
+	 * 
+	 * @param context The context information object.
+	 * @param methodDesc Method descriptor that contains the method information.
+	 * @throws WSDLException whether an exception occurs while generating the method entries on the WSDL.
+	 */
 	protected void generateMethod( WsdlContext context, MethodDescriptor methodDesc )
 		throws WSDLException
 	{
@@ -165,14 +224,14 @@ public class WsdlGenerator
 		if (methodDesc == null)
 			throw new IllegalArgumentException("The method descriptor can not be null");
 
-		String serviceName = context.classDesc.getName() + "Service";
-		String portTypeName = serviceName + "PortType";
+		String serviceName = context.classDesc.getName() + SUFFIX_SERVICE;
+		String portTypeName = serviceName + SUFFIX_PORTTYPE;
 		String methodName = methodDesc.getName();
-		String bindingName = serviceName + "Binding";
+		String bindingName = serviceName + SUFFIX_BINDING;
 
 		// create the input and output messages
-		Message inputMessage = createMessage(context, methodDesc.getName() + "Input");
-		Message outputMessage = createMessage(context, methodDesc.getName() + "Output");
+		Message inputMessage = createMessage(context, methodDesc.getName() + SUFFIX_INPUT);
+		Message outputMessage = createMessage(context, methodDesc.getName() + SUFFIX_OUTPUT);
 		context.wsdlDef.addMessage(inputMessage);
 		context.wsdlDef.addMessage(outputMessage);
 
@@ -185,13 +244,17 @@ public class WsdlGenerator
 			context.wsdlDef.addPortType(context.portType);
 		}
 
-		// create the operation documentation
-		Element docRoot = document.createElementNS("http://schemas.xmlsoap.org/wsdl/", "documentation");
-		docRoot.setPrefix("wsdl");
-		docRoot.setTextContent("asd" + methodDesc.getDescription());
 		// create the operation
 		Operation operation = createOperation(context, methodName, inputMessage, outputMessage);
-		operation.setDocumentationElement(docRoot);
+		// create the operation documentation, if any
+		if (methodDesc.getDescription() != null || !methodDesc.getDescription().isEmpty())
+		{
+			Element docRoot = document.createElementNS(NAMESPACE_WSDL, "documentation");
+			docRoot.setPrefix("wsdl");
+			docRoot.setTextContent(methodDesc.getDescription());
+			operation.setDocumentationElement(docRoot);
+		}
+		// add the operation to the port type
 		context.portType.addOperation(operation);
 
 		// check if the binding is already created
@@ -200,7 +263,7 @@ public class WsdlGenerator
 			// create the SOAP binding
 			SOAPBinding soapBinding = new SOAPBindingImpl();
 			soapBinding.setStyle("document");
-			soapBinding.setTransportURI("http://schemas.xmlsoap.org/soap/http");
+			soapBinding.setTransportURI(NAMESPACE_SOAP);
 
 			context.binding = context.wsdlDef.createBinding();
 			context.binding.setQName(new QName(context.wsdlNamespace, bindingName));
@@ -222,7 +285,7 @@ public class WsdlGenerator
 		// create the input message
 		Part part = context.wsdlDef.createPart();
 		part.setName("body");
-		part.setElementName(new QName(context.schemaNamespace, messageName + "Type"));
+		part.setElementName(new QName(context.schemaNamespace, messageName + SUFFIX_MESSAGE));
 
 		Message message = context.wsdlDef.createMessage();
 		message.addPart(part);
@@ -304,8 +367,8 @@ public class WsdlGenerator
 
 	protected void generateWsdlService( WsdlContext context )
 	{
-		String serviceName = context.classDesc.getName() + "Service";
-		String bindingName = serviceName + "Binding";
+		String serviceName = context.classDesc.getName() + SUFFIX_SERVICE;
+		String bindingName = serviceName + SUFFIX_BINDING;
 
 		SOAPAddress soapAd = new SOAPAddressImpl();
 		soapAd.setLocationURI(context.endpointUrl);
@@ -313,7 +376,7 @@ public class WsdlGenerator
 		Port port = context.wsdlDef.createPort();
 		port.setBinding(context.wsdlDef.getBinding(new QName(context.wsdlNamespace, bindingName)));
 		port.addExtensibilityElement(soapAd);
-		port.setName(serviceName + "Port");
+		port.setName(serviceName + SUFFIX_PORT);
 
 		Service service = context.wsdlDef.createService();
 		service.addPort(port);
@@ -375,16 +438,18 @@ public class WsdlGenerator
 
 	}
 	
-	public static String getXMLSchemaNamespace( Class<?> classRef )
+	public static String getXMLSchemaNamespace( String endpointUrl, ClassDescriptor classDesc )
 	{
-		if (classRef == null) return null;
-		return classRef.getName() + "/XSD";
+		if (endpointUrl == null || classDesc == null) return null;
+		if (!endpointUrl.endsWith("/")) endpointUrl = endpointUrl + "/";
+		return endpointUrl + classDesc.getName() + "/XSD";
 	}
 	
-	public static String getWSDLNamespace( Class<?> classRef )
+	public static String getWSDLNamespace( String endpointUrl, ClassDescriptor classDesc )
 	{
-		if (classRef == null) return null;
-		return classRef.getName() + "/WSDL";
+		if (endpointUrl == null || classDesc == null) return null;
+		if (!endpointUrl.endsWith("/")) endpointUrl = endpointUrl + "/";
+		return endpointUrl + classDesc.getName() + "/WSDL";
 	}
 	
 }

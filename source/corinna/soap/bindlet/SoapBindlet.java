@@ -25,11 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import corinna.rpc.BeanObject;
-import corinna.rpc.POJOUtil;
 import corinna.rpc.ProcedureCall;
 import corinna.rpc.ReflectionUtil;
-import corinna.rpc.RpcValidator;
-import corinna.rpc.TypeConverter;
 import corinna.soap.core.WsdlGenerator;
 import corinna.soap.network.SoapMarshaller;
 import corinna.soap.network.SoapUnmarshaller;
@@ -91,7 +88,8 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 	}
 	
 	@SuppressWarnings("rawtypes")
-	protected ProcedureCall getProcedureCall( IHttpBindletRequest request, IHttpBindletResponse response )
+	@Override
+	protected ProcedureCall getProcedureCall( IHttpBindletRequest request, IHttpBindletResponse response ) throws BindletException
 	{
 		SOAPMessage soapMessage = getMessage(request);
 		SOAPElement soapMethod = null;
@@ -115,9 +113,10 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 
 			// extract the method name from input parameters
 			String soapMethodName = soapMethod.getElementQName().getLocalPart();
-			int pos = soapMethodName.indexOf("InputType");
-			if (pos <= 0) return null;
-			soapMethodName = soapMethodName.substring(0, pos);
+			if (!soapMethodName.endsWith(WsdlGenerator.SUFFIX_INPUT_MESSAGE) ||
+			    soapMethodName.length() <= WsdlGenerator.SUFFIX_INPUT_MESSAGE.length())
+				throw new BindletException("Method not found");
+			soapMethodName = soapMethodName.substring(0, soapMethodName.length() - WsdlGenerator.SUFFIX_INPUT_MESSAGE.length());
 			
 			ProcedureCall procedure = new ProcedureCall(soapMethodName);
 			
@@ -143,16 +142,19 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 			procedure.setParameter(PARAM_RESPONSE, response);
 			
 			return procedure;
+		} catch (BindletException e)
+		{
+			throw e; 
 		} catch (Exception e)
 		{
-			serverLog.error("Error parsing SOAP message", e);
-			return null;
-		}
+			throw new BindletException("Error parsing SOAP request", e);
+		} 
+		
 	}
 
+	@SuppressWarnings("rawtypes")
 	protected boolean isElementPOJO( SOAPElement element )
 	{
-		
         for (Iterator iter = element.getChildElements(); iter.hasNext();) 
         {
             Object child = iter.next();
@@ -211,7 +213,7 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 		
 		// create the SOAP method response element
 		SOAPBody body = message.getSOAPBody();
-		QName qname = new QName(namespace, prototype + "OutputType");
+		QName qname = new QName(namespace, prototype + WsdlGenerator.SUFFIX_OUTPUT_MESSAGE);
 		SOAPElement element = body.addChildElement(qname);
 		// create the return value element
 		SoapUtils.generateElement(element, WsdlGenerator.PARAMETER_RESULT, result);
@@ -229,7 +231,17 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 		{
 			t = t.getCause();
 		}
-		if (t != null) text = t.getMessage(); 
+		if (t != null && t.getMessage() != null) 
+			text = t.getMessage();
+		else
+		if (t != null)
+		{
+			text = t.toString();
+		}
+		else
+			text = "Unknown";
+		
+		serverLog.error("SOAP fault", error);
 		
 		// create the SOAP method response element
 		SOAPBody body = message.getSOAPBody();

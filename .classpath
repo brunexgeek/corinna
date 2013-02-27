@@ -3,6 +3,7 @@
 	<classpathentry excluding="**/.bzr/*" kind="src" path="source"/>
 	<classpathentry excluding="**/.bzr/*" kind="src" path="bindlet-api"/>
 	<classpathentry excluding="**/.bzr/*" kind="src" path="test"/>
+	<classpathentry kind="src" path="protocols"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/logback-classic-1.0.6-sources.jar"/>
 	<classpathentry kind="lib" path="lib/logback-core-1.0.6-sources.jar"/>

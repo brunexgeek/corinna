@@ -106,8 +106,7 @@ public class MethodRunner implements IMethodRunner
 		throws InvocationTargetException, IncompleteImplementationException,
 		InvalidRpcClassException
 	{
-		if (filter == null)
-			filter = new QualifiedPrototypeFilter();
+		if (filter == null) filter = new QualifiedPrototypeFilter();
 		
 		// verifica se as classes informadas são válidas para o uso através de RPC
 		RpcValidator.validateInterface(intfClass);
@@ -150,6 +149,10 @@ public class MethodRunner implements IMethodRunner
 		for (int i = 0; i < methods.length; i++)
 		{
 			Method intrMethod = methods[i];
+			
+			// check whether the current method should be exported
+			if (!RpcValidator.isRemoteMethod(intrMethod)) continue;
+			
 			Method implMethod;
 
 			try

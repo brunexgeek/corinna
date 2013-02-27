@@ -29,7 +29,7 @@ public interface IComponentInterface
 
 	@RemoteMethod(export=false)
 	public void init( Object data ) throws ComponentException;
-	
+
 	@RemoteMethod(export=false)
 	public void destroy() throws ComponentException;
 	

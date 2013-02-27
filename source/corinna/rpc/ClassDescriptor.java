@@ -36,7 +36,8 @@ public class ClassDescriptor
 		{
 			for (Method current : methods)
 			{
-				if (!current.isAnnotationPresent(RemoteMethod.class)) continue;
+				// check whether the current method should be exported
+				if (!RpcValidator.isRemoteMethod(current)) continue;
 
 				name = current.getName();
 				MethodDescriptor method = new MethodDescriptor(current);

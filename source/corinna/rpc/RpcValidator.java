@@ -71,16 +71,16 @@ public class RpcValidator
 		if (!method.isAnnotationPresent(RemoteMethod.class))
 			throw new InvalidRpcMethodException("The method must be anottated as public procedure");
 
-		// verifica se é um método público
-		if (!Modifier.isPublic(method.getModifiers()))
+		// the method must be public
+		if ( !Modifier.isPublic(method.getModifiers()) )
 			throw new InvalidRpcMethodException("The method access modifier must be public");
-		// verifica se é um método dinâmico
-		if (Modifier.isStatic(method.getModifiers()))
+		// the method can not be static
+		if ( Modifier.isStatic(method.getModifiers()) )
 			throw new InvalidRpcMethodException("The method can not be static");
-		// métodos RPC devem retornar um tipo primitivo ou uma instância 'KeyValueList'
-		/*if ( !TypeConverter.isSupportedType( method.getReturnType() ) )
-			throw new InvalidRpcTypeException("The method return type is not supported");*/
-		
+		// the return type can not be void
+		if ( method.getReturnType() == Void.class || method.getReturnType() == void.class )
+			throw new InvalidRpcTypeException("The method return type can not be void");
+
 		Annotation[][] paramAnnots = method.getParameterAnnotations();
 		Class<?>[] paramTypes = method.getParameterTypes();
 
@@ -108,7 +108,21 @@ public class RpcValidator
 					+ " of the method " + method.getName() + " has an unsupported type");*/
 		}
 	}
-
+	
+	/**
+	 * Returns a boolean value to indicate whether the given method can be accessed remotely via
+	 * the RPC mechanism. A method is not accessible if have not a {@link RemoteMethod} annotation
+	 * or if have the annotation whith {@link RemoteMethod#export()} field setted to <code>false</code>.
+	 * 
+	 * @param method Method to be checked.
+	 * @return <code>true</code> if the method can be accessed remotely or <code>false</code> otherwise.
+	 */
+	public static boolean isRemoteMethod( Method method )
+	{
+		RemoteMethod annot = method.getAnnotation(RemoteMethod.class);
+		return (annot != null && annot.export());
+	}
+	
 	/**
 	 * Verifica se a classe especificada é uma interface válida para uso através do mecanismo de
 	 * RPC. Para ser válida, a classe deve ser uma interface e ter todos os seus métodos acessíveis
@@ -139,8 +153,9 @@ public class RpcValidator
 		{
 			for (Method current : methods)
 			{
-				if (!current.isAnnotationPresent(RemoteMethod.class)) continue;
-
+				// check whether the current method should be exported
+				if (!isRemoteMethod(current)) continue;
+				// validate the current method
 				validateMethod(current);
 				
 				String prototype = prototypeFilter.getMethodPrototype(current);
@@ -235,90 +250,5 @@ public class RpcValidator
 		}
 	}
 
-
-	/*@Deprecated
-	public static String getMethodDescriptor( Method method ) throws InvalidRpcMethodException
-	{
-		if (method == null) throw new NullPointerException("The method instance can not be null");
-
-		StringBuffer sb = new StringBuffer();
-		sb.append(method.getReturnType().getCanonicalName());
-		sb.append(" ");
-		sb.append(method.getDeclaringClass().getName());
-		sb.append(".");
-		sb.append(method.getName());
-		sb.append("( ");
-
-		Class<?> paramTypes[] = method.getParameterTypes();
-		Annotation paramAnnot[][] = method.getParameterAnnotations();
-
-		for (int i = 0; i < paramTypes.length; ++i)
-		{
-			boolean required = true;
-			String name = null;
-
-			Annotation annotations[] = paramAnnot[i];
-
-			for (Annotation annotation : annotations)
-			{
-				if (annotation instanceof Parameter)
-				{
-					Parameter current = (Parameter) annotation;
-					required = current.required();
-					name = current.name();
-				}
-			}
-
-			if (name == null)
-				throw new InvalidRpcMethodException("The method has same non annoted parameters");
-
-			if (!required) sb.append("optional ");
-			sb.append(name);
-			sb.append(" : ");
-			sb.append(paramTypes[i].getName());
-			if (i + 1 == paramTypes.length)
-				sb.append(" ");
-			else
-				sb.append(", ");
-		}
-		sb.append(")");
-
-		return sb.toString();
-	}
-
-	@Deprecated
-	public static String getMethodPrototype( Method method )
-	{
-		if (method == null) throw new NullPointerException("The method instance can not be null");
-
-		StringBuffer sb = new StringBuffer();
-		sb.append(method.getDeclaringClass().getName());
-		sb.append(".");
-		sb.append(method.getName());
-		sb.append("(");
-
-		Class<?> paramTypes[] = method.getParameterTypes();
-
-		for (int i = 0; i < paramTypes.length; ++i)
-			sb.append(getTypeName(paramTypes[i]));
-		sb.append(")");
-		sb.append(getTypeName(method.getReturnType()));
-
-		return sb.toString();
-	}
-
-	@Deprecated
-	public static String getTypeName( Class<?> type )
-	{
-		int k;
-
-		for (k = 0; k < TYPE_NAMES.length && !TYPE_CLASSES[k].equals(type); ++k)
-			;
-
-		if (k < TYPE_NAMES.length)
-			return TYPE_NAMES[k];
-		else
-			return "?";
-	}*/
 
 }

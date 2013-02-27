@@ -37,7 +37,13 @@ public class SchemaGenerator
 
 	private static final String PREFIX_TYPES = "types";
 
-	private static final String TYPE_SUFFIX = "Type";
+	public static final String SUFFIX_TYPE = "Type";
+	
+	public static final String SUFFIX_MESSAGE = "Message";
+
+	public static final String SUFFIX_OUTPUT = "Output";
+
+	public static final String SUFFIX_INPUT = "Input";
 	
 	private Document document;
 	
@@ -106,17 +112,24 @@ public class SchemaGenerator
 		return classRef.isEnum();
 	}
 	
+	/**
+	 * Generate all XML Schema entries required to export the given method. That entries can includes the 
+	 * parameters and return value types.
+	 * 
+	 * @param context
+	 * @param schemaElement
+	 * @param method
+	 */
 	protected void generateMethod( SchemaContext context, Element schemaElement, MethodDescriptor method )
 	{
-		// construct the WSDL message for method request 
+		// construct the XML schema type for each method parameter
 		Element element = createElement(context, schemaElement, "element");
-		element.setAttribute("name", method.getName() + "InputType");
+		element.setAttribute("name", method.getName() + SUFFIX_INPUT + SUFFIX_MESSAGE);
 		element = createElement(context, element, "complexType");
 		Element sequence = createElement(context, element, "sequence");
 		
 		for (int c = 0; c < method.getParameterCount(); ++c)
 		{
-
 			ParameterDescriptor param = method.getParameter(c);
 			if (!param.isPublic()) continue;
 			
@@ -124,12 +137,11 @@ public class SchemaGenerator
 				param.isRequired());
 		}
 		
-		// construct the WSDL message for method response
+		// construct the XML schema type for the return value
 		element = createElement(context, schemaElement, "element");
-		element.setAttribute("name", method.getName() + "OutputType");
+		element.setAttribute("name", method.getName() + SUFFIX_OUTPUT + SUFFIX_MESSAGE);
 		element = createElement(context, element, "complexType");
 		sequence = createElement(context, element, "sequence");
-		
 		createElement(context, sequence, "result", method.getReturnType(), true);
 	}
 	
@@ -179,8 +191,12 @@ public class SchemaGenerator
 		if (context == null)
 			throw new IllegalArgumentException("The schema context can not be null");
 
+		// check whether the given type is already generated
+		String pojoName = types.get(classRef);
+		if (pojoName != null) return pojoName;
+		
 		Map<String,Class<?>> fields = extractBeanFields(classRef);
-		String pojoName = classRef.getSimpleName() + "POJOType";
+		pojoName = classRef.getSimpleName() + SUFFIX_TYPE;
 		
 		//Element element = createElement(context, context.schemaElement, "element");
 		//element.setAttribute("name", pojoName);
@@ -207,6 +223,9 @@ public class SchemaGenerator
 			temp.setAttributeNS(SchemaConstants.NS_URI_XSD_2001, "name", current.getKey());
 			temp.setAttributeNS(SchemaConstants.NS_URI_XSD_2001, "type", typeName);
 		}
+		
+		// register the new type
+		types.put(classRef, pojoName);
 		
 		return pojoName;
 	}
@@ -239,9 +258,12 @@ public class SchemaGenerator
 		if (context == null)
 			throw new IllegalArgumentException("The schema context can not be null");
 		
+		// check whether the given type is already generated
+		String typeName = types.get(classRef);
+		if (typeName != null) return typeName;
 		// build the full qualified type name
-		String typeName = name;
-		if (typeName == null) typeName = classRef.getSimpleName() + TYPE_SUFFIX;
+		typeName = name;
+		if (typeName == null) typeName = classRef.getSimpleName() + SUFFIX_TYPE;
 		typeName = PREFIX_TYPES + ":" + typeName;
 		
 		Element element = createElement(context, context.schemaElement, "simpleType");

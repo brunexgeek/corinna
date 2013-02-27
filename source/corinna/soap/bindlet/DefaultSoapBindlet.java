@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.bindlet.IBindletConfig;
 import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
+import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
 import javax.bindlet.io.BindletOutputStream;
@@ -129,7 +130,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 
 		Class<?> intfClass = loadClass(intfClassName);
 		Class<?> implClass = loadClass(implClassName);
-
+		
 		try
 		{
 			IPrototypeFilter filter = new CanonicalPrototypeFilter();
@@ -139,24 +140,25 @@ public class DefaultSoapBindlet extends SoapBindlet
 			log.error("Error creating the method runner ", e);
 			throw new BindletException("Error creating the method runner", e);
 		}
+		
+		// force the generation of the WSDL
+		generateWsdl();
 	}
 
 	@Override
 	protected void doGet( IHttpBindletRequest req, IHttpBindletResponse response ) throws BindletException, IOException
 	{
-		/*String resource = req.getResourcePath();
+		String resource = req.getResourcePath();
 		if (!resource.equals("/"))
 		{
 			response.sendError(HttpStatus.NOT_FOUND);
 			return;
-		}*/
+		}
 
-		Definition wsdl = getWsdl(req);
+		Definition wsdl = getWsdl();
 		response.setContentType("text/xml");
-		//response.setContentLength(wsdl.length);
 		
 		BindletOutputStream output = response.getOutputStream();
-		//output.write(wsdl);
 		WSDLWriter wr;
 		try
 		{
@@ -164,6 +166,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 			wr.writeWSDL(wsdl, output);	
 		} catch (WSDLException e)
 		{
+			log.error("Error generating WSDL", e);
 		}
 			
 		output.close();
@@ -181,7 +184,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 			return runner.callMethod(procedure);
 		} catch (Exception e)
 		{
-			throw new BindletException( e.getMessage(), e.getCause() );
+			throw new BindletException("Error invoking RPC method", e);
 		}
 	}
 
@@ -200,17 +203,19 @@ public class DefaultSoapBindlet extends SoapBindlet
 	
 
 
-	protected Definition generateWsdl( IHttpBindletRequest req ) throws BindletException
+	protected Definition generateWsdl( ) throws BindletException
 	{
 		wsdlLock.writeLock();
 		try
 		{
 			ClassDescriptor desc = new ClassDescriptor(runner.getInterfaceClass());
+			schemaNamespace = WsdlGenerator.getXMLSchemaNamespace(endpointUrl, desc);
 			WsdlGenerator wsdlgen = new WsdlGenerator( desc, endpointUrl, wsdlNamespace , schemaNamespace );
 			wsdlName = wsdlgen.getServiceName();
 			return (wsdl = wsdlgen.generateWsdl());
 		} catch (Exception e)
 		{
+			log.error("Error generating WSDL", e);
 			throw new BindletException("Error generating WSDL", e);
 		} finally
 		{
@@ -218,7 +223,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 		}
 	}
 
-	protected Definition getWsdl( IHttpBindletRequest req ) throws BindletException
+	protected Definition getWsdl( ) throws BindletException
 	{
 		Definition def = null;
 		
@@ -229,7 +234,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 		if (def != null)
 			return def;
 		else
-			return generateWsdl(req);
+			return generateWsdl();
 	}
 
 	protected String getWsdlName()
