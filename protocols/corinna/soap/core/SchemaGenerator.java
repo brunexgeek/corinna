@@ -196,10 +196,10 @@ public class SchemaGenerator
 		if (pojoName != null) return pojoName;
 		
 		Map<String,Class<?>> fields = extractBeanFields(classRef);
-		pojoName = PREFIX_TYPES + ":" + classRef.getSimpleName() + SUFFIX_TYPE;
+		pojoName = classRef.getSimpleName() + SUFFIX_TYPE;
 		
 		// register the new type (insert before complete the job to avoid infinite recursion)
-		types.put(classRef, pojoName);
+		types.put(classRef, PREFIX_TYPES + ":" + pojoName);
 		
 		//Element element = createElement(context, context.schemaElement, "element");
 		//element.setAttribute("name", pojoName);
@@ -233,10 +233,7 @@ public class SchemaGenerator
 			temp.setAttributeNS(SchemaConstants.NS_URI_XSD_2001, "nillable", (isPOJO) ? "true" : "false");
 		}
 		
-		// register the new type
-		types.put(classRef, pojoName);
-		
-		return pojoName;
+		return PREFIX_TYPES + ":" + pojoName;
 	}
 	
 	/**

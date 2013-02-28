@@ -4,10 +4,13 @@ import java.util.Iterator;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+
+import org.w3c.dom.Text;
 
 import corinna.rpc.BeanObject;
 import corinna.rpc.TypeConverter;
@@ -94,6 +97,130 @@ public class SOAPUtils
 			else
 				generatePrimitiveElement(subElement, currentKey, pojo.get(currentKey));
 		}
+	}
+	
+	/**
+	 * Returns the root {@link SOAPElement} inside of the given SOAP body.
+	 * 
+	 * @param body
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	public static SOAPElement getBodyElement( SOAPBody body )
+	{
+		Object current;
+
+		if (body == null) return null;
+		
+		Iterator it = body.getChildElements();
+		while (it.hasNext())
+			if ((current = it.next()) instanceof SOAPElement) return (SOAPElement)current;
+
+		return null;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static SOAPElement getNextSOAPElement( Iterator it )
+	{
+		if (it == null) return null;
+		
+		while (it.hasNext())
+		{
+			Object entry = it.next();
+			if (entry instanceof SOAPElement) return (SOAPElement) entry;
+		}
+		
+		return null;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static Text getNextTextElement( Iterator it )
+	{
+		if (it == null) return null;
+		
+		while (it.hasNext())
+		{
+			Object entry = it.next();
+			if (entry instanceof Text) return (Text) entry;
+		}
+		
+		return null;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static boolean canParseAsPOJO( SOAPElement element )
+	{
+		boolean result = false;
+		
+        for (Iterator iter = element.getChildElements(); iter.hasNext();) 
+        {
+            Object child = iter.next();
+            if (child instanceof Text && ((Text)child).getData().trim().length() != 0) return false;
+            if (child instanceof SOAPElement) result = true;
+        }
+
+        return result;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static boolean canParseAsPrimitive( SOAPElement element )
+	{
+        for (Iterator iter = element.getChildElements(); iter.hasNext();) 
+        {
+            Object child = iter.next();
+            if (child instanceof SOAPElement) return false;
+        }
+
+        return true;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static BeanObject parseAsPOJO( SOAPElement element )
+	{
+		BeanObject object = new BeanObject();
+		
+		// find all procedure parameters
+		Iterator it = element.getChildElements();
+		while (it.hasNext())
+		{
+			Object current = it.next();
+			if (current instanceof SOAPElement)
+			{
+				SOAPElement field = (SOAPElement) current;
+				String fieldName = field.getElementName().getLocalName();
+				Object value;
+				if (canParseAsPOJO(field))
+					value = parseAsPOJO(field);
+				else
+				//if (canParseAsPrimitive(field))
+					value = parseAsPrimitive(field);
+				object.set(fieldName, value);
+			}
+		}
+		return object;
+	}
+
+	public static String parseAsPrimitive( SOAPElement element )
+	{
+		/*// find all procedure parameters
+		Iterator it = ;
+		while (it.hasNext())
+		{
+			Object current = it.next();
+			if (current instanceof Text)
+			{
+				Text content = (Text)current;
+				return content.getData();
+			}
+		}
+		return null;*/
+		if (element == null) return "";
+		
+		Text entry = getNextTextElement( element.getChildElements() );
+		if (entry != null) 
+			return entry.getData();
+		else
+			return "";
 	}
 	
 }

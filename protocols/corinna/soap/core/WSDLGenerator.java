@@ -126,7 +126,9 @@ public class WSDLGenerator
 	{
 		if (classDesc == null)
 			throw new IllegalArgumentException("The class descriptor can not be null");
-
+		if (endpointURL == null)
+			throw new IllegalArgumentException("The endpoint URL can not be null");
+		
 		// initialize internal parameters
 		classDescriptor = classDesc;
 		localWSDLNamespace = wsdlNamespace;

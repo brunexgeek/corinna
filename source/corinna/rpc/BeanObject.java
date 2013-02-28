@@ -363,7 +363,13 @@ public class BeanObject implements IBeanObject
 				callPOJOSetter(destination, current, bean);
 			}
 			else
+			{
+				// check whether the value type match with setter parameter
+				Class<?> paramType = current.getParameterTypes()[0];
+				if (value != null && !paramType.equals(value.getClass()))
+					value = TypeConverter.convert(paramType, value);
 				callPOJOSetter(destination, current, value);
+			}
 		}
 	}
 

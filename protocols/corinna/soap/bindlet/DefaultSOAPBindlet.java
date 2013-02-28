@@ -101,6 +101,8 @@ public class DefaultSOAPBindlet extends SOAPBindlet
 	@Override
 	public void init() throws BindletException
 	{
+		super.init();
+		
 		// if the bindlet are running in stateless model, ensure will be initialized only once
 		if (setInitialized(true)) return;
 
@@ -121,7 +123,7 @@ public class DefaultSOAPBindlet extends SOAPBindlet
 		localWSDLNamespace = config.getBindletParameter(PARAMETER_WSDL_NAMESPACE);
 		// load the endpoint URL
 		endpointURL = config.getBindletParameter(PARAMETER_ENDPOINT);
-		if (implClassName == null || implClassName.isEmpty())
+		if (endpointURL == null || endpointURL.isEmpty())
 			throw new BindletException("The endpoint URL must be specified through " +
 				"bindlet configuration key '" + PARAMETER_ENDPOINT + "'");
 

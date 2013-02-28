@@ -33,7 +33,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 public class HttpBindletResponse extends WebBindletResponse implements IHttpBindletResponse
 {
 
-	private List<Cookie> cookies = new LinkedList<Cookie>();
+	//private List<Cookie> cookies = new LinkedList<Cookie>();
 	
 	public HttpBindletResponse( Channel channel, HttpVersion version )
 	{
@@ -48,7 +48,7 @@ public class HttpBindletResponse extends WebBindletResponse implements IHttpBind
 	@Override
 	public void addCookie( Cookie cookie )
 	{
-		if (cookie != null) cookies.add(cookie);
+		//if (cookie != null) cookies.add(cookie);
 	}
 
 	@Override
@@ -67,9 +67,9 @@ public class HttpBindletResponse extends WebBindletResponse implements IHttpBind
 	protected void update()
 	{
 		super.update();
-		for (Cookie entry : cookies)
+		/*for (Cookie entry : cookies)
 			// TODO: write all cookie attributes in response header
-			response.addHeader("Set-Cookie", entry.getName() + "=" + entry.getValue() );
+			response.addHeader("Set-Cookie", entry.getName() + "=" + entry.getValue() );*/
 	}
 	
 }

@@ -1,299 +1,60 @@
 package corinna.soap.bindlet;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Iterator;
 
 import javax.bindlet.BindletModel;
 import javax.bindlet.BindletModel.Model;
 import javax.bindlet.exception.BindletException;
-import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
-import javax.bindlet.http.io.HttpBindletInputStream;
-import javax.bindlet.io.BindletOutputStream;
 import javax.bindlet.rpc.IProcedureCall;
-import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPConstants;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.Text;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import corinna.rpc.BeanObject;
 import corinna.rpc.ProcedureCall;
 import corinna.rpc.ReflectionUtil;
-import corinna.soap.core.WSDLGenerator;
-import corinna.soap.network.SoapMarshaller;
-import corinna.soap.network.SoapUnmarshaller;
+import corinna.soap.core.SOAPProtocolHandler;
 
 
-// TODO: merge with "javax.bindlet.soap.SoapBindlet"
 @SuppressWarnings("serial")
 public abstract class SOAPBindlet extends javax.bindlet.soap.SoapBindlet
 {
-
-	private static Logger serverLog = LoggerFactory.getLogger(SOAPBindlet.class);
 	
-	protected static SoapUnmarshaller unmarshaller = null;
-	
-	protected static SoapMarshaller marshaller = null;
-	
-	static
-	{
-		try
-		{
-			unmarshaller = new SoapUnmarshaller(SOAPConstants.SOAP_1_1_PROTOCOL);
-			marshaller = new SoapMarshaller(SOAPConstants.SOAP_1_1_PROTOCOL);
-		} catch (Exception e)
-		{
-			// suprime qualquer erro
-		}
-	}
+	private SOAPProtocolHandler protocolHandler = null;
 	
 	public SOAPBindlet() throws BindletException
 	{
 		super();
 	}
-
-	protected Charset getCharsetByName( String encoding )
-	{
-		try
-		{
-			return Charset.forName( encoding.toUpperCase() );
-		} catch (Exception e)
-		{
-			return Charset.defaultCharset();
-		}
-	}
 	
-	protected SOAPMessage getMessage( IHttpBindletRequest request )
+	protected IProcedureCall getProcedureCall( IHttpBindletRequest request,
+		IHttpBindletResponse response ) throws BindletException
 	{
-		Charset charset = getCharsetByName( request.getCharacterEncoding() );
-		try
-		{
-			HttpBindletInputStream input = (HttpBindletInputStream)request.getInputStream();
-			String content = input.readText(charset);
-			input.close();
-			return unmarshaller.unmarshall(content, charset);
-		} catch (Exception e)
-		{
-			// sumprime os erros
-			return null;
-		}
-	}
-	
-	@SuppressWarnings("rawtypes")
-	@Override
-	protected ProcedureCall getProcedureCall( IHttpBindletRequest request, IHttpBindletResponse response ) throws BindletException
-	{
-		SOAPMessage soapMessage = getMessage(request);
-		SOAPElement soapMethod = null;
-		
-		if (soapMessage == null) return null;
-		
-		try
-		{
-			SOAPBody body = soapMessage.getSOAPBody();
-			Iterator it = body.getChildElements();
-			while (it.hasNext())
-			{
-				Object current = it.next();
-				if (current instanceof SOAPElement)
-				{
-					soapMethod = (SOAPElement)current;
-					break;
-				}
-			}
-			if (soapMethod == null) return null;
+		ProcedureCall procedure = getProtocolHandler().readRequest(request);
 
-			// extract the method name from input parameters
-			String soapMethodName = soapMethod.getElementQName().getLocalPart();
-			if (!soapMethodName.endsWith(WSDLGenerator.SUFFIX_INPUT_MESSAGE) ||
-			    soapMethodName.length() <= WSDLGenerator.SUFFIX_INPUT_MESSAGE.length())
-				throw new BindletException("Method not found");
-			soapMethodName = soapMethodName.substring(0, soapMethodName.length() - WSDLGenerator.SUFFIX_INPUT_MESSAGE.length());
-			
-			ProcedureCall procedure = new ProcedureCall(soapMethodName);
-			
-			// find all procedure parameters
-			it = soapMethod.getChildElements();
-			while (it.hasNext())
-			{
-				Object current = it.next();
-				if (current instanceof SOAPElement)
-				{
-					Object value;
-					SOAPElement param = (SOAPElement)current;
-					
-					if (isElementPOJO(param))
-						value = getElementPOJO(param);
-					else
-						value = getElementContent(param);
-					procedure.setParameter(param.getLocalName(), value);
-				}
-			}
-			
-			procedure.setParameter(PARAM_REQUEST, request);
-			procedure.setParameter(PARAM_RESPONSE, response);
-			
-			return procedure;
-		} catch (BindletException e)
-		{
-			throw e; 
-		} catch (Exception e)
-		{
-			throw new BindletException("Error parsing SOAP request", e);
-		} 
+		procedure.setParameter(PARAM_REQUEST, request);
+		procedure.setParameter(PARAM_RESPONSE, response);
 		
+		return procedure;
 	}
-
-	@SuppressWarnings("rawtypes")
-	protected boolean isElementPOJO( SOAPElement element )
-	{
-        for (Iterator iter = element.getChildElements(); iter.hasNext();) 
-        {
-            Object child = iter.next();
-            if (child instanceof SOAPElement) return true;
-        }
-        
-        return false;
-	}
-	
-	@SuppressWarnings("rawtypes")
-	protected BeanObject getElementPOJO( SOAPElement element )
-	{
-		BeanObject object = new BeanObject();
 		
-		// find all procedure parameters
-		Iterator it = element.getChildElements();
-		while (it.hasNext())
-		{
-			Object current = it.next();
-			if (current instanceof SOAPElement)
-			{
-				SOAPElement field = (SOAPElement) current;
-				String fieldName = field.getElementName().getLocalName();
-				Object value;
-				if (isElementPOJO(field))
-					value = getElementPOJO(field);
-				else
-					value = getElementContent(field);
-				object.set(fieldName, value);
-			}
-		}
-		return object;
-	}
-	
-	@SuppressWarnings("rawtypes")
-	protected String getElementContent( SOAPElement element )
-	{
-		// find all procedure parameters
-		Iterator it = element.getChildElements();
-		while (it.hasNext())
-		{
-			Object current = it.next();
-			if (current instanceof Text)
-			{
-				Text content = (Text)current;
-				return content.getData();
-			}
-		}
-		return null;
-	}
-
-		
-	protected SOAPMessage createSoapResponse( String namespace, String prototype, Object result ) throws SOAPException
-	{
-		SOAPMessage message = SOAPUtils.createMessage();
-		
-		// create the SOAP method response element
-		SOAPBody body = message.getSOAPBody();
-		QName qname = new QName(namespace, prototype + WSDLGenerator.SUFFIX_OUTPUT_MESSAGE);
-		SOAPElement element = body.addChildElement(qname);
-		// create the return value element
-		SOAPUtils.generateElement(element, WSDLGenerator.RETURN_VALUE_NAME, result);
-		
-		return message;
-	}
-
-	protected SOAPMessage createSoapFault( String namespace, Exception error ) throws SOAPException
-	{
-		Throwable t = error;
-		String text = "";
-		SOAPMessage message = SOAPUtils.createMessage();
-		
-		while (t != null && t.getCause() != null)
-		{
-			t = t.getCause();
-		}
-		if (t != null && t.getMessage() != null) 
-			text = t.getMessage();
-		else
-		if (t != null)
-		{
-			text = t.toString();
-		}
-		else
-			text = "Unknown";
-		
-		serverLog.error("SOAP fault", error);
-		
-		// create the SOAP method response element
-		SOAPBody body = message.getSOAPBody();
-		QName qname = new QName("fault");
-		SOAPElement element = body.addChildElement(qname);
-		// create the 'faultcode' element
-		qname = new QName("faultcode");
-		SOAPElement sub = element.addChildElement(qname);
-		sub.setValue("client");
-		// create the 'faultstring' element
-		qname = new QName("faultstring");
-		sub = element.addChildElement(qname);
-		sub.setValue(text);
-		
-		return message;
-	}
-	
 	protected void doPost( IHttpBindletRequest request, IHttpBindletResponse response )
 	throws BindletException, IOException
 	{
-		SOAPMessage resp = null;
+		Object result = null;
+		IProcedureCall procedure = null;
+		SOAPProtocolHandler proto = getProtocolHandler();
 		
 		try
 		{
 			// extract the SOAP message from request content
-			IProcedureCall call = getProcedureCall(request, response);
-			Object result = doCall(call);
-			resp = createSoapResponse(getXMLSchemaNamespace(), call.getMethodPrototype(), result);
+			procedure = getProcedureCall(request, response);
+
+			result = doCall(procedure);
 		} catch (Exception e)
 		{
-			try
-			{
-				resp = createSoapFault("", e);
-			} catch (SOAPException e1)
-			{
-				response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
-				return;
-			}
+			proto.writeException(response, e);
 		}
-			
-		try
-		{
-			String content = marshaller.marshall(resp);	
-			response.setContentType("text/xml");
-			
-			BindletOutputStream out = response.getOutputStream();
-			out.writeString(content);
-			out.close();
-		} catch (Exception e)
-		{
-			response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
+		proto.writeResponse(response, procedure, result);
 	}
 	
 	public abstract String getXMLSchemaNamespace();
@@ -309,6 +70,19 @@ public abstract class SOAPBindlet extends javax.bindlet.soap.SoapBindlet
 		} catch (Exception e)
 		{
 			return Model.STATEFULL;
+		}
+	}
+	
+	protected SOAPProtocolHandler getProtocolHandler() throws BindletException
+	{
+		try
+		{
+			if (protocolHandler == null)
+				protocolHandler = new SOAPProtocolHandler( getXMLSchemaNamespace() );
+			return protocolHandler;
+		} catch (Exception e)
+		{
+			throw new BindletException("Error creating a SOAP protocol handler", e);
 		}
 	}
 	
