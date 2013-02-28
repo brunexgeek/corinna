@@ -18,7 +18,7 @@ import corinna.rpc.annotation.Parameter;
 import corinna.rpc.annotation.RemoteComponent;
 import corinna.rpc.annotation.RemoteMethod;
 import corinna.soap.core.SchemaGenerator;
-import corinna.soap.core.WsdlGenerator;
+import corinna.soap.core.WSDLGenerator;
 
 
 public class MainTest
@@ -30,7 +30,7 @@ public class MainTest
 		
 		ClassDescriptor desc = new ClassDescriptor(MyPOJO.class);
 		
-		WsdlGenerator wgen = new WsdlGenerator(desc, "http://fuck.com");
+		WSDLGenerator wgen = new WSDLGenerator(desc, "http://fuck.com");
 		Definition def = wgen.generateWsdl();
 		
 		WSDLWriter wr = factory.newWSDLWriter();

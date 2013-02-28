@@ -47,7 +47,7 @@ import corinna.thread.ObjectLocker;
  * @author Bruno Ribeiro
  * @since 1.0
  */
-public class WsdlGenerator
+public class WSDLGenerator
 {
 
 	public static final String RETURN_VALUE_NAME = "result";
@@ -116,12 +116,12 @@ public class WsdlGenerator
 	
 	private ObjectLocker wsdlLock = new ObjectLocker();
 
-	public WsdlGenerator( ClassDescriptor classDesc, String endpointUrl ) throws WSDLException
+	public WSDLGenerator( ClassDescriptor classDesc, String endpointUrl ) throws WSDLException
 	{
 		this(classDesc, endpointUrl, null, null);
 	}
 
-	public WsdlGenerator( ClassDescriptor classDesc, String endpointURL, String wsdlNamespace,
+	public WSDLGenerator( ClassDescriptor classDesc, String endpointURL, String wsdlNamespace,
 		String schemaNamespace ) throws WSDLException
 	{
 		if (classDesc == null)

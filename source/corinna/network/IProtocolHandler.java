@@ -5,6 +5,14 @@ import javax.bindlet.exception.BindletException;
 import corinna.rpc.ProcedureCall;
 
 
+/**
+ * Utility class responsible to perform translations between protocol specific messages and objects of the RPC mechanism.
+ * 
+ * @author Bruno Ribeiro
+ *
+ * @param <R> Request class type.
+ * @param <P> Response class type.
+ */
 public interface IProtocolHandler<R, P>
 {
 

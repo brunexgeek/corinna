@@ -14,7 +14,7 @@ import corinna.rpc.TypeConverter;
 
 
 // TODO: move this class to 'corinna.soap.core' package
-public class SoapUtils
+public class SOAPUtils
 {
 
 	private static MessageFactory factory = null;

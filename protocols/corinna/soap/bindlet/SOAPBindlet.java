@@ -27,17 +27,17 @@ import org.slf4j.LoggerFactory;
 import corinna.rpc.BeanObject;
 import corinna.rpc.ProcedureCall;
 import corinna.rpc.ReflectionUtil;
-import corinna.soap.core.WsdlGenerator;
+import corinna.soap.core.WSDLGenerator;
 import corinna.soap.network.SoapMarshaller;
 import corinna.soap.network.SoapUnmarshaller;
 
 
 // TODO: merge with "javax.bindlet.soap.SoapBindlet"
 @SuppressWarnings("serial")
-public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
+public abstract class SOAPBindlet extends javax.bindlet.soap.SoapBindlet
 {
 
-	private static Logger serverLog = LoggerFactory.getLogger(SoapBindlet.class);
+	private static Logger serverLog = LoggerFactory.getLogger(SOAPBindlet.class);
 	
 	protected static SoapUnmarshaller unmarshaller = null;
 	
@@ -55,7 +55,7 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 		}
 	}
 	
-	public SoapBindlet() throws BindletException
+	public SOAPBindlet() throws BindletException
 	{
 		super();
 	}
@@ -113,10 +113,10 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 
 			// extract the method name from input parameters
 			String soapMethodName = soapMethod.getElementQName().getLocalPart();
-			if (!soapMethodName.endsWith(WsdlGenerator.SUFFIX_INPUT_MESSAGE) ||
-			    soapMethodName.length() <= WsdlGenerator.SUFFIX_INPUT_MESSAGE.length())
+			if (!soapMethodName.endsWith(WSDLGenerator.SUFFIX_INPUT_MESSAGE) ||
+			    soapMethodName.length() <= WSDLGenerator.SUFFIX_INPUT_MESSAGE.length())
 				throw new BindletException("Method not found");
-			soapMethodName = soapMethodName.substring(0, soapMethodName.length() - WsdlGenerator.SUFFIX_INPUT_MESSAGE.length());
+			soapMethodName = soapMethodName.substring(0, soapMethodName.length() - WSDLGenerator.SUFFIX_INPUT_MESSAGE.length());
 			
 			ProcedureCall procedure = new ProcedureCall(soapMethodName);
 			
@@ -209,14 +209,14 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 		
 	protected SOAPMessage createSoapResponse( String namespace, String prototype, Object result ) throws SOAPException
 	{
-		SOAPMessage message = SoapUtils.createMessage();
+		SOAPMessage message = SOAPUtils.createMessage();
 		
 		// create the SOAP method response element
 		SOAPBody body = message.getSOAPBody();
-		QName qname = new QName(namespace, prototype + WsdlGenerator.SUFFIX_OUTPUT_MESSAGE);
+		QName qname = new QName(namespace, prototype + WSDLGenerator.SUFFIX_OUTPUT_MESSAGE);
 		SOAPElement element = body.addChildElement(qname);
 		// create the return value element
-		SoapUtils.generateElement(element, WsdlGenerator.RETURN_VALUE_NAME, result);
+		SOAPUtils.generateElement(element, WSDLGenerator.RETURN_VALUE_NAME, result);
 		
 		return message;
 	}
@@ -225,7 +225,7 @@ public abstract class SoapBindlet extends javax.bindlet.soap.SoapBindlet
 	{
 		Throwable t = error;
 		String text = "";
-		SOAPMessage message = SoapUtils.createMessage();
+		SOAPMessage message = SOAPUtils.createMessage();
 		
 		while (t != null && t.getCause() != null)
 		{

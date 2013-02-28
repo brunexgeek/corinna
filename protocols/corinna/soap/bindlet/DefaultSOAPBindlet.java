@@ -22,12 +22,12 @@ import corinna.rpc.CanonicalPrototypeFilter;
 import corinna.rpc.ClassDescriptor;
 import corinna.rpc.IPrototypeFilter;
 import corinna.rpc.MethodRunner;
-import corinna.soap.core.WsdlGenerator;
+import corinna.soap.core.WSDLGenerator;
 import corinna.thread.ObjectLocker;
 import corinna.util.ComponentInformation;
 
 
-public class DefaultSoapBindlet extends SoapBindlet
+public class DefaultSOAPBindlet extends SOAPBindlet
 {
 	
 	private static Logger log = LoggerFactory.getLogger("CorinnaLog");
@@ -69,7 +69,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 	
 	private String endpointURL = null;
 	
-	public DefaultSoapBindlet( ) throws BindletException
+	public DefaultSOAPBindlet( ) throws BindletException
 	{
 	}
 
@@ -206,7 +206,7 @@ public class DefaultSoapBindlet extends SoapBindlet
 		try
 		{
 			ClassDescriptor desc = new ClassDescriptor(runner.getInterfaceClass());
-			WsdlGenerator wsdlgen = new WsdlGenerator( desc, endpointURL, localWSDLNamespace , localXMLSchemaNamespace );
+			WSDLGenerator wsdlgen = new WSDLGenerator( desc, endpointURL, localWSDLNamespace , localXMLSchemaNamespace );
 			localXMLSchemaNamespace = wsdlgen.getXMLSchemaNamespace();
 			wsdlName = wsdlgen.getServiceName();
 			return (wsdl = wsdlgen.generateWsdl());
