@@ -4,7 +4,6 @@ package corinna.rpc;
 import java.util.Iterator;
 
 import corinna.exception.BeanObjectException;
-import corinna.json.core.JSONException;
 
 
 public interface IBeanObject

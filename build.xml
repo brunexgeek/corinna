@@ -34,6 +34,113 @@
 		<mkdir dir="${core.dir.build}" />
 	</target>
 	
+	<target name="export-protocol-http" 
+		depends="prepare" 
+		description="Construct the JAR file for Corinna SOAP protocol classes">
+		<javac destdir="${protocol.http.dir.build}" 
+			debug="${compiler.debug}" 
+			deprecation="${compiler.deprecation}" 
+			compiler="${compiler.type}" 
+			classpathref="core.path">
+			<src path="${protocol.http.dir.source}"/>
+		</javac>
+		<jar destfile="${global.dir.dist}/${protocol.http.filename}" update="true" index="false">
+			<manifest>
+				<attribute name="Product-Name" value="${protocol.http.title}"/>
+				<attribute name="Package-Title" value="${protocol.http.title}"/>
+				<attribute name="Package-Version" value="${protocol.http.version}"/>
+				<attribute name="Class-Path" value=". ${core.filename} ${core.classpath}"/>
+			</manifest>
+			<fileset dir="${protocol.http.dir.build}" includes="corinna/http/**"/>
+			<fileset dir="${protocol.http.dir.source}" includes="**/*.properties"/>
+		</jar>
+		<echo>Copying libraries to distribution directory...</echo>
+		<copy todir="${global.dir.dist}" flatten="false">
+			<path refid="core.path">
+			</path>
+		</copy>
+	</target>
+	
+	<target name="export-protocol-json" 
+		depends="prepare" 
+		description="Construct the JAR file for Corinna SOAP protocol classes">
+		<javac destdir="${protocol.json.dir.build}" 
+			debug="${compiler.debug}" 
+			deprecation="${compiler.deprecation}" 
+			compiler="${compiler.type}" 
+			classpathref="core.path">
+			<src path="${protocol.json.dir.source}"/>
+		</javac>
+		<jar destfile="${global.dir.dist}/${protocol.json.filename}" update="true" index="false">
+			<manifest>
+				<attribute name="Product-Name" value="${protocol.json.title}"/>
+				<attribute name="Package-Title" value="${protocol.json.title}"/>
+				<attribute name="Package-Version" value="${protocol.json.version}"/>
+				<attribute name="Class-Path" value=". ${protocol.http.filename} ${core.filename} ${core.classpath}"/>
+			</manifest>
+			<fileset dir="${protocol.json.dir.build}" includes="corinna/json/**"/>
+			<fileset dir="${protocol.json.dir.source}" includes="**/*.properties"/>
+		</jar>
+		<echo>Copying libraries to distribution directory...</echo>
+		<copy todir="${global.dir.dist}" flatten="false">
+			<path refid="core.path">
+			</path>
+		</copy>
+	</target>
+	
+	<target name="export-protocol-rest" 
+		depends="prepare" 
+		description="Construct the JAR file for Corinna SOAP protocol classes">
+		<javac destdir="${protocol.rest.dir.build}" 
+			debug="${compiler.debug}" 
+			deprecation="${compiler.deprecation}" 
+			compiler="${compiler.type}" 
+			classpathref="core.path">
+			<src path="${protocol.rest.dir.source}"/>
+		</javac>
+		<jar destfile="${global.dir.dist}/${protocol.rest.filename}" update="true" index="false">
+			<manifest>
+				<attribute name="Product-Name" value="${protocol.rest.title}"/>
+				<attribute name="Package-Title" value="${protocol.rest.title}"/>
+				<attribute name="Package-Version" value="${protocol.rest.version}"/>
+				<attribute name="Class-Path" value=". ${protocol.http.filename} ${core.filename} ${core.classpath}"/>
+			</manifest>
+			<fileset dir="${protocol.rest.dir.build}" includes="corinna/rest/**"/>
+			<fileset dir="${protocol.rest.dir.source}" includes="**/*.properties"/>
+		</jar>
+		<echo>Copying libraries to distribution directory...</echo>
+		<copy todir="${global.dir.dist}" flatten="false">
+			<path refid="core.path">
+			</path>
+		</copy>
+	</target>
+	
+	<target name="export-protocol-soap" 
+		depends="prepare" 
+		description="Construct the JAR file for Corinna SOAP protocol classes">
+		<javac destdir="${protocol.soap.dir.build}" 
+			debug="${compiler.debug}" 
+			deprecation="${compiler.deprecation}" 
+			compiler="${compiler.type}" 
+			classpathref="core.path">
+			<src path="${protocol.soap.dir.source}"/>
+		</javac>
+		<jar destfile="${global.dir.dist}/${protocol.soap.filename}" update="true" index="false">
+			<manifest>
+				<attribute name="Product-Name" value="${protocol.soap.title}"/>
+				<attribute name="Package-Title" value="${protocol.soap.title}"/>
+				<attribute name="Package-Version" value="${protocol.soap.version}"/>
+				<attribute name="Class-Path" value=". ${protocol.http.filename} ${core.filename} ${core.classpath}"/>
+			</manifest>
+			<fileset dir="${protocol.soap.dir.build}" includes="corinna/soap/**"/>
+			<fileset dir="${protocol.soap.dir.source}" includes="**/*.properties"/>
+		</jar>
+		<echo>Copying libraries to distribution directory...</echo>
+		<copy todir="${global.dir.dist}" flatten="false">
+			<path refid="core.path">
+			</path>
+		</copy>
+	</target>
 
 	<target name="export-core" 
 		depends="prepare" 
@@ -50,7 +157,7 @@
 				<attribute name="Product-Name" value="${core.title}"/>
 				<attribute name="Package-Title" value="${core.title}"/>
 				<attribute name="Package-Version" value="${core.version}"/> 
-				<attribute name="Class-Path" value=". lib/${api.filename} ${core.classpath}"/>
+				<attribute name="Class-Path" value=". ${core.classpath}"/>
 			</manifest> 
 			<fileset dir="${core.dir.build}" excludes="**/service/*"/>
 			<fileset dir="${core.dir.source}" includes="**/*.properties"/>
@@ -84,10 +191,9 @@
 			<fileset dir="${api.dir.build}"/>
 		</jar>
 	</target>
-	
 
 	<target name="export-all" 
-		depends="clean,export-bindlet-api,export-core"
+		depends="clean,export-bindlet-api,export-core,export-protocol-http,export-protocol-json,export-protocol-soap,export-protocol-rest"
 		description="Build all">
 	</target>
 
