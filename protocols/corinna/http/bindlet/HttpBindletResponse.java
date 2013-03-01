@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bruno Ribeiro <brunei@users.sourceforge.net>
+ * Copyright 2011-2013 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,23 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 public class HttpBindletResponse extends WebBindletResponse implements IHttpBindletResponse
 {
 
-	//private List<Cookie> cookies = new LinkedList<Cookie>();
+	private List<Cookie> cookies = null;
 	
 	public HttpBindletResponse( Channel channel, HttpVersion version )
 	{
 		super(channel, new DefaultHttpResponse(version, HttpResponseStatus.OK));
+		cookies = new LinkedList<Cookie>();
 	}
 
 	public HttpBindletResponse( Channel channel, HttpResponse response )
 	{
 		super(channel, response);
+		cookies = new LinkedList<Cookie>();
 	}
 	
 	@Override
 	public void addCookie( Cookie cookie )
 	{
-		//if (cookie != null) cookies.add(cookie);
 	}
 
 	@Override
@@ -67,9 +68,6 @@ public class HttpBindletResponse extends WebBindletResponse implements IHttpBind
 	protected void update()
 	{
 		super.update();
-		/*for (Cookie entry : cookies)
-			// TODO: write all cookie attributes in response header
-			response.addHeader("Set-Cookie", entry.getName() + "=" + entry.getValue() );*/
 	}
 	
 }

@@ -74,8 +74,6 @@ public class XMLDomainParser implements IDomainParser
 	
 	Map<String, ContextEntry> contextList = null;
 	
-	Map<String, AdapterEntry> adapterList = null;
-	
 	List<BeanEntry> beanList = null;
 	
 	public XMLDomainParser( String fileName ) throws IOException

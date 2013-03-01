@@ -88,7 +88,7 @@ public abstract class StreamHandler implements IDownstreamHandler, IUpstreamHand
 	public void outgoingException( ChannelHandlerContext context, ExceptionEvent event ) 
 		throws Exception
 	{
-		//log.error("Outgoing exception caught", event.getCause() );
+		log.error("Outgoing exception caught", event.getCause() );
 	}
 
 	@Override
@@ -136,7 +136,7 @@ public abstract class StreamHandler implements IDownstreamHandler, IUpstreamHand
 	public void incomingException( ChannelHandlerContext context, ExceptionEvent event ) 
 		throws Exception
 	{
-		//log.error("Incoming exception caught", event.getCause() );
+		log.error("Incoming exception caught", event.getCause() );
 	}
 	
 	@Override

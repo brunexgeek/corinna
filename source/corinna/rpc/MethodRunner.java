@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bruno Ribeiro
+ * Copyright 2011-2013 Bruno Ribeiro
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,8 +125,10 @@ public class MethodRunner implements IMethodRunner
 		if (model != null && model.value() == Model.STATELESS)
 		{
 			implementation = createImplementation();
-			serverLog.debug("Created stateless component of '" + implClass.getName() + "'");
+			serverLog.debug("Using stateless component '" + implClass.getName() + "'");
 		}
+		else
+			serverLog.trace("Using statefull component '" + implClass.getName() + "'");
 	}
 
 	/**
@@ -243,6 +245,7 @@ public class MethodRunner implements IMethodRunner
 		IncompleteInterfaceException
 	{
 		Method methodRef;
+		Object result = null;
 		
 		methodRef = procedures.get(methodPrototype);
 		if (methodRef == null)
@@ -253,7 +256,7 @@ public class MethodRunner implements IMethodRunner
 
 		try
 		{
-			return methodRef.invoke(impl, values);
+			result = methodRef.invoke(impl, values);
 		} catch (SecurityException e)
 		{
 			throw new MethodNotFoundException("Method '" + methodRef.getName() + "' not found",
@@ -267,6 +270,16 @@ public class MethodRunner implements IMethodRunner
 			throw new InternalException("Internal error while invoking method'" + methodRef.getName(),
 				e.getCause());
 		}
+		
+		try
+		{
+			destroyImplemenetation(impl);
+		} catch (Exception e)
+		{
+			serverLog.error("Error destroying component", e);
+		}
+		
+		return result;
 	}
 
 	@Override
@@ -348,8 +361,6 @@ public class MethodRunner implements IMethodRunner
 
 		try
 		{
-			//Constructor<?> ctor = getImplementationClass().getConstructor(ARGS_IMPL);
-			//impl = (IComponentInterface) ctor.newInstance(getData());
 			impl = (IComponentInterface) getImplementationClass().newInstance();
 			// inject all referenced service beans
 			BeanManager.getInstance().inject(impl);
@@ -375,6 +386,13 @@ public class MethodRunner implements IMethodRunner
 		return createImplementation();
 	}
 
+	private void destroyImplemenetation( IComponentInterface impl ) throws ComponentException
+	{
+		// verifica se já possui um objeto de implementação reusável
+		if (implementation == impl) return;
+		impl.destroy();
+	}
+	
 	@Override
 	public boolean containsMethod( Method method )
 	{

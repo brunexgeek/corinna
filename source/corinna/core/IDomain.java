@@ -16,22 +16,34 @@
 
 package corinna.core;
 
+
 import corinna.exception.ServerInUseException;
 
 
 public interface IDomain extends ILifecycle
 {
 
+	/**
+	 * Returns the name of this domain.
+	 * 
+	 * @return
+	 */
 	public String getName();
-	
+
+	/**
+	 * Returns the server with the given name. If no server found, returns <code>null</code>.
+	 * 
+	 * @param name
+	 * @return
+	 */
 	public IServer getServer( String name );
-	
+
 	public void addServer( IServer server ) throws ServerInUseException;
-	
+
 	public IServer removeServer( IServer server ) throws ServerInUseException;
-	
+
 	public IServer removeServer( String name ) throws ServerInUseException;
 
-	String dumpHierarchy();
-	
+	public String dumpHierarchy();
+
 }

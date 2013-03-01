@@ -44,8 +44,6 @@ public final class Domain extends Lifecycle implements IDomain
 		serversLock = new ObjectLocker();
 	}
 	
-	
-
 	@Override
 	public String getName()
 	{

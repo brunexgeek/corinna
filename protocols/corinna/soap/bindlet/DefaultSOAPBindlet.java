@@ -2,6 +2,8 @@ package corinna.soap.bindlet;
 
 import java.io.IOException;
 
+import javax.bindlet.BindletModel;
+import javax.bindlet.BindletModel.Model;
 import javax.bindlet.IBindletConfig;
 import javax.bindlet.IComponentInformation;
 import javax.bindlet.exception.BindletException;
@@ -27,6 +29,7 @@ import corinna.thread.ObjectLocker;
 import corinna.util.ComponentInformation;
 
 
+@BindletModel(Model.STATELESS)
 public class DefaultSOAPBindlet extends SOAPBindlet
 {
 	
