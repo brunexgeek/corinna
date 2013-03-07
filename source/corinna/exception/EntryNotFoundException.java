@@ -17,11 +17,10 @@
 package corinna.exception;
 
 
-
-
-@SuppressWarnings("serial")
 public class EntryNotFoundException extends GenericException 
 {
+
+	private static final long serialVersionUID = -9109636713356638690L;
 
 	public EntryNotFoundException() 
 	{

@@ -1,8 +1,10 @@
 package corinna.rpc;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 
 public class POJOUtil
@@ -92,6 +94,52 @@ public class POJOUtil
 			{
 				classRef.getMethod("set" + key, returnType);
 				list.add(key);
+			} catch (Exception e)
+			{
+				continue;
+			}
+		}
+		
+		return list;
+	}
+	
+	public static Map<String,Class<?>> getPOJOTypes( Class<?> classRef )
+	{
+		Map<String,Class<?>> list = new HashMap<String, Class<?>>();
+
+		String name = "";
+		String key = "";
+		Class<?> returnType = null;
+		
+		Method[] methods = getMethods(classRef);
+		for (Method current : methods)
+		{
+			name = current.getName();
+			key = "";
+			
+			// check whether the current method is a getter
+			if (name.startsWith("get"))
+			{
+				if ("getClass".equals(name) || "getDeclaringClass".equals(name))
+					key = "";
+				else
+					key = name.substring(3);
+			}
+			else
+				if (name.startsWith("is"))
+					key = name.substring(2);
+				else
+					continue;
+			// check whether the current getter is a valid POJO getter
+			if (key.length() == 0 || Character.isLowerCase(key.charAt(0))
+				|| current.getParameterTypes().length > 0)
+				continue;
+			returnType = current.getReturnType();
+			// find for the corresponding setter
+			try
+			{
+				classRef.getMethod("set" + key, returnType);
+				list.put(key, returnType);
 			} catch (Exception e)
 			{
 				continue;

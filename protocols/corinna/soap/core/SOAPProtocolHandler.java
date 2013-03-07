@@ -155,19 +155,12 @@ public class SOAPProtocolHandler implements
 		String text = "";
 		SOAPMessage message = SOAPUtils.createMessage();
 
-		while (t != null && t.getCause() != null)
+		// find the first error with a message
+		while (t != null && t.getCause() != null && t.getCause().getMessage() != null)
 		{
 			t = t.getCause();
 		}
-		if (t != null && t.getMessage() != null)
-			text = t.getMessage();
-		else
-			if (t != null)
-			{
-				text = t.toString();
-			}
-			else
-				text = "Unknown";
+		text = t.getClass().getSimpleName() + ": " + t.getMessage();
 
 		log.error("SOAP fault", error);
 

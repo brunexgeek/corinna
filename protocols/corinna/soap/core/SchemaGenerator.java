@@ -18,6 +18,7 @@ import com.ibm.wsdl.extensions.schema.SchemaConstants;
 
 import corinna.rpc.ClassDescriptor;
 import corinna.rpc.MethodDescriptor;
+import corinna.rpc.POJOUtil;
 import corinna.rpc.ParameterDescriptor;
 
 
@@ -195,7 +196,7 @@ public class SchemaGenerator
 		String pojoName = types.get(classRef);
 		if (pojoName != null) return pojoName;
 		
-		Map<String,Class<?>> fields = extractBeanFields(classRef);
+		Map<String,Class<?>> fields = POJOUtil.getPOJOTypes(classRef);//extractBeanFields(classRef);
 		pojoName = classRef.getSimpleName() + SUFFIX_TYPE;
 		
 		// register the new type (insert before complete the job to avoid infinite recursion)
@@ -296,13 +297,13 @@ public class SchemaGenerator
 	{
 		Map<String, Class<?>> output = new HashMap<String, Class<?>>();
 				
-		Method[] methods = classRef.getMethods();
+		//Method[] methods = classRef.getMethods();
 		
 		// TODO: using 'getDeclaredFields', inherited fields will not found
-		for (Field field : classRef.getDeclaredFields())
+		for (Map.Entry<String,Class<?>> field : POJOUtil.getPOJOTypes(classRef).entrySet())
 		{
-			String fieldName = null;
-			
+			/*String fieldName = null;
+
 			corinna.rpc.annotation.Field annot = field.getAnnotation(corinna.rpc.annotation.Field.class);
 			if (annot != null) fieldName = annot.name();
 			if (fieldName == null || fieldName.isEmpty()) fieldName = field.getName();
@@ -318,7 +319,9 @@ public class SchemaGenerator
 				getter = containsBeanMethod(methods, fieldName, MethodPrefix.GET);
 			if (!getter) continue;
 			
-			output.put(fieldName, field.getType());
+			output.put(fieldName, field.getType());*/
+			
+			
 		}
 		
 		return output;
