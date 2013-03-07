@@ -152,7 +152,6 @@ public class SOAPProtocolHandler implements
 	protected SOAPMessage createSoapFault( String namespace, Exception error ) throws SOAPException
 	{
 		Throwable t = error;
-		String text = "";
 		SOAPMessage message = SOAPUtils.createMessage();
 
 		// find the first error with a message
@@ -160,20 +159,22 @@ public class SOAPProtocolHandler implements
 		{
 			t = t.getCause();
 		}
-		text = t.getClass().getSimpleName() + ": " + t.getMessage();
-
+		String text = t.getMessage();
+		// detect the error code
+		String errorCode = t.getClass().getSimpleName();
+		
 		log.error("SOAP fault", error);
 
 		// create the SOAP method response element
 		SOAPBody body = message.getSOAPBody();
-		QName qname = new QName("fault");
+		QName qname = new QName(body.getNamespaceURI(), "fault");
 		SOAPElement element = body.addChildElement(qname);
 		// create the 'faultcode' element
-		qname = new QName("faultcode");
+		qname = new QName(body.getNamespaceURI(), "faultcode");
 		SOAPElement sub = element.addChildElement(qname);
-		sub.setValue("client");
+		sub.setValue(errorCode);
 		// create the 'faultstring' element
-		qname = new QName("faultstring");
+		qname = new QName(body.getNamespaceURI(), "faultstring");
 		sub = element.addChildElement(qname);
 		sub.setValue(text);
 
