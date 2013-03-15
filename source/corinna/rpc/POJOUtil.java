@@ -9,7 +9,6 @@ import java.util.Map;
 
 public class POJOUtil
 {
-
 	
 	public static boolean isValidPOJO( Class<?> classRef )
 	{
@@ -103,13 +102,15 @@ public class POJOUtil
 		return list;
 	}
 	
-	public static Map<String,Class<?>> getPOJOTypes( Class<?> classRef )
+	// TODO: create a cache for already processed types
+	public static Map<String,POJOInfo> getPOJOInfo( Class<?> classRef )
 	{
-		Map<String,Class<?>> list = new HashMap<String, Class<?>>();
+		Map<String,POJOInfo> list = new HashMap<String, POJOInfo>();
 
 		String name = "";
 		String key = "";
 		Class<?> returnType = null;
+		Method setter = null;
 		
 		Method[] methods = getMethods(classRef);
 		for (Method current : methods)
@@ -138,8 +139,8 @@ public class POJOUtil
 			// find for the corresponding setter
 			try
 			{
-				classRef.getMethod("set" + key, returnType);
-				list.put(key, returnType);
+				setter = classRef.getMethod("set" + key, returnType);
+				list.put(key, new POJOInfo(key, returnType, current, setter));
 			} catch (Exception e)
 			{
 				continue;
@@ -180,6 +181,12 @@ public class POJOUtil
 		return null;
 	}
 
+	/**
+	 * Returns all methods for the given class.
+	 * 
+	 * @param classRef
+	 * @return
+	 */
 	public static Method[] getMethods( Class<?> classRef )
 	{
 		if (classRef.getClassLoader() != null)

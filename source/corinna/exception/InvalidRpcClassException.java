@@ -26,6 +26,7 @@ package corinna.exception;
  * @since 1.0
  * @see RpcValidator
  */
+// TODO: rename to 'InvalidRPCClassException'
 public class InvalidRpcClassException extends RpcException 
 {
 

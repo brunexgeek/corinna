@@ -2,6 +2,7 @@ package corinna.rpc;
 
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -194,45 +195,21 @@ public class BeanObject implements IBeanObject
 	}
 
 	@Override
+	public IBeanCollection getCollection( String key ) throws BeanObjectException
+	{
+		Object object = this.get(key);
+		if (object == null) throw new BeanObjectException("Key [" + key + "] can not be null.");
+
+		if (object instanceof IBeanCollection)
+			return (IBeanCollection) object;
+		else
+			throw new BeanObjectException("Key [" + key + "] is not a number.");
+	}
+	
+	@Override
 	public Iterator<String> keys()
 	{
 		return entries.keySet().iterator();
-	}
-
-	protected String extractPOJOGetterSuffix( Class<?> classRef, Method method )
-	{
-		if (method == null) return null;
-
-		String name = method.getName();
-		String key = "";
-		Class<?> returnType;
-
-		// check whether the current method is a getter
-		if (name.startsWith("get"))
-		{
-			if ("getClass".equals(name) || "getDeclaringClass".equals(name))
-				key = "";
-			else
-				key = name.substring(3);
-		}
-		else
-			if (name.startsWith("is"))
-				key = name.substring(2);
-			else
-				return null;
-		// check whether the current getter is a valid POJO getter
-		if (key.length() == 0 || Character.isLowerCase(key.charAt(0))
-			|| method.getParameterTypes().length > 0) return null;
-		returnType = method.getReturnType();
-		// find for the corresponding setter
-		try
-		{
-			classRef.getMethod("set" + key, returnType);
-			return key;//Character.toLowerCase( key.charAt(0) ) + key.substring(1);
-		} catch (Exception e)
-		{
-			return null;
-		}
 	}
 
 	protected Method getMethod( Class<?> classRef, String name, Class<?> ... params )
@@ -244,34 +221,6 @@ public class BeanObject implements IBeanObject
 		{
 			return null;
 		}
-	}
-	
-	// TODO: optimize string manipulation
-	protected String extractPOJOSetterSuffix( Class<?> classRef, Method method )
-	{
-		if (method == null) return null;
-
-		String name = method.getName();
-		String key = "";
-		Class<?> returnType;
-
-		// check whether the current method is a getter
-		if (name.startsWith("set"))
-			key = name.substring(3);
-		else
-			return null;
-		// check whether the current getter is a valid POJO getter
-		if (key.length() == 0 || Character.isLowerCase(key.charAt(0))
-			|| method.getParameterTypes().length != 1) return null;
-		returnType = method.getParameterTypes()[0];
-		// find for the corresponding getter
-		Method getter = getMethod(classRef, "get" + key);
-		if (getter == null)
-			getter = getMethod(classRef, "is" + key);
-		if (getter != null && getter.getReturnType() == returnType)
-			return key;//Character.toLowerCase( key.charAt(0) ) + key.substring(1);
-		else
-			return null;
 	}
 	
 	protected Object callPOJOGetter( Object bean, Method method )
@@ -297,6 +246,19 @@ public class BeanObject implements IBeanObject
 		}
 	}
 	
+	public static boolean isCollection( Class<?> classRef )
+	{
+		return (Collection.class.isAssignableFrom(classRef));
+	}
+	
+	/**
+	 * Returns a logical value indicating whether the given type is primitive. For this
+	 * implementationm primitive types are all types that can represented with a
+	 * single value (integers, strings, enumerations, etc.).
+	 * 
+	 * @param classRef
+	 * @return
+	 */
 	public static boolean isPrimitive( Class<?> classRef )
 	{
 		if (classRef == Long.class) return true;
@@ -318,20 +280,15 @@ public class BeanObject implements IBeanObject
 		if (source == null) return;
 		Class<?> classRef = source.getClass();
 		
-		Method[] methods = POJOUtil.getMethods(classRef);
-		for (Method current : methods)
+		// retrieve all POJO information from destination object
+		Map<String, POJOInfo> infoMap = POJOUtil.getPOJOInfo(classRef);
+		for (String current : infoMap.keySet())
 		{
-			String suffix = extractPOJOGetterSuffix(classRef, current);
-			if (suffix == null) continue;
-			
-			Object value = callPOJOGetter(source, current);
-			if (value != null && !isPrimitive(value.getClass()))
-			{
-				IBeanObject object = new BeanObject(value);
-				entries.put(suffix, object);
-			}
-			else
-				entries.put(suffix, value);
+			POJOInfo info = infoMap.get(current);
+			// insert the getter value in the bean object
+			Object value = callPOJOGetter(source, info.getGetter());
+			value = extractValue(value);
+			entries.put(current, value);
 		}
 	}
 
@@ -341,36 +298,53 @@ public class BeanObject implements IBeanObject
 		if (destination == null) return;
 		Class<?> classRef = destination.getClass();
 		Object bean = null;
-		
-		Method[] methods = POJOUtil.getMethods(classRef);
-		for (Method current : methods)
+				
+		// retrieve all POJO information from destination object
+		Map<String, POJOInfo> infoMap = POJOUtil.getPOJOInfo(classRef);
+		for (String current : infoMap.keySet())
 		{
-			String suffix = extractPOJOSetterSuffix(classRef, current);
-			if (suffix == null) continue;
+			POJOInfo info = infoMap.get(current);
+			Object value = entries.get(current);
 			
-			Object value = entries.get(suffix);
 			if (value != null && IBeanObject.class.isAssignableFrom(value.getClass()))
 			{
 				// create a new instance of the java bean
 				try
 				{
-					bean = current.getParameterTypes()[0].newInstance();
+					bean = info.getType().newInstance();
 					((IBeanObject)value).populate(bean);
 				} catch (Exception e)
 				{
 					continue;
 				}
-				callPOJOSetter(destination, current, bean);
+				callPOJOSetter(destination, info.getSetter(), bean);
 			}
 			else
 			{
 				// check whether the value type match with setter parameter
-				Class<?> paramType = current.getParameterTypes()[0];
+				Class<?> paramType = info.getType();
 				if (value != null && !paramType.equals(value.getClass()))
 					value = TypeConverter.convert(paramType, value);
-				callPOJOSetter(destination, current, value);
+				callPOJOSetter(destination, info.getSetter(), value);
 			}
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	public static Object extractValue( Object source )
+	{
+		Object value = source;
+		
+		if ( value != null && BeanObject.isCollection( value.getClass() ) )
+			value = new BeanCollection( (Collection<Object>)value );
+		else
+		if (value != null && !BeanObject.isPrimitive( value.getClass() ) )
+			value = new BeanObject(value);
+		else
+			value = (value == null) ? null : value.toString();
+
+		return value;
+	}
+
+	
 }

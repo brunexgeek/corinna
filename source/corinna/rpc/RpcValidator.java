@@ -140,6 +140,7 @@ public class RpcValidator
 			throw new NullPointerException("The interface class must not be null");
 		if (!intfClass.isInterface())
 			throw new InvalidRpcClassException("The interface class must be an interface");
+		// TODO: move this restriction to 'core' (the RPC mechanism should only require the 'RemoteComponent' annotation 
 		if (!IComponentInterface.class.isAssignableFrom(intfClass))
 			throw new InvalidRpcClassException(
 				"The interface class must extends 'IComponentInterface'");

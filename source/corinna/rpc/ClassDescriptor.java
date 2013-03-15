@@ -6,9 +6,14 @@ import java.util.List;
 
 import corinna.exception.InvalidRpcClassException;
 import corinna.rpc.annotation.RemoteComponent;
-import corinna.rpc.annotation.RemoteMethod;
 
 
+/**
+ * Hold information about a class to be used by the RPC mechanism.
+ * 
+ * @author Bruno Ribeiro
+ */
+// TODO: rename to 'ComponentDescriptor'
 public class ClassDescriptor
 {
 
@@ -26,7 +31,9 @@ public class ClassDescriptor
 		type = clazz;
 		
 		RemoteComponent annotation = clazz.getAnnotation(RemoteComponent.class);
-		if (annotation != null && annotation.name() != null && !annotation.name().isEmpty())
+		if (annotation == null)
+			throw new InvalidRpcClassException("Component classes must be annotated with 'RemoteComponent' annotation");
+		if (annotation.name() != null && !annotation.name().isEmpty())
 			componentName = cleanName( annotation.name() );
 		else
 			componentName = type.getSimpleName();

@@ -1,6 +1,5 @@
 package corinna.soap.core;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Calendar;
@@ -18,6 +17,7 @@ import com.ibm.wsdl.extensions.schema.SchemaConstants;
 
 import corinna.rpc.ClassDescriptor;
 import corinna.rpc.MethodDescriptor;
+import corinna.rpc.POJOInfo;
 import corinna.rpc.POJOUtil;
 import corinna.rpc.ParameterDescriptor;
 
@@ -196,7 +196,7 @@ public class SchemaGenerator
 		String pojoName = types.get(classRef);
 		if (pojoName != null) return pojoName;
 		
-		Map<String,Class<?>> fields = POJOUtil.getPOJOTypes(classRef);//extractBeanFields(classRef);
+		Map<String,POJOInfo> fields = POJOUtil.getPOJOInfo(classRef);
 		pojoName = classRef.getSimpleName() + SUFFIX_TYPE;
 		
 		// register the new type (insert before complete the job to avoid infinite recursion)
@@ -209,10 +209,10 @@ public class SchemaGenerator
 		element.setAttribute("name", pojoName);
 		element = createElement(context, element, "sequence");
 		
-		for (Map.Entry<String,Class<?>> current : fields.entrySet())
+		for (Map.Entry<String,POJOInfo> current : fields.entrySet())
 		{
 			String typeName = null;
-			Class<?> type = current.getValue();
+			Class<?> type = current.getValue().getType();
 			boolean isPOJO = false;
 			
 			// check if the field type is a enumeration
@@ -291,42 +291,7 @@ public class SchemaGenerator
 		
 		return typeName;
 	}
-	
-	// TODO: use the 'BeanObject' logic to extract POJO fields
-	protected Map<String,Class<?>> extractBeanFields( Class<?> classRef )
-	{
-		Map<String, Class<?>> output = new HashMap<String, Class<?>>();
-				
-		//Method[] methods = classRef.getMethods();
 		
-		// TODO: using 'getDeclaredFields', inherited fields will not found
-		for (Map.Entry<String,Class<?>> field : POJOUtil.getPOJOTypes(classRef).entrySet())
-		{
-			/*String fieldName = null;
-
-			corinna.rpc.annotation.Field annot = field.getAnnotation(corinna.rpc.annotation.Field.class);
-			if (annot != null) fieldName = annot.name();
-			if (fieldName == null || fieldName.isEmpty()) fieldName = field.getName();
-			
-			// check if the class has a getter and setter for this field
-			boolean setter = containsBeanMethod(methods, fieldName, MethodPrefix.SET);
-			if (!setter) continue;
-			
-			boolean getter = false;
-			if (field.getType() == Boolean.class || field.getType() == boolean.class)
-				getter = containsBeanMethod(methods, fieldName, MethodPrefix.IS);
-			if (!getter)
-				getter = containsBeanMethod(methods, fieldName, MethodPrefix.GET);
-			if (!getter) continue;
-			
-			output.put(fieldName, field.getType());*/
-			
-			
-		}
-		
-		return output;
-	}
-	
 	protected boolean containsBeanMethod( Method[] methods, String fieldname, MethodPrefix prefix )
 	{
 		if (fieldname == null || fieldname.isEmpty())

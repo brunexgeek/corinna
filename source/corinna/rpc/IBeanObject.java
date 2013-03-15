@@ -6,7 +6,7 @@ import java.util.Iterator;
 import corinna.exception.BeanObjectException;
 
 
-public interface IBeanObject
+public interface IBeanObject extends IBeanType
 {
 
 	/**
@@ -14,7 +14,7 @@ public interface IBeanObject
 	 *
 	 * @param key   A key string.
 	 * @return      The object associated with the key.
-	 * @throws      JSONException if the key is not found.
+	 * @throws      BeanObjectException if the key is not found.
 	 */
 	public Object get( String key ) throws BeanObjectException;
 
@@ -23,7 +23,7 @@ public interface IBeanObject
 	 *
 	 * @param key   A key string.
 	 * @return      The truth.
-	 * @throws      JSONException
+	 * @throws      BeanObjectException
 	 *  if the value is not a Boolean or the String "true" or "false".
 	 */
 	public boolean getBoolean( String key ) throws BeanObjectException;
@@ -32,7 +32,7 @@ public interface IBeanObject
 	 * Get the double value associated with a key.
 	 * @param key   A key string.
 	 * @return      The numeric value.
-	 * @throws JSONException if the key is not found or
+	 * @throws BeanObjectException if the key is not found or
 	 *  if the value is not a Number object and cannot be converted to a number.
 	 */
 	public double getDouble( String key ) throws BeanObjectException;
@@ -44,7 +44,7 @@ public interface IBeanObject
 	 *
 	 * @param key   A key string.
 	 * @return      The integer value.
-	 * @throws   JSONException if the key is not found or if the value cannot
+	 * @throws   BeanObjectException if the key is not found or if the value cannot
 	 *  be converted to an integer.
 	 */
 	public int getInt( String key ) throws BeanObjectException;
@@ -58,7 +58,7 @@ public interface IBeanObject
 	 *
 	 * @param key   A key string.
 	 * @return      The long value.
-	 * @throws   JSONException if the key is not found or if the value cannot
+	 * @throws   BeanObjectException if the key is not found or if the value cannot
 	 *  be converted to a long.
 	 */
 	public long getLong( String key ) throws BeanObjectException;
@@ -68,22 +68,22 @@ public interface IBeanObject
 	 *
 	 * @param key   A key string.
 	 * @return      A string which is the value.
-	 * @throws   JSONException if there is no string value for the key.
+	 * @throws   BeanObjectException if there is no string value for the key.
 	 */
 	public String getString( String key ) throws BeanObjectException;
 
 	/**
-     * Get the JSONObject value associated with a key.
+     * Get the BeanObject value associated with a key.
      *
      * @param key   A key string.
-     * @return      A JSONObject which is the value.
-     * @throws      JSONException if the key is not found or
+     * @return      A BeanObject which is the value.
+     * @throws      BeanObjectException if the key is not found or
      *  if the value is not a JSONObject.
      */
     public IBeanObject getObject(String key) throws BeanObjectException;
 	
 	/**
-	 * Get an enumeration of the keys of the JSONObject.
+	 * Get an enumeration of the keys of the BeanObject.
 	 *
 	 * @return An iterator of the keys.
 	 */
@@ -93,8 +93,10 @@ public interface IBeanObject
 	
 	public void extract(  Object source );
 
-	void setString( String key, String value );
+	public void setString( String key, String value );
 	
-	void set( String key, Object value );
+	public void set( String key, Object value );
+
+	public IBeanCollection getCollection( String key ) throws BeanObjectException;
 	
 }

@@ -26,13 +26,13 @@ import corinna.exception.EntryNotFoundException;
 public interface IParameterList
 {
 
-	public abstract boolean containsParameter( String name );
+	public boolean containsParameter( String name );
 
-	public abstract Object getParameter( String name, Object defaultValue );
+	public Object getParameter( String name, Object defaultValue );
 
-	public abstract Object getParameter( String name ) throws EntryNotFoundException;
+	public Object getParameter( String name ) throws EntryNotFoundException;
 
-	public abstract Charset getCharset();
+	public Charset getCharset();
 		
 	public String[] getParameterNames();
 

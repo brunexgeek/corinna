@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that a method should be exposed through the RPC mechanism.
+ * Indicates whether and how a method should be exposed through the RPC mechanism.
  * 
  * @author Bruno Ribeiro
  */

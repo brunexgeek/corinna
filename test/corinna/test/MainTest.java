@@ -5,20 +5,19 @@ import java.util.UUID;
 import javax.wsdl.Definition;
 import javax.wsdl.Types;
 import javax.wsdl.extensions.schema.Schema;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLWriter;
 
 import org.w3c.dom.Element;
 
 import com.ibm.wsdl.extensions.schema.SchemaConstants;
 import com.ibm.wsdl.extensions.schema.SchemaImpl;
 
+import corinna.rpc.BeanObject;
 import corinna.rpc.ClassDescriptor;
+import corinna.rpc.IBeanObject;
 import corinna.rpc.annotation.Parameter;
 import corinna.rpc.annotation.RemoteComponent;
 import corinna.rpc.annotation.RemoteMethod;
 import corinna.soap.core.SchemaGenerator;
-import corinna.soap.core.WSDLGenerator;
 
 
 public class MainTest
@@ -26,7 +25,7 @@ public class MainTest
 
 	public static void main( String[] args ) throws Exception
 	{
-		WSDLFactory factory = WSDLFactory.newInstance();
+		/*WSDLFactory factory = WSDLFactory.newInstance();
 		
 		ClassDescriptor desc = new ClassDescriptor(MyPOJO.class);
 		
@@ -34,13 +33,15 @@ public class MainTest
 		Definition def = wgen.generateWsdl();
 		
 		WSDLWriter wr = factory.newWSDLWriter();
-		wr.writeWSDL(def, System.out);
-		/*MyPOJO A = new MyPOJO( new MyPOJO() );
+		wr.writeWSDL(def, System.out);*/
+		MyPOJO A = new MyPOJO( new MyPOJO() );
 		MyPOJO B = new MyPOJO( );
 		A.setActive(true);
 		A.setState(MyEnum.PARADA);
 		IBeanObject bean = new BeanObject(A);
-		bean.populate(B);*/
+		bean.populate(B);
+		System.out.println(A);
+		System.out.println(B);
 	}
 
 	public static void generateTypes( Definition def, Class<?> classRef, String targetNamespace ) throws Exception
@@ -140,6 +141,13 @@ public class MainTest
 		public String getName()
 		{
 			return name;
+		}
+		
+		@Override
+		public String toString()
+		{
+			return "[ active:" + active + "; name='" + name + "'; state:'" + state + "']\n" +
+				((pojo == null) ? "" : "\t" + pojo.toString());
 		}
 		
 	}
