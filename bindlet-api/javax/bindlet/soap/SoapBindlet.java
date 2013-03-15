@@ -53,7 +53,7 @@ public abstract class SoapBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	public final void process( IHttpBindletRequest request, IHttpBindletResponse response )
 		throws BindletException, IOException
 	{
-		response.setContentType("text/xml");
+		//response.setContentType("text/xml");
 		if (request == null) response.sendError(HttpStatus.BAD_REQUEST);
 
 		if (request.getHttpMethod() == HttpMethod.GET)
@@ -68,7 +68,7 @@ public abstract class SoapBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		}
 		else
 		{
-			response.setContentType("text/html");
+			//response.setContentType("text/html");
 			response.sendError(HttpStatus.METHOD_NOT_ALLOWED);
 		}
 	}
