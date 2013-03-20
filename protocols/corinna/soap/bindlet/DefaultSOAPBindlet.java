@@ -1,5 +1,6 @@
 package corinna.soap.bindlet;
 
+
 import java.io.IOException;
 
 import javax.bindlet.BindletModel;
@@ -29,50 +30,117 @@ import corinna.thread.ObjectLocker;
 import corinna.util.ComponentInformation;
 
 
+/**
+ * A SOAP bindlet that translates SOAP messages into RPC calls.
+ * 
+ * <h1>Custom parameters</h1>
+ * 
+ * <p>
+ * This bindlet support a set of parameters through which it's possible to customize the bindlet
+ * behavior. The following list show all supported parameters for this implementation:
+ * </p>
+ * 
+ * <ul>
+ * <li><strong>rpc.interfaceClass:</strong> qualified class name of the class that defines the web service interface.</li>
+ * <li><strong>rpc.implementationClass:</strong> qualified class name of the class that implements the web service interface.</li>
+ * <li><strong>wsdl.schemaNamespace:</strong> namespace to be used by the XSD of the WSDL.</li>
+ * <li><strong>wsdl.wsdlNamespace:</strong> namespace to be used by the WSDL.</li>
+ * <li><strong>wsdl.endpointURL:</strong> endpoint URL of the web service.</li>
+ * </ul>
+ * 
+ * @version 1.1
+ * @since 1.0
+ * @author Bruno Ribeiro
+ */
 @BindletModel(Model.STATELESS)
 public class DefaultSOAPBindlet extends SOAPBindlet
 {
-	
-	private static Logger log = LoggerFactory.getLogger("CorinnaLog");
-	
+
+	private static Logger log = LoggerFactory.getLogger(DefaultSOAPBindlet.class);
+
 	private static final long serialVersionUID = -5420790590792120345L;
-	
-	private static final String PARAMETER_INTERFACE = "interfaceClass";
-	
-	private static final String PARAMETER_IMPLEMENTATION = "implementationClass";
-	
-	private static final String PARAMETER_XMLSCHEMA_NAMESPACE = "XMLSchemaNamespace";
-	
-	private static final String PARAMETER_WSDL_NAMESPACE = "WSDLNamespace";
-	
-	private static final String PARAMETER_ENDPOINT = "endpointURL";
-	
+
+	/**
+	 * Parameter name to define the qualified class name of the class that defines the web service.
+	 */
+	private static final String PARAMETER_INTERFACE = "rpc.interfaceClass";
+
+	/**
+	 * Parameter name to define the qualified class name of the class that implements the web service interface.
+	 */
+	private static final String PARAMETER_IMPLEMENTATION = "rpc.implementationClass";
+
+	/**
+	 * Parameter name to define the namespace to be used by the XSD of the WSDL.
+	 */
+	private static final String PARAMETER_XMLSCHEMA_NAMESPACE = "wsdl.schemaNamespace";
+
+	/**
+	 * Parameter name to define the namespace to be used by the WSDL.
+	 */
+	private static final String PARAMETER_WSDL_NAMESPACE = "wsdl.wsdlNamespace";
+
+	/**
+	 * Parameter name to define the endpoint URL of the web service.
+	 */
+	private static final String PARAMETER_ENDPOINT = "wsdl.endpointURL";
+
+	/**
+	 * Descriptive component name.
+	 */
 	private static final String COMPONENT_NAME = "SOAP Web Service Bindlet";
-	
-	private static final String COMPONENT_VERSION = "1.0";
-	
+
+	/**
+	 * Component version.
+	 */
+	private static final String COMPONENT_VERSION = "1.1";
+
+	/**
+	 * Component implementor.
+	 */
 	private static final String COMPONENT_IMPLEMENTOR = "Bruno Ribeiro";
-	
-	private static final IComponentInformation bindletInfo = new ComponentInformation(COMPONENT_NAME,
-		COMPONENT_VERSION, COMPONENT_IMPLEMENTOR);
-	
+
+	/**
+	 * Object containing all component information.
+	 */
+	private static final IComponentInformation bindletInfo = new ComponentInformation(
+		COMPONENT_NAME, COMPONENT_VERSION, COMPONENT_IMPLEMENTOR);
+
+	/**
+	 * Instance of the method runner used to access the web service methods.
+	 */
 	private MethodRunner runner;
-	
+
+	/**
+	 * Cached WSDL for the current web service interface.
+	 */
 	private Definition wsdl = null;
-	
+
+	/**
+	 * Lock object to protected the access for {@link #wsdl} field.
+	 */
 	private ObjectLocker wsdlLock = new ObjectLocker();
-	
+
 	private Boolean isInitialized = false;
 
 	private String wsdlName;
 
+	/**
+	 * Namespace used by the XSD of the WSDL.
+	 */
 	private String localXMLSchemaNamespace = null;
 
+	/**
+	 * Namespace used by the WSDL.
+	 */
 	private String localWSDLNamespace = null;
-	
+
+	/**
+	 * Current endpoint URL of the web service.
+	 */
 	private String endpointURL = null;
-	
-	public DefaultSOAPBindlet( ) throws BindletException
+
+	public DefaultSOAPBindlet() throws BindletException
 	{
 	}
 
@@ -80,7 +148,7 @@ public class DefaultSOAPBindlet extends SOAPBindlet
 	 * Change the initialization state to specified value and return <code>true</code> if no actions
 	 * must be done (the previous value are the same) or <code>false</code> otherwise.
 	 * 
-	 * @param value 
+	 * @param value
 	 * @return
 	 */
 	// TODO: what this means?
@@ -100,12 +168,12 @@ public class DefaultSOAPBindlet extends SOAPBindlet
 			}
 		}
 	}
-	
+
 	@Override
 	public void init() throws BindletException
 	{
 		super.init();
-		
+
 		// if the bindlet are running in stateless model, ensure will be initialized only once
 		if (setInitialized(true)) return;
 
@@ -114,25 +182,25 @@ public class DefaultSOAPBindlet extends SOAPBindlet
 		// load the interface class name
 		String intfClassName = config.getBindletParameter(PARAMETER_INTERFACE);
 		if (intfClassName == null || intfClassName.isEmpty())
-			throw new BindletException("The interface class must be specified through " +
-				"bindlet configuration key '" + PARAMETER_INTERFACE + "'");
+			throw new BindletException("The interface class must be specified through "
+				+ "bindlet configuration key '" + PARAMETER_INTERFACE + "'");
 		// load the implementation class name
 		String implClassName = config.getBindletParameter(PARAMETER_IMPLEMENTATION);
 		if (implClassName == null || implClassName.isEmpty())
-			throw new BindletException("The implementation class must be specified through " +
-				"bindlet configuration key '" + PARAMETER_IMPLEMENTATION + "'");
+			throw new BindletException("The implementation class must be specified through "
+				+ "bindlet configuration key '" + PARAMETER_IMPLEMENTATION + "'");
 		// load the XML Schema and WSDL namespaces
 		localXMLSchemaNamespace = config.getBindletParameter(PARAMETER_XMLSCHEMA_NAMESPACE);
 		localWSDLNamespace = config.getBindletParameter(PARAMETER_WSDL_NAMESPACE);
 		// load the endpoint URL
 		endpointURL = config.getBindletParameter(PARAMETER_ENDPOINT);
 		if (endpointURL == null || endpointURL.isEmpty())
-			throw new BindletException("The endpoint URL must be specified through " +
-				"bindlet configuration key '" + PARAMETER_ENDPOINT + "'");
+			throw new BindletException("The endpoint URL must be specified through "
+				+ "bindlet configuration key '" + PARAMETER_ENDPOINT + "'");
 
 		Class<?> intfClass = loadClass(intfClassName);
 		Class<?> implClass = loadClass(implClassName);
-		
+
 		try
 		{
 			IPrototypeFilter filter = new CanonicalPrototypeFilter();
@@ -142,13 +210,14 @@ public class DefaultSOAPBindlet extends SOAPBindlet
 			log.error("Error creating the method runner ", e);
 			throw new BindletException("Error creating the method runner", e);
 		}
-		
+
 		// force the generation of the WSDL
 		generateWsdl();
 	}
 
 	@Override
-	protected void doGet( IHttpBindletRequest req, IHttpBindletResponse response ) throws BindletException, IOException
+	protected void doGet( IHttpBindletRequest req, IHttpBindletResponse response )
+		throws BindletException, IOException
 	{
 		String resource = req.getResourcePath();
 		if (!resource.equals("/"))
@@ -159,27 +228,26 @@ public class DefaultSOAPBindlet extends SOAPBindlet
 
 		Definition wsdl = getWsdl();
 		response.setContentType("text/xml");
-		
+
 		BindletOutputStream output = response.getOutputStream();
 		WSDLWriter wr;
 		try
 		{
 			wr = WSDLFactory.newInstance().newWSDLWriter();
-			wr.writeWSDL(wsdl, output);	
+			wr.writeWSDL(wsdl, output);
 		} catch (WSDLException e)
 		{
 			log.error("Error generating WSDL", e);
 		}
-			
+
 		output.close();
 	}
 
 	@Override
 	protected Object doCall( IProcedureCall procedure ) throws BindletException
 	{
-		if (log.isTraceEnabled())
-			log.trace("Received method call '" + procedure + "'");
-		
+		if (log.isTraceEnabled()) log.trace("Received method call '" + procedure + "'");
+
 		try
 		{
 			// call the method and generate the SOAP response message
@@ -190,8 +258,6 @@ public class DefaultSOAPBindlet extends SOAPBindlet
 		}
 	}
 
-
-	
 	protected Class<?> loadClass( String name ) throws BindletException
 	{
 		try
@@ -202,16 +268,15 @@ public class DefaultSOAPBindlet extends SOAPBindlet
 			throw new BindletException("Error loading class '" + name + "'", e);
 		}
 	}
-	
 
-
-	protected Definition generateWsdl( ) throws BindletException
+	protected Definition generateWsdl() throws BindletException
 	{
 		wsdlLock.writeLock();
 		try
 		{
 			ClassDescriptor desc = new ClassDescriptor(runner.getInterfaceClass());
-			WSDLGenerator wsdlgen = new WSDLGenerator( desc, endpointURL, localWSDLNamespace , localXMLSchemaNamespace );
+			WSDLGenerator wsdlgen = new WSDLGenerator(desc, endpointURL, localWSDLNamespace,
+				localXMLSchemaNamespace);
 			localXMLSchemaNamespace = wsdlgen.getXMLSchemaNamespace();
 			wsdlName = wsdlgen.getServiceName();
 			return (wsdl = wsdlgen.generateWsdl());
@@ -225,14 +290,14 @@ public class DefaultSOAPBindlet extends SOAPBindlet
 		}
 	}
 
-	protected Definition getWsdl( ) throws BindletException
+	protected Definition getWsdl() throws BindletException
 	{
 		Definition def = null;
-		
+
 		wsdlLock.readLock();
 		def = wsdl;
 		wsdlLock.readUnlock();
-		
+
 		if (def != null)
 			return def;
 		else
@@ -244,10 +309,10 @@ public class DefaultSOAPBindlet extends SOAPBindlet
 		wsdlLock.readLock();
 		String value = wsdlName;
 		wsdlLock.readUnlock();
-		
+
 		return value;
 	}
-	
+
 	@Override
 	public IComponentInformation getBindletInfo()
 	{
@@ -259,5 +324,5 @@ public class DefaultSOAPBindlet extends SOAPBindlet
 	{
 		return localXMLSchemaNamespace;
 	}
-	
+
 }

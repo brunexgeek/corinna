@@ -17,8 +17,6 @@ import javax.bindlet.rpc.IProcedureCall;
 public abstract class SoapBindlet extends Bindlet<IHttpBindletRequest, IHttpBindletResponse>
 {
 
-	private static final String WSDL_SUFFIX = "?wsdl";
-
 	private static final String INIT_PARAM_IS_RESTRICTED = "isRestricted";
 
 	private IBindletAuthenticator authenticator = null;

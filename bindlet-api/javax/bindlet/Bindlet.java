@@ -22,27 +22,26 @@ import java.io.Serializable;
 import javax.bindlet.exception.BindletException;
 
 
-
 /**
- * 
- * Defines a generic, protocol-independent bindletlet. To write an HTTP bindlet or SOAP bindlet for use on the Web,
- * extend {@link corinna.service.bindlet.http.HttpBindlet} or {@link corinna.service.bindlet.soap.SoapBindlet} instead.
- * 
  * <p>
- * <code>GenericServlet</code> implements the <code>Servlet</code> and <code>ServletConfig</code>
- * interfaces. <code>GenericServlet</code> may be directly extended by a servlet, although it's more
- * common to extend a protocol-specific subclass such as <code>HttpServlet</code>.
+ * Defines a generic, protocol-independent bindlet. To write an HTTP bindlet or SOAP bindlet for use
+ * on the web, extend {@link javax.bindlet.http.HttpBindlet} or
+ * {@link javax.bindlet.soap.SoapBindlet} instead.
  * </p>
  * 
  * <p>
- * <code>GenericServlet</code> makes writing servlets easier. It provides simple versions of the
- * lifecycle methods <code>init</code> and <code>destroy</code> and of the methods in the
- * <code>ServletConfig</code> interface. <code>GenericServlet</code> also implements the
- * <code>log</code> method, declared in the <code>ServletContext</code> interface.
+ * <code>Bindlet</code> implements the <code>IBindlet</code> and <code>IBindletConfig</code>
+ * interfaces. <code>Bindlet</code> may be directly extended by a bindlet, but it's recommended
+ * extend a protocol-specific subclass such as <code>HttpBindlet</code>.
  * </p>
  * 
  * <p>
- * To write a generic servlet, you need only override the abstract <code>service</code> method.
+ * This class provides simple versions of the lifecycle methods <code>init</code> and
+ * <code>destroy</code> and of the methods in the <code>IBindletConfig</code> interface.
+ * </p>
+ * 
+ * <p>
+ * The entry point for requests of a bindlet depends of the protocol which it serves.
  * </p>
  * 
  * @author Bruno Ribeiro
@@ -53,17 +52,13 @@ import javax.bindlet.exception.BindletException;
 public abstract class Bindlet<R, P> implements IBindlet<R, P>, Serializable
 {
 
-	protected static final String PARAM_REQUEST = "_request";
-	
-	protected static final String PARAM_RESPONSE = "_response";
-	
 	private IBindletConfig config = null;
-		
+
 	/**
 	 * Does nothing. All of the bindlet initialization is done by one of the <code>init</code>
 	 * methods.
 	 */
-	public Bindlet( ) throws BindletException
+	public Bindlet() throws BindletException
 	{
 	}
 
@@ -110,7 +105,6 @@ public abstract class Bindlet<R, P> implements IBindlet<R, P>, Serializable
 		return config.getBindletParameterNames();
 	}
 
-
 	/**
 	 * Returns a reference to the {@link IBindletContext} in which this servlet is running. See
 	 * {@link IBindletConfig#getServletContext}.
@@ -154,13 +148,13 @@ public abstract class Bindlet<R, P> implements IBindlet<R, P>, Serializable
 
 		init();
 	}
-	
+
 	@Override
-	public void init(  ) throws BindletException
+	public void init() throws BindletException
 	{
 		// does nothing
 	}
-	
+
 	/**
 	 * Called by the servlet container to indicate to a servlet that the servlet is being taken out
 	 * of service. See {@link IBindlet#destroy}.
@@ -172,7 +166,7 @@ public abstract class Bindlet<R, P> implements IBindlet<R, P>, Serializable
 	{
 		// does nothing
 	}
-	
+
 	@Override
 	public IBindletConfig getBindletConfig()
 	{

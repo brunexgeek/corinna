@@ -65,13 +65,23 @@ public class Section implements ISection
 	
 	protected ObjectLocker lock;
 
+	/**
+	 * Indicates whether compound key names separeted with dots (.) will be expanded to generate
+	 * subsections automatically.
+	 */
+	protected boolean autoExpand = true;
+	
+	public Section( String name )
+	{
+		this(name, true);
+	}
 	
 	/**
 	 * Cria uma seção de configuração especificando seu nome.
 	 * 
 	 * @param name Nome da seção.
 	 */
-	public Section( String name )
+	public Section( String name, boolean autoExpand )
 	{
 		if (name == null || name.isEmpty()) 
 			throw new IllegalArgumentException("The section name can not be null or empty");
@@ -80,6 +90,7 @@ public class Section implements ISection
 		this.items = new LinkedHashMap<String, String>();
 		this.sections = new LinkedHashMap<String,ISection>();
 		this.lock = new ObjectLocker();
+		this.autoExpand = autoExpand;
 	}
 
 	@Override
@@ -116,7 +127,7 @@ public class Section implements ISection
 	{
 		if (key == null || key.isEmpty()) return;
 
-		if (key.indexOf('.') < 0)
+		if (!autoExpand || key.indexOf('.') < 0)
 		{
 			lock.writeLock();
 			if (value != null)
@@ -256,7 +267,7 @@ public class Section implements ISection
 		
 		if (name == null || name.isEmpty()) return defaultSection;
 		
-		if (name.indexOf('.') < 0)
+		if (!autoExpand || name.indexOf('.') < 0)
 		{
 			lock.readLock();
 			result = sections.get(name);
@@ -349,7 +360,7 @@ public class Section implements ISection
 		
 		String result = defaultValue;
 		
-		if (key.indexOf('.') < 0)
+		if (!autoExpand || key.indexOf('.') < 0)
 		{
 			lock.readLock();
 			result = items.get(key);

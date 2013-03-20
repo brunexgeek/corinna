@@ -16,6 +16,7 @@
 
 package javax.bindlet;
 
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -23,6 +24,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
+/**
+ * <p>
+ * Indicates the bindlet class state model.
+ * </p>
+ * 
+ * <ul>
+ * <li><strong>Statefull:</strong> the bindlet class will be instantiated for every request.</li>
+ * <li><strong>Stateless:</strong> the bindlet class will be instantiated once and that instance
+ * will be used across every requests.</li>
+ * <li><strong>Recyclable:</strong> almost the same as statefull bindlets, but the bindlet instances
+ * will be reused in future calls. Parameters to configure the recyclable behavior can be defined in
+ * the bindlet context.</li>
+ * </ul>
+ * 
+ * @author Bruno Ribeiro
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
@@ -30,16 +47,16 @@ public @interface BindletModel
 {
 
 	public Model value() default Model.STATEFULL;
-	
+
 	public enum Model
 	{
-		
+
 		STATELESS,
-		
+
 		STATEFULL,
-		
+
 		RECYCLABLE
-				
+
 	}
-	
+
 }

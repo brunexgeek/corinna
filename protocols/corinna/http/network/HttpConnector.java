@@ -44,8 +44,8 @@ import corinna.util.StateModel;
  * 
  * <h1>Custom parameters</h1>
  * 
- * This connector support a set of parameters through which it's possible to customize the connector
- * behavior. The following list show all supported parameters for this implementations:
+ * <p>This connector support a set of parameters through which it's possible to customize the connector
+ * behavior. The following list show all supported parameters for this implementation:</p>
  * 
  * <ul>
  * <li><strong>EnableSSL:</strong> allow to enable/disable the SSL feature.</li>
@@ -53,7 +53,7 @@ import corinna.util.StateModel;
  * if the SSL is enable.</li>
  * <li><strong>KeystorePassword:</strong> define the password used to access the keystore.</li>
  * <li><strong>PrivateKeyPassword:</strong> define the password used to access the private key.</li>
- * 
+ * </ul>
  * 
  * @author Bruno Ribeiro
  */

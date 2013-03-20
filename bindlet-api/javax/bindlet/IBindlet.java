@@ -32,13 +32,13 @@ import javax.bindlet.exception.BindletException;
  * 
  * <p>
  * To implement this interface, you can write a generic bindlet that extends
- * <code>corinna.service.bindlet.Bindlet</code> or use one of pre-implemented protocol specific
- * bindlets, like <code>corinna.service.bindlet.rest.RestBindlet</code>.
+ * <code>javax.bindlet.Bindlet</code> or use one of pre-implemented protocol specific
+ * bindlets, like <code>javax.bindlet.rest.RestBindlet</code>.
  * 
  * <p>
- * This interface defines methods to initialize a bindletlet and to process requests. The bindlet is
+ * This interface defines methods to initialize a bindlet and to process requests. The bindlet is
  * constructed through a non-parametrized constructor and then initialized with the
- * <code>init</code> method. All requests received from a network listner are handled by
+ * <code>init</code> method. All requests received from a network listener are handled by
  * <code>process</code> method. When the bindlet is taken out of service, it's destroyed with the
  * <code>destroy</code> method. The bindlet can be implemented to work in one of three state models:
  * statefull, where each request will have your own bindlet instance; recycleable, when your 

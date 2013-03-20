@@ -28,7 +28,7 @@ public class RequestEvent<R extends IBindletRequest, P extends IBindletResponse>
 
 	private static final long serialVersionUID = 8507321749616247470L;
 
-	private Boolean isHandled = false;
+	private transient Boolean isHandled = false;
 
 	private transient R request;
 

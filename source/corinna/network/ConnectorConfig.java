@@ -21,14 +21,30 @@ import corinna.core.BasicConfig;
 
 public class ConnectorConfig extends BasicConfig implements IConnectorConfig
 {
+	
+	/**
+	 * Default number of the worker threads that will be created for the network connector.
+	 */
 	public static final int DEFAULT_MAX_WORKERS = 150;
 
+	/**
+	 * Minimum number of the worker threads allowed.
+	 */
 	private static final int MIN_WORKERS = 1;
 
+	/**
+	 * Maximum number of the worker thread allowed.
+	 */
 	private static final int MAX_WORKERS = 1000;
 
-	private static final String PROP_MAX_WORKERS = "network.MaxWorkerThreads";
+	/**
+	 * Parameter name to define the maximum number of the worker threads for the connector.
+	 */
+	public static final String PARAMETER_MAXWORKERS = "network.maxWorkerThreads";
 	
+	/**
+	 * Address and port which the conenctor will listen for requests.
+	 */
 	private InetSocketAddress address;
 	
 	public ConnectorConfig( String name, String hostname, int port )
@@ -76,12 +92,12 @@ public class ConnectorConfig extends BasicConfig implements IConnectorConfig
 		else
 		if (maxWorkers > MAX_WORKERS)
 			maxWorkers = MAX_WORKERS;
-		setParameter(PROP_MAX_WORKERS, String.valueOf(maxWorkers));
+		setParameter(PARAMETER_MAXWORKERS, String.valueOf(maxWorkers));
 	}
 
 	public int getMaxWorkers()
 	{
-		String value = getParameter(PROP_MAX_WORKERS, null);
+		String value = getParameter(PARAMETER_MAXWORKERS, null);
 		return stringToInt(value, DEFAULT_MAX_WORKERS);
 	}
 

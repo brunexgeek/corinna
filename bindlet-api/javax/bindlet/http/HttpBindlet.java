@@ -21,82 +21,74 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import javax.bindlet.Bindlet;
+import javax.bindlet.IBindlet;
 import javax.bindlet.IBindletAuthenticator;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.io.HttpBindletOutputStream;
 
 
 /**
- * 
- * Provides an abstract class to be subclassed to create an HTTP bindlet suitable for a Web site. A
- * subclass of <code>HttpServlet</code> must override at least one method, usually one of these:
+ * <p>
+ * Provides an abstract class to create an HTTP bindlet. A subclass of <code>HttpBindlet</code> must
+ * override at least one of these methods:
+ * </p>
  * 
  * <ul>
- * <li> <code>doGet</code>, if the servlet supports HTTP GET requests
+ * <li> <code>doGet</code>, for HTTP GET requests
  * <li> <code>doPost</code>, for HTTP POST requests
  * <li> <code>doPut</code>, for HTTP PUT requests
  * <li> <code>doDelete</code>, for HTTP DELETE requests
- * <li> <code>init</code> and <code>destroy</code>, to manage resources that are held for the life of
- * the servlet
- * <li> <code>getServletInfo</code>, which the servlet uses to provide information about itself
  * </ul>
  * 
  * <p>
- * There's almost no reason to override the <code>service</code> method. <code>service</code>
- * handles standard HTTP requests by dispatching them to the handler methods for each HTTP request
- * type (the <code>do</code><i>XXX</i> methods listed above).
+ * Additionally, all bindlets must implements the <code>init</code> and <code>destroy</code>
+ * methods, to manage resources that are held for the life of the bindet, and
+ * <code>getServletInfo</code>, which the bindlet uses to provide information about itself
+ * </p>
  * 
  * <p>
- * Likewise, there's almost no reason to override the <code>doOptions</code> and
- * <code>doTrace</code> methods.
+ * HTTP bindlets have the <code>service</code> method that handle requests for all HTTP verbs by
+ * dispatching them to their respective handler methods (the <code>do</code><i>XXX</i> methods
+ * listed above). Likewise, there's almost no reason to override the <code>process</code>,
+ * <code>doOptions</code> and <code>doTrace</code> methods.
  * 
  * <p>
- * Servlets typically run on multithreaded servers, so be aware that a servlet must handle
+ * Bindlets typically run on multithreaded servers, so be aware that a bindlet must handle
  * concurrent requests and be careful to synchronize access to shared resources. Shared resources
  * include in-memory data such as instance or class variables and external objects such as files,
- * database connections, and network connections. See the <a
- * href="http://java.sun.com/Series/Tutorial/java/threads/multithreaded.html"> Java Tutorial on
- * Multithreaded Programming</a> for more information on handling multiple threads in a Java
- * program.
+ * database connections, and network connections.
+ * </p>
  * 
- * @author Various
- * @version $Version$
+ * <p>
+ * Bindlets can be also designed to a specific model. The bindlet model is defined through the
+ * {@link BindletModel} annotation (ie. a bindlet can be designed for <code>stateless</code> model
+ * for the container use only one instance of it, like a singleton).
+ * </p>
  * 
+ * @author Bruno Ribeiro
+ * @version 1.0
+ * @since 1.0
+ * @see {@link Bindlet}
  */
 @SuppressWarnings("serial")
 public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBindletResponse>
 	implements java.io.Serializable
 {
 
-	public static final String METHOD_DELETE = "DELETE";
-
-	public static final String METHOD_HEAD = "HEAD";
-
-	public static final String METHOD_GET = "GET";
-
-	public static final String METHOD_OPTIONS = "OPTIONS";
-
-	public static final String METHOD_POST = "POST";
-
-	public static final String METHOD_PUT = "PUT";
-
-	public static final String METHOD_TRACE = "TRACE";
-
 	private static final String HEADER_IFMODSINCE = "If-Modified-Since";
 
 	private static final String HEADER_LASTMOD = "Last-Modified";
 
-	private static final String INIT_PARAM_IS_RESTRICTED = "isRestricted";
+	private static final String INIT_PARAM_RESTRICTED = "isRestricted";
 
 	private IBindletAuthenticator authenticator = null;
-	
+
 	/**
 	 * Does nothing, because this is an abstract class.
 	 * 
 	 * @throws BindletException
 	 * 
 	 */
-
 	public HttpBindlet() throws BindletException
 	{
 		super();
@@ -167,7 +159,6 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	 * @see corinna.service.bindlet.IBindletResponse#setContentType
 	 * 
 	 */
-
 	protected void doGet( IHttpBindletRequest request, IHttpBindletResponse response )
 		throws BindletException, IOException
 	{
@@ -235,7 +226,6 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	 * @exception BindletException
 	 *                if the request for the HEAD could not be handled
 	 */
-
 	protected void doHead( IHttpBindletRequest request, IHttpBindletResponse response )
 		throws BindletException, IOException
 	{
@@ -501,31 +491,31 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		}
 
 		String allow = null;
-		if (ALLOW_GET) if (allow == null) allow = METHOD_GET;
+		if (ALLOW_GET) if (allow == null) allow = HttpMethod.GET.toString();
 		if (ALLOW_HEAD) if (allow == null)
-			allow = METHOD_HEAD;
+			allow = HttpMethod.HEAD.toString();
 		else
-			allow += ", " + METHOD_HEAD;
+			allow += ", " + HttpMethod.HEAD.toString();
 		if (ALLOW_POST) if (allow == null)
-			allow = METHOD_POST;
+			allow = HttpMethod.POST.toString();
 		else
-			allow += ", " + METHOD_POST;
+			allow += ", " + HttpMethod.POST.toString();
 		if (ALLOW_PUT) if (allow == null)
-			allow = METHOD_PUT;
+			allow = HttpMethod.PUT.toString();
 		else
-			allow += ", " + METHOD_PUT;
+			allow += ", " + HttpMethod.PUT.toString();
 		if (ALLOW_DELETE) if (allow == null)
-			allow = METHOD_DELETE;
+			allow = HttpMethod.DELETE.toString();
 		else
-			allow += ", " + METHOD_DELETE;
+			allow += ", " + HttpMethod.DELETE.toString();
 		if (ALLOW_TRACE) if (allow == null)
-			allow = METHOD_TRACE;
+			allow = HttpMethod.TRACE.toString();
 		else
-			allow += ", " + METHOD_TRACE;
+			allow += ", " + HttpMethod.TRACE.toString();
 		if (ALLOW_OPTIONS) if (allow == null)
-			allow = METHOD_OPTIONS;
+			allow = HttpMethod.OPTIONS.toString();
 		else
-			allow += ", " + METHOD_OPTIONS;
+			allow += ", " + HttpMethod.OPTIONS.toString();
 
 		response.setHeader("Allow", allow);
 	}
@@ -565,18 +555,13 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		int responseLength;
 
 		String CRLF = "\r\n";
-		String responseString = "TRACE " + /* request.getRequestURI() */request.getRequestURI()
-			+ " " + request.getProtocol();
+		String responseString = "TRACE " + request.getRequestURI() + " " + request.getProtocol();
 
-		// String[] reqHeaderEnum = request.getHeaderNames();
+		String[] reqHeaderEnum = request.getHeaderNames();
 
-		/*
-		 * while (reqHeaderEnum.) { String headerName = (String) reqHeaderEnum.nextElement();
-		 * responseString += CRLF + headerName + ": " + request.getHeader(headerName); }
-		 */
-
+		for (String headerName : reqHeaderEnum)
+			responseString += CRLF + headerName + ": " + request.getHeader(headerName);
 		responseString += CRLF;
-
 		responseLength = responseString.length();
 
 		response.setContentType("message/http");
@@ -588,23 +573,19 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	}
 
 	/**
-	 * 
-	 * Receives standard HTTP requests from the public <code>service</code> method and dispatches
-	 * them to the <code>do</code><i>XXX</i> methods defined in this class. This method is an
-	 * HTTP-specific version of the {@link corinna.service.bindlet.IBindlet#service} method. There's
-	 * no need to override this method.
-	 * 
-	 * 
+	 * <p>
+	 * Receives HTTP requests from the HTTP context and dispatches them to the <code>do</code>
+	 * <i>XXX</i> methods defined in this class. This method is an HTTP-specific version of the
+	 * {@link javax.bindlet.IBindlet#process} method. There's no need to override this method.
+	 * </p>
 	 * 
 	 * @param request
 	 *            the {@link IHttpBindletRequest} object that contains the request the client made
 	 *            of the servlet
 	 * 
-	 * 
 	 * @param response
 	 *            the {@link IHttpBindletResponse} object that contains the response the servlet
 	 *            returns to the client
-	 * 
 	 * 
 	 * @exception IOException
 	 *                if an input or output error occurs while the servlet is handling the HTTP
@@ -613,96 +594,82 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	 * @exception BindletException
 	 *                if the HTTP request cannot be handled
 	 * 
-	 * @see corinna.service.bindlet.IBindlet#service
-	 * 
+	 * @see IBindlet#process
+	 * @see IHttpBindletRequest
+	 * @see IHttpBindletResponse
 	 */
-
-	protected void service( IHttpBindletRequest request, IHttpBindletResponse response )
+	@Override
+	public void process( IHttpBindletRequest request, IHttpBindletResponse response )
 		throws BindletException, IOException
 	{
+		if (request == null)
+		{
+			response.sendError(HttpStatus.BAD_REQUEST);
+			return;
+		}
+
 		HttpMethod method = request.getHttpMethod();
+
+		if (method == null)
+		{
+			response.sendError(HttpStatus.NOT_IMPLEMENTED);
+			return;
+		}
 
 		if (isRestricted() && !doAuthentication(request, response)) return;
 
-		if (method == HttpMethod.GET)
+		switch (method)
 		{
-			long lastModified = getLastModified(request);
-			if (lastModified == -1)
-			{
-				// servlet doesn't support if-modified-since, no reason
-				// to go through further expensive logic
-				doGet(request, response);
-			}
-			else
-			{
-				long ifModifiedSince = request.getDateHeader(HEADER_IFMODSINCE);
-				if (ifModifiedSince < (lastModified / 1000 * 1000))
+			case GET:
+				long lastModified = getLastModified(request);
+				if (lastModified == -1)
 				{
-					// If the servlet mod time is later, call doGet()
-					// Round down to the nearest second for a proper compare
-					// A ifModifiedSince of -1 will always be less
-					maybeSetLastModified(response, lastModified);
+					// bindlet doesn't support if-modified-since, no reason
+					// to go through further expensive logic
 					doGet(request, response);
 				}
 				else
 				{
-					response.setStatus(HttpStatus.NOT_MODIFIED);
-				}
-			}
-
-		}
-		else
-			if (method == HttpMethod.HEAD)
-			{
-				long lastModified = getLastModified(request);
-				maybeSetLastModified(response, lastModified);
-				doHead(request, response);
-
-			}
-			else
-				if (method == HttpMethod.POST)
-				{
-					doPost(request, response);
-
-				}
-				else
-					if (method == HttpMethod.PUT)
+					long ifModifiedSince = request.getDateHeader(HEADER_IFMODSINCE);
+					if (ifModifiedSince < (lastModified / 1000 * 1000))
 					{
-						doPut(request, response);
-
+						// If the bindlet mod time is later, call doGet()
+						// Round down to the nearest second for a proper compare
+						// A ifModifiedSince of -1 will always be less
+						maybeSetLastModified(response, lastModified);
+						doGet(request, response);
 					}
 					else
-						if (method == HttpMethod.DELETE)
-						{
-							doDelete(request, response);
-
-						}
-						else
-							if (method == HttpMethod.OPTIONS)
-							{
-								doOptions(request, response);
-
-							}
-							else
-								if (method == HttpMethod.TRACE)
-								{
-									doTrace(request, response);
-
-								}
-								else
-								{
-									//
-									// Note that this means NO servlet supports whatever
-									// method was requested, anywhere on this server.
-									//
-
-									response.sendError(HttpStatus.NOT_IMPLEMENTED);
-								}
+					{
+						response.setStatus(HttpStatus.NOT_MODIFIED);
+					}
+				}
+				break;
+			case POST:
+				doPost(request, response);
+				break;
+			case PUT:
+				doPut(request, response);
+				break;
+			case OPTIONS:
+				doOptions(request, response);
+				break;
+			case TRACE:
+				doTrace(request, response);
+				break;
+			case DELETE:
+				doDelete(request, response);
+				break;
+			case HEAD:
+				maybeSetLastModified(response, getLastModified(request));
+				doHead(request, response);
+				break;
+		}
 	}
 
 	public boolean isRestricted()
 	{
-		String value = getInitParameter(INIT_PARAM_IS_RESTRICTED);
+		String value = getInitParameter(INIT_PARAM_RESTRICTED);
 		return (authenticator != null && (value != null && value.equalsIgnoreCase("true")));
 	}
 
@@ -710,12 +677,12 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	{
 		this.authenticator = authenticator;
 	}
-	
+
 	protected IBindletAuthenticator getAuthenticator()
 	{
 		return authenticator;
 	}
-	
+
 	/**
 	 * Sets the Last-Modified entity header field, if it has not already been set and if the value
 	 * is meaningful. Called before doGet, to ensure that headers are set before response data is
@@ -725,40 +692,6 @@ public abstract class HttpBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	{
 		if (response.containsHeader(HEADER_LASTMOD)) return;
 		if (lastModified >= 0) response.setDateHeader(HEADER_LASTMOD, lastModified);
-	}
-	
-	/**
-	 * 
-	 * Dispatches client requests to the protected <code>service</code> method. There's no need to
-	 * override this method.
-	 * 
-	 * 
-	 * @param request
-	 *            the {@link IHttpBindletRequest} object that contains the request the client made
-	 *            of the servlet
-	 * 
-	 * 
-	 * @param res
-	 *            the {@link IHttpBindletResponse} object that contains the response the servlet
-	 *            returns to the client
-	 * 
-	 * 
-	 * @exception IOException
-	 *                if an input or output error occurs while the servlet is handling the HTTP
-	 *                request
-	 * 
-	 * @exception BindletException
-	 *                if the HTTP request cannot be handled
-	 * 
-	 * 
-	 * @see corinna.service.bindlet.IBindlet#service
-	 * 
-	 */
-	@Override
-	public void process( IHttpBindletRequest request, IHttpBindletResponse res )
-		throws BindletException, IOException
-	{
-		service(request, res);
 	}
 
 	protected boolean doAuthentication( IHttpBindletRequest request, IHttpBindletResponse response )

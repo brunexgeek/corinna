@@ -30,8 +30,8 @@ public abstract class SOAPBindlet extends javax.bindlet.soap.SoapBindlet
 	{
 		ProcedureCall procedure = getProtocolHandler().readRequest(request);
 
-		procedure.setParameter(PARAM_REQUEST, request);
-		procedure.setParameter(PARAM_RESPONSE, response);
+		procedure.setParameter(ProcedureCall.PARAM_REQUEST, request);
+		procedure.setParameter(ProcedureCall.PARAM_RESPONSE, response);
 		
 		return procedure;
 	}

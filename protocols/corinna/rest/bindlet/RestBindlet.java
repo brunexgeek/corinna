@@ -111,8 +111,8 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		{
 			charset = getProcedureCharset(request);
 			ProcedureCall call = (ProcedureCall) getProcedureCall(request);
-			call.setParameter(PARAM_REQUEST, request);
-			call.setParameter(PARAM_RESPONSE, response);
+			call.setParameter(ProcedureCall.PARAM_REQUEST, request);
+			call.setParameter(ProcedureCall.PARAM_RESPONSE, response);
 			result = doCall(call);
 		} catch (Exception e)
 		{

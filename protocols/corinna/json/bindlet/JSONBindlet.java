@@ -26,6 +26,7 @@ import corinna.json.core.JSONProcedureCall;
 import corinna.json.exception.JSONRPCErrorCode;
 import corinna.json.exception.JSONRPCException;
 import corinna.rpc.BeanObject;
+import corinna.rpc.ProcedureCall;
 import corinna.rpc.ReflectionUtil;
 
 
@@ -88,8 +89,8 @@ public abstract class JSONBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		{
 			charset = getCharset(request);
 			call = getProcedureCall(request);
-			call.setParameter(PARAM_REQUEST, request);
-			call.setParameter(PARAM_RESPONSE, response);
+			call.setParameter(ProcedureCall.PARAM_REQUEST, request);
+			call.setParameter(ProcedureCall.PARAM_RESPONSE, response);
 			result = doCall(call);
 		} catch (Exception e)
 		{

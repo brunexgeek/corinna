@@ -15,6 +15,7 @@
  */
 package corinna.network;
 
+
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.HashMap;
@@ -37,41 +38,56 @@ import corinna.thread.ObjectLocker;
 
 
 /**
+ * <p>
+ * Define an abstract connector that must be specialized to create protocol-specific connectors,
+ * such as <code>HttpConnector</code>. A connector is responsible to listen a TCP or UDP port and
+ * delivery every incoming messages from clients to the bindlet container.
+ * </p>
  * 
- * @author bruno
- *
- * @param <R> pipeline request type
- * @param <P> pipeline response type
+ * <h1>Custom parameters</h1>
+ * 
+ * <p>
+ * This connector support a set of parameters through which it's possible to customize the connector
+ * behavior. The following list show all supported parameters for this implementation:
+ * </p>
+ * 
+ * <ul>
+ * <li><strong>network.maxWorkerThreads:</strong> maximum number of the worker threads for the
+ * connector.</li>
+ * </ul>
+ * 
+ * @author Bruno Ribeiro
  */
-public abstract class Connector extends Lifecycle implements IConnector, 
-	ChannelPipelineFactory, IStreamHandlerListener
+public abstract class Connector extends Lifecycle implements IConnector, ChannelPipelineFactory,
+	IStreamHandlerListener
 {
 
 	private ServerBootstrap bootstrap;
 
 	private IConnectorConfig config;
-	
+
 	private IServer server = null;
-	
+
 	private ObjectLocker serverLock;
-	
+
 	private Channel channel = null;
-	
-	private Map<String,String> params;
-	
+
+	private Map<String, String> params;
+
 	public Connector( IConnectorConfig config )
 	{
 		if (config == null)
 			throw new IllegalArgumentException("The network configuration can not be null");
 
 		this.config = config;
-		this.params = new HashMap<String,String>();
+		this.params = new HashMap<String, String>();
 
-		ChannelFactory factory = new NioServerSocketChannelFactory(
-			Executors.newCachedThreadPool(), Executors.newCachedThreadPool(), config.getMaxWorkers());
+		// create the bootstrap to listen on the given hostname and port
+		ChannelFactory factory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
+			Executors.newCachedThreadPool(), config.getMaxWorkers());
 		this.bootstrap = new ServerBootstrap(factory);
 		this.bootstrap.setPipelineFactory(this);
-		
+
 		this.serverLock = new ObjectLocker();
 	}
 
@@ -80,9 +96,9 @@ public abstract class Connector extends Lifecycle implements IConnector,
 	{
 		return config.getAddress();
 	}
-	
+
 	@Override
-	public IServer getServer( )
+	public IServer getServer()
 	{
 		serverLock.readLock();
 		try
@@ -93,7 +109,7 @@ public abstract class Connector extends Lifecycle implements IConnector,
 			serverLock.readUnlock();
 		}
 	}
-	
+
 	@Override
 	public boolean setServer( IServer server )
 	{
@@ -108,12 +124,21 @@ public abstract class Connector extends Lifecycle implements IConnector,
 			serverLock.writeUnlock();
 		}
 	}
-	
-	protected void dispatchEventToServer( RequestEvent<?,?> event ) throws BindletException, 
+
+	/**
+	 * <p>
+	 * Dispatch the given request event to the server associated with the connector.
+	 * </p>
+	 * 
+	 * @param event
+	 * @throws BindletException
+	 * @throws IOException
+	 */
+	protected void dispatchEventToServer( RequestEvent<?, ?> event ) throws BindletException,
 		IOException
 	{
 		if (event == null || server == null) return;
-		
+
 		serverLock.readLock();
 		try
 		{
@@ -123,27 +148,26 @@ public abstract class Connector extends Lifecycle implements IConnector,
 			serverLock.readUnlock();
 		}
 	}
-	
+
 	@Override
-	public void handlerRequestReceived( StreamHandler handler, RequestEvent<?,?> event, Channel channel ) 
-		throws BindletException, IOException
+	public void handlerRequestReceived( StreamHandler handler, RequestEvent<?, ?> event,
+		Channel channel ) throws BindletException, IOException
 	{
 		dispatchEventToServer(event);
 	}
-	
+
 	protected void startConnector() throws LifecycleException
 	{
 		try
 		{
-			if ( getServer() == null )
-				throw new NullPointerException("Invalid domain");
+			if (getServer() == null) throw new NullPointerException("Invalid domain");
 			this.channel = bootstrap.bind(config.getAddress());
 		} catch (Exception e)
 		{
 			throw new LifecycleException("Error starting component", e);
 		}
 	}
-	
+
 	@Override
 	public void start() throws LifecycleException
 	{
@@ -157,7 +181,7 @@ public abstract class Connector extends Lifecycle implements IConnector,
 		super.stop();
 		stopConnector();
 	}
-	
+
 	protected void stopConnector() throws LifecycleException
 	{
 		try
@@ -171,13 +195,13 @@ public abstract class Connector extends Lifecycle implements IConnector,
 			throw new LifecycleException("Error stopping component", e);
 		}
 	}
-	
+
 	@Override
 	public void onStop() throws LifecycleException
 	{
 		stopConnector();
 	}
-	
+
 	@Override
 	public String getName()
 	{
@@ -211,6 +235,5 @@ public abstract class Connector extends Lifecycle implements IConnector,
 	{
 		return config;
 	}
-	
-	
+
 }

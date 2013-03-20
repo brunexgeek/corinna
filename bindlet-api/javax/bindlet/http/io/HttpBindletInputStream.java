@@ -25,27 +25,21 @@ import javax.bindlet.io.BindletInputStream;
 
 
 /**
- * 
- * Provides an input stream for reading binary data from a client request, including an efficient
- * <code>readLine</code> method for reading data one line at a time. With some protocols, such as
- * HTTP POST and PUT, a <code>ServletInputStream</code> object can be used to read data sent from
- * the client.
+ * <p>
+ * Provides an abstract input stream for reading binary and text data from a client request.
+ * </p>
  * 
  * <p>
- * A <code>ServletInputStream</code> object is normally retrieved via the
- * {@link IBindletRequest#getInputStream} method.
+ * A <code>HttpBindletInputStream</code> object is normally retrieved via the
+ * <code>getInputStream</code> method from <code>IHttpBindletRequest</code> interface.
+ * </p>
  * 
- * 
- * <p>
- * This is an abstract class that a servlet container implements. Subclasses of this class must
- * implement the <code>java.io.InputStream.read()</code> method.
- * 
- * 
- * @author Various
- * @version $Version$
+ * @author Bruno Ribeiro
+ * @version 1.0
+ * @since 1.0
  * 
  * @see IBindletRequest
- * 
+ * @see IHttpBindletRequest
  */
 
 public abstract class HttpBindletInputStream extends BindletInputStream
@@ -55,21 +49,20 @@ public abstract class HttpBindletInputStream extends BindletInputStream
 	 * Does nothing, because this is an abstract class.
 	 * 
 	 */
-	public HttpBindletInputStream( )
+	public HttpBindletInputStream()
 	{
 	}
 
 	/**
-	 * 
+	 * <p>
 	 * Reads the input stream, one line at a time. Starting at an offset, reads bytes into an array,
 	 * until it reads a certain number of bytes or reaches a newline character, which it reads into
 	 * the array as well.
+	 * </p>
 	 * 
 	 * <p>
-	 * This method returns -1 if it reaches the end of the input stream before reading the maximum
-	 * number of bytes.
-	 * 
-	 * 
+	 * This method returns -1 no byte is available because the end of the stream has been reached.
+	 * </p>
 	 * 
 	 * @param b
 	 *            an array of bytes into which data is read
@@ -100,16 +93,25 @@ public abstract class HttpBindletInputStream extends BindletInputStream
 		{
 			b[off++] = (byte) c;
 			count++;
-			if (c == '\n' || count == len)
-			{
-				break;
-			}
+			if (c == '\n' || count == len) break;
 		}
 		return count > 0 ? count : -1;
 	}
 
+	/**
+	 * Read the entire data of the input stream as a string. It's necessary to specify the charset
+	 * to be used to interpret the content.
+	 * 
+	 * @param charset
+	 * @return
+	 */
 	public abstract String readText( Charset charset );
-	
-	public abstract String readText( );
-	
+
+	/**
+	 * Read the entire data of the input stream as a string.
+	 * 
+	 * @return
+	 */
+	public abstract String readText();
+
 }

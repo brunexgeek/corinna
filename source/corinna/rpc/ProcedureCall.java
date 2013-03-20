@@ -38,6 +38,10 @@ import corinna.rpc.annotation.Parameter;
 public class ProcedureCall implements IProcedureCall
 {
 
+	public static final String PARAM_REQUEST = "_request";
+	
+	public static final String PARAM_RESPONSE = "_response";
+	
 	public static final String PAIR_SEPARATOR = "&";
 
 	public static final String KEYVALUE_SEPARATOR = "=";

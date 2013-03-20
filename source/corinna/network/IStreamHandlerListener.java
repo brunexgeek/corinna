@@ -15,6 +15,7 @@
  */
 package corinna.network;
 
+
 import java.io.IOException;
 
 import javax.bindlet.exception.BindletException;
@@ -25,7 +26,16 @@ import org.jboss.netty.channel.Channel;
 public interface IStreamHandlerListener
 {
 
-	public void handlerRequestReceived( StreamHandler handler, RequestEvent<?,?> event, Channel channel ) 
-	throws BindletException, IOException;
-	
+	/**
+	 * Invoked when an incoming message arrive.
+	 * 
+	 * @param handler
+	 * @param event
+	 * @param channel
+	 * @throws BindletException
+	 * @throws IOException
+	 */
+	public void handlerRequestReceived( StreamHandler handler, RequestEvent<?, ?> event,
+		Channel channel ) throws BindletException, IOException;
+
 }

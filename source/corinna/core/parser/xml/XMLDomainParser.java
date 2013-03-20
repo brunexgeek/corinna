@@ -634,7 +634,7 @@ public class XMLDomainParser implements IDomainParser
 			// get the bindlet class name
 			String bindletClassName = getTagContent(element, XMLDomainTags.BINDLET_CLASS);
 			// create the registred init parameters for this bindlet
-			ISection config = new Section("Parameters");
+			ISection config = new Section("Parameters", false);
 			parseParameters(element, XMLDomainTags.INIT_PARAMETERS, config);
 
 			try
