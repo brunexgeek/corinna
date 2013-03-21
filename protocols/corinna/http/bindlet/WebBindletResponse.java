@@ -1,10 +1,13 @@
 package corinna.http.bindlet;
 
+
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IWebBindletResponse;
@@ -27,79 +30,72 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	protected HttpResponse response = null;
 
 	private String charset = null;
-	
-	private Calendar calendar = Calendar.getInstance();
-	
+
 	private Channel channel = null;
 
 	private String contentType = null;
-
+	
 	private Boolean isCommited = false;
 
 	private long contentLength = -1;
 
-	private Locale locale = null;
+	private Locale locale = Locale.ENGLISH;
 
 	private boolean isChunked = true;
 
 	private BindletOutputStream outputStream = null;
-	
+
 	private ObjectLocker outputLocker = null;
-	
+
+	private HttpStatus status = HttpStatus.OK;
+
+	private Map<String, Object> headers;
+
 	public WebBindletResponse( Channel channel, HttpResponse response )
 	{
-		if (response == null)
-			throw new IllegalAccessError("The response object can not be null");
-		if (channel == null)
-			throw new IllegalArgumentException("The channel can not be null");
-		
+		if (response == null) throw new IllegalAccessError("The response object can not be null");
+		if (channel == null) throw new IllegalArgumentException("The channel can not be null");
+
 		this.response = response;
 		this.channel = channel;
 		this.outputLocker = new ObjectLocker();
-		init();
+		this.headers = new HashMap<String, Object>();
+
+		reset();
 	}
-	
+
 	@Override
 	public boolean isClosed()
 	{
 		outputLocker.readLock();
 		boolean result = (outputStream != null && outputStream.isClosed());
 		outputLocker.readUnlock();
-		
+
 		return result;
 	}
-	
-	protected void init()
-	{
-		contentType = "text/html";
-		charset = Charset.defaultCharset().displayName();
-		contentLength = -1;
-		locale = Locale.ENGLISH;
-		response.setStatus(HttpResponseStatus.OK);
-		response.setContent(null);
-		
-		update();
-	}
-	
-	// TODO: enhance this wrapper 
+
+	/**
+	 * Update the wrapped <code>HttpResponse</code> object.
+	 */
 	protected void update()
 	{
-		String now = HttpUtils.formatDate( calendar.getTime() );
-		
-		// update the response date and last modification date
-		response.setHeader(HttpHeaders.Names.DATE, now );
-		if (!containsHeader(HttpHeaders.Names.LAST_MODIFIED))
-			response.setHeader(HttpHeaders.Names.LAST_MODIFIED, now );
-		
+		// copy all HTTP headers
+		response.clearHeaders();
+		Set<String> names = headers.keySet();
+		for (String current : names)
+			response.setHeader(current, getHeader(current));
+
 		// update the response content informations
 		if (charset == null)
-			response.setHeader( HttpHeaders.Names.CONTENT_TYPE, contentType );
+			response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType);
 		else
-			response.setHeader( HttpHeaders.Names.CONTENT_TYPE, contentType + "; charset=" + charset );
+			response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType + "; charset=" + charset);
 		response.setHeader(HttpHeaders.Names.CONTENT_LANGUAGE, Locale.ENGLISH.getLanguage());
+
+		response.setStatus( HttpResponseStatus.valueOf(status.getCode()));
 		
 		// update the response extra fields
-		//response.setHeader(HttpHeaders.Names.SERVER, HEADER_SERVER);
+		// response.setHeader(HttpHeaders.Names.SERVER, HEADER_SERVER);
 		if (isChunked() && getContentLength() < 0)
 		{
 			response.setHeader(HttpHeaders.Names.TRANSFER_ENCODING, HttpHeaders.Values.CHUNKED);
@@ -113,15 +109,7 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 			response.removeHeader(HttpHeaders.Names.TRANSFER_ENCODING);
 		}
 	}
-	
-	protected boolean isCommited()
-	{
-		synchronized (isCommited)
-		{
-			return isCommited || isClosed();
-		}
-	}
-	
+
 	protected HttpResponse getResponse()
 	{
 		update();
@@ -132,37 +120,46 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	public BindletOutputStream getOutputStream() throws IOException
 	{
 		BindletOutputStream out = null;
-		
-		update();
-		
+
 		outputLocker.writeLock();
 		try
 		{
-			if (outputStream  == null)
-			{
-				if (!isChunked() || getContentLength() >= 0)
-					outputStream = new BufferedHttpOutputStream(this);
-				else
-					outputStream = new ChunkedHttpOutputStream(this);
-		
-				setCommited(true);
-			}
+			if (outputStream == null) outputStream = new DefaultHttpOutputStream(this);
 			out = outputStream;
 		} finally
 		{
 			outputLocker.writeUnlock();
 		}
-		
+
 		return out;
 	}
-	
+
 	@Override
 	public void reset()
 	{
-		if (isCommited()) return;
+		throwIfCommited();
 
-		response.clearHeaders();
-		init();
+		clearHeaders();
+		// set the default values
+		contentType = "text/html";
+		charset = Charset.defaultCharset().displayName();
+		contentLength = -1;
+		locale = Locale.ENGLISH;
+		status = HttpStatus.OK;
+		// TODO: all responses must be chunked because we always commit before write the content. Fix this!
+		isChunked = true;
+	}
+
+	@Override
+	public void clearHeaders()
+	{
+		headers.clear();
+	}
+
+	@Override
+	public Object getHeader( String name )
+	{
+		return headers.get(name);
 	}
 
 	@Override
@@ -174,14 +171,14 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	@Override
 	public void setCharacterEncoding( String charset )
 	{
-		if (isCommited()) return;
+		throwIfCommited();
 		this.charset = charset;
 	}
 
 	@Override
 	public void setCharacterEncoding( Charset charset )
 	{
-		if (isCommited()) return;
+		throwIfCommited();
 		if (charset == null) charset = Charset.defaultCharset();
 		this.charset = charset.displayName();
 	}
@@ -189,14 +186,14 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	@Override
 	public void setContentType( String contentType )
 	{
-		if (isCommited()) return;
+		throwIfCommited();
 		this.contentType = contentType;
 	}
 
 	@Override
 	public void setContentType( String contentType, String charset )
 	{
-		if (isCommited()) return;
+		throwIfCommited();
 		this.contentType = contentType;
 		this.charset = charset;
 	}
@@ -210,8 +207,9 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	@Override
 	public void setContentLength( long length )
 	{
-		if (isCommited()) return;
+		throwIfCommited();
 		contentLength = length;
+		isChunked = (length < 0);
 	}
 
 	@Override
@@ -223,7 +221,7 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	@Override
 	public void setLocale( Locale locale )
 	{
-		if (isCommited()) return;
+		throwIfCommited();
 		this.locale = locale;
 	}
 
@@ -236,109 +234,138 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	@Override
 	public boolean containsHeader( String name )
 	{
-		return response.containsHeader(name);
+		return headers.containsKey(name);
+	}
+
+	protected void throwIfCommited()
+	{
+		if (isCommited())
+			throw new IllegalStateException("HTTP response already commited");
 	}
 
 	@Override
-	public void sendError( HttpStatus code, String message ) throws IOException
+	public void sendError( HttpStatus status, Throwable exception ) throws IOException
 	{
-		if (isCommited()) return;
+		throwIfCommited();
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("<pre id='info'>");
 		
-		HttpResponseStatus status = HttpResponseStatus.valueOf(code.getCode());
-		response.setStatus(status);
-		
+		while (exception != null)
+		{
+			sb.append("<p id='exception'><strong>");
+			sb.append(exception.toString());
+			sb.append("</strong></p>");
+			for (StackTraceElement element : exception.getStackTrace())
+			{
+				sb.append("<p class='stackEntry'>   at ");
+				sb.append(element.toString());
+				sb.append("</p>");
+			}
+			exception = exception.getCause();
+		}
+		sb.append("</pre>");
+		sendError(status, sb.toString());
+	}
+
+	@Override
+	public void sendError( HttpStatus status, String message ) throws IOException
+	{
+		throwIfCommited();
+
+		setStatus(status);
 		HttpBindletOutputStream output = (HttpBindletOutputStream) getOutputStream();
-		output.writeString(message);
+		if (message != null) output.writeString(message);
 		output.close();
 	}
 
 	@Override
 	public void sendError( HttpStatus code ) throws IOException
 	{
-		sendError(code, code.getDescription());
+		sendError(code, (String) null);
 	}
 
 	@Override
 	public void sendRedirect( String location ) throws IOException
 	{
-		if (isCommited()) return;
-		
-		HttpStatus status = HttpStatus.valueOf( HttpResponseStatus.TEMPORARY_REDIRECT.getCode() );
-		sendError(status);
-		response.setHeader(HttpHeaders.Names.LOCATION , location);
-		setCommited(true);
-	}
+		throwIfCommited();
 
-	protected void setCommited( boolean value )
-	{
-		synchronized (isCommited)
-		{
-			isCommited = value;
-		}
+		setHeader(HttpHeaders.Names.LOCATION, location);
+		setStatus(HttpStatus.TEMPORARY_REDIRECT);
+		BindletOutputStream output = getOutputStream();
+		output.close();
 	}
 
 	@Override
 	public void setDateHeader( String name, Date date )
 	{
-		if (isCommited()) return;
-		
-		response.setHeader(name, HttpUtils.formatDate(date));
+		throwIfCommited();
+
+		if (date == null) return;
+		setHeader(name, HttpUtils.formatDate(date));
 	}
 
 	@Override
 	public void setDateHeader( String name, long date )
 	{
-		if (isCommited()) return;
-		
+		throwIfCommited();
+
+		if (date < 0) return;
 		Date temp = new Date(date);
-		response.setHeader(name, HttpUtils.formatDate(temp));
+		setHeader(name, HttpUtils.formatDate(temp));
 	}
-	
+
 	@Override
 	public void addDateHeader( String name, Date date )
 	{
-		if (isCommited()) return;
-		
-		response.addHeader(name, HttpUtils.formatDate(date));
+		throwIfCommited();
+
+		if (date == null) return;
+		addHeader(name, HttpUtils.formatDate(date));
 	}
 
 	@Override
 	public void addDateHeader( String name, long date )
 	{
-		if (isCommited()) return;
-		
+		throwIfCommited();
+
 		Date temp = new Date(date);
-		response.addHeader(name, HttpUtils.formatDate(temp));
+		addHeader(name, HttpUtils.formatDate(temp));
 	}
-	
+
 	@Override
 	public void setHeader( String name, Object value )
 	{
-		if (isCommited()) return;
-		
+		throwIfCommited();
+
 		if (value instanceof Date)
-			setDateHeader(name, (Date)value);
+			setDateHeader(name, (Date) value);
 		else
-			response.setHeader(name, value);
+			headers.put(name, value);
 	}
 
 	@Override
 	public void addHeader( String name, Object value )
 	{
-		if (isCommited()) return;
-		
+		throwIfCommited();
+
 		if (value instanceof Date)
-			addDateHeader(name, (Date)value);
+			addDateHeader(name, (Date) value);
 		else
-			response.addHeader(name, value);
+			addHeader(name, value);
 	}
 
 	@Override
 	public void setStatus( HttpStatus status )
 	{
-		if (isCommited()) return;
-		
-		response.setStatus( HttpResponseStatus.valueOf(status.getCode()) );
+		throwIfCommited();
+
+		this.status = status;
+	}
+
+	public HttpStatus getStatus()
+	{
+		return status;
 	}
 
 	protected Channel getChannel()
@@ -349,6 +376,8 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	@Override
 	public void setContentType( String contentType, Charset charset )
 	{
+		throwIfCommited();
+
 		this.contentType = contentType;
 		this.charset = charset.displayName();
 	}
@@ -358,13 +387,15 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 	{
 		return isChunked;
 	}
-	
+
 	@Override
 	public void setChunked( boolean value )
 	{
+		throwIfCommited();
 		isChunked = value;
+		if (value) contentLength = -1;
 	}
-	
+
 	@Override
 	public void close() throws IOException
 	{
@@ -374,12 +405,20 @@ public abstract class WebBindletResponse implements IWebBindletResponse
 		if (out != null && !out.isClosed()) out.close();
 	}
 
-	protected void sendHeaders()
+	protected boolean isCommited()
 	{
-		update();
-		channel.write(getResponse());
+		synchronized (isCommited)
+		{
+			return isCommited;
+		}
 	}
 	
-	
-	
+	protected void commit()
+	{
+		synchronized (isCommited)
+		{
+			channel.write(getResponse());
+			isCommited = true;
+		}
+	}
 }

@@ -343,5 +343,11 @@ public interface IWebBindletResponse extends ICloseable, IBindletResponse
 	public void setCharacterEncoding( Charset charset );
 
 	public void setContentType( String contentType, Charset charset );
+
+	public void clearHeaders();
+
+	public void sendError( HttpStatus status, Throwable exception ) throws IOException;
+
+	public Object getHeader( String name );
 	
 }
