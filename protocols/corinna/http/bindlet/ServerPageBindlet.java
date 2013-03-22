@@ -236,7 +236,7 @@ public class ServerPageBindlet extends HttpBindlet
 		}
 		// check whether the current file is a JSP
 		String mime = getMimeType(file.getAbsolutePath());
-		if ( !mime.equals(MimeTypeUtil.MIME_TEXT_JSP) )
+		if ( !mime.equals(MimeTypeUtil.getMimeType("jsp")) )
 			processFile(file, mime, request, response);
 		else
 			processJSP(file, request, response);

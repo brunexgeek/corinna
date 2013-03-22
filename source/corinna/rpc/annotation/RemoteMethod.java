@@ -34,13 +34,13 @@ public @interface RemoteMethod
 	 * The name by which the procedure will be accessible. If this parameter is empty or null,
 	 * the method name in the Java interface will be used.
 	 */
-	public String name() default "";
+	//public String name() default "";
 	
 	/**
 	 * Indicates that the procedure can be invoked only after authentication process, if any. The
 	 * default value is <code>false</code>
 	 */
-	public boolean secure() default false;
+	//public boolean secure() default false;
 	
 	
 	/**
