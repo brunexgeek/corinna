@@ -59,16 +59,16 @@ public class HttpStreamHandler extends StreamHandler
 	{
 		if (event.getMessage() == null)
 			throw new NullPointerException("The request object can not be null");
-		
+
 		Channel channel = context.getChannel();
-		
+
 		HttpRequest request = (HttpRequest) event.getMessage();
 		HttpResponse response = new DefaultHttpResponse(request.getProtocolVersion(), HttpResponseStatus.OK);
 		
-		IHttpBindletRequest req = new HttpBindletRequest(request);
+		IHttpBindletRequest req = new HttpBindletRequest(channel, request);
 		IHttpBindletResponse res = new HttpBindletResponse(channel, response);
 		
-		HttpRequestEvent ev = new HttpRequestEvent(req,res); 
+		HttpRequestEvent ev = new HttpRequestEvent(req,res);
 		try
 		{
 			connector.handlerRequestReceived(this, ev, channel);
@@ -84,38 +84,40 @@ public class HttpStreamHandler extends StreamHandler
 	public void onError( RequestEvent<?,?> event, Channel channel, Throwable exception )
 	{
 		log.error("Error processing HTTP request", exception);
+
+		IHttpBindletResponse response = (IHttpBindletResponse) event.getResponse();
+		IHttpBindletRequest request = (IHttpBindletRequest) event.getRequest();
 		
 		try
 		{
-			IHttpBindletResponse response = (IHttpBindletResponse) event.getResponse();
-			IHttpBindletRequest request = (IHttpBindletRequest) event.getRequest();
-
-			response.sendError(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
-			// close the connection, if necessary
-			if (!request.isKeepAlive()) channel.close();
+			response.sendError(HttpStatus.INTERNAL_SERVER_ERROR, exception);
 		} catch (Exception e)
 		{
 			log.error("Error sending HTTP error information", e);
 		}
+		
+		// close the connection, if necessary
+		if (!request.isKeepAlive()) channel.close();
 	}
 
 	@Override
 	public void onSuccess( RequestEvent<?,?> event, Channel channel )
 	{
+		IHttpBindletResponse response = (IHttpBindletResponse) event.getResponse();
+		IHttpBindletRequest request = (IHttpBindletRequest) event.getRequest();
+		
 		try
 		{
-			IHttpBindletResponse response = (IHttpBindletResponse) event.getResponse();
-			IHttpBindletRequest request = (IHttpBindletRequest) event.getRequest();
-			
 			if (!event.isHandled())
 				response.sendError(HttpStatus.NOT_FOUND);
 			else
 				response.close();
-			// close the connection, if necessary
-			if (!request.isKeepAlive()) channel.close();
 		} catch (Exception e)
 		{
-			// supress any error
+			log.error("Error sending HTTP message", e);
 		}
+
+		// close the connection, if necessary
+		if (!request.isKeepAlive()) channel.close();
 	}
 }

@@ -22,6 +22,7 @@ import javax.bindlet.http.Cookie;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.ISession;
 
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
 //TODO: promote this class to a concrete request (not a request wrapper) PS: need to create new pipeline handlers
@@ -29,9 +30,9 @@ public class HttpBindletRequest extends WebBindletRequest implements IHttpBindle
 {
 
 
-	public HttpBindletRequest( HttpRequest request )
+	public HttpBindletRequest( Channel channel, HttpRequest request )
 	{
-		super(request);
+		super(channel, request);
 	}
 
 	@Override

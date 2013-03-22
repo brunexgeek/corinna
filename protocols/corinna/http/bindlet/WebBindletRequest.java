@@ -2,6 +2,9 @@ package corinna.http.bindlet;
 
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +14,7 @@ import javax.bindlet.http.IWebBindletRequest;
 import javax.bindlet.io.BindletInputStream;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names;
 import org.jboss.netty.handler.codec.http.HttpHeaders.Values;
@@ -47,14 +51,17 @@ public class WebBindletRequest implements IWebBindletRequest
 	private String characterEncoding;
 	
 	private String userName = null;
+	
+	private Channel channel;
 
-	public WebBindletRequest( HttpRequest request )
+	public WebBindletRequest( Channel channel, HttpRequest reques )
 	{
 		if (request == null)
 			throw new NullPointerException("The internal request can not be null");
 
 		this.request = request;
 		this.params = new HashMap<String, String>();
+		this.channel = channel;
 
 		parseHost();
 		parseUri();
@@ -417,6 +424,16 @@ public class WebBindletRequest implements IWebBindletRequest
 	public void setUserName( String userName )
 	{
 		this.userName = userName;
+	}
+
+	@Override
+	public InetSocketAddress getRemoteAddress()
+	{
+		SocketAddress addr = channel.getRemoteAddress();
+		if (addr instanceof InetSocketAddress)
+			return (InetSocketAddress) addr;
+		else
+			return null;
 	}
 	
 }

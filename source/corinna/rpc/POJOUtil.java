@@ -15,16 +15,19 @@
  */
 package corinna.rpc;
 
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.java.swing.plaf.nimbus.LoweredBorder;
+
 
 public class POJOUtil
 {
-	
+
 	public static boolean isValidPOJO( Class<?> classRef )
 	{
 		boolean includeSuperClass = classRef.getClassLoader() != null;
@@ -32,13 +35,14 @@ public class POJOUtil
 		String name = "";
 		String key = "";
 		Class<?> returnType = null;
-		
-		Method[] methods = includeSuperClass ? classRef.getMethods() : classRef.getDeclaredMethods();
+
+		Method[] methods = includeSuperClass ? classRef.getMethods() : classRef
+			.getDeclaredMethods();
 		for (Method current : methods)
 		{
 			name = current.getName();
 			key = "";
-			
+
 			// check whether the current method is a getter
 			if (name.startsWith("get"))
 			{
@@ -54,8 +58,7 @@ public class POJOUtil
 					continue;
 			// check whether the current getter is a valid POJO getter
 			if (key.length() == 0 || Character.isLowerCase(key.charAt(0))
-				|| current.getParameterTypes().length > 0)
-				continue;
+				|| current.getParameterTypes().length > 0) continue;
 			returnType = current.getReturnType();
 			// find for the corresponding setter
 			try
@@ -67,10 +70,10 @@ public class POJOUtil
 				continue;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	public static List<String> getPOJOKeys( Class<?> classRef )
 	{
 		List<String> list = new LinkedList<String>();
@@ -78,13 +81,13 @@ public class POJOUtil
 		String name = "";
 		String key = "";
 		Class<?> returnType = null;
-		
+
 		Method[] methods = getMethods(classRef);
 		for (Method current : methods)
 		{
 			name = current.getName();
 			key = "";
-			
+
 			// check whether the current method is a getter
 			if (name.startsWith("get"))
 			{
@@ -100,39 +103,39 @@ public class POJOUtil
 					continue;
 			// check whether the current getter is a valid POJO getter
 			if (key.length() == 0 || Character.isLowerCase(key.charAt(0))
-				|| current.getParameterTypes().length > 0)
-				continue;
+				|| current.getParameterTypes().length > 0) continue;
 			returnType = current.getReturnType();
 			// find for the corresponding setter
 			try
 			{
 				classRef.getMethod("set" + key, returnType);
+				key = toCamelCase(key);
 				list.add(key);
 			} catch (Exception e)
 			{
 				continue;
 			}
 		}
-		
+
 		return list;
 	}
-	
+
 	// TODO: create a cache for already processed types
-	public static Map<String,POJOInfo> getPOJOInfo( Class<?> classRef )
+	public static Map<String, POJOInfo> getPOJOInfo( Class<?> classRef )
 	{
-		Map<String,POJOInfo> list = new HashMap<String, POJOInfo>();
+		Map<String, POJOInfo> list = new HashMap<String, POJOInfo>();
 
 		String name = "";
 		String key = "";
 		Class<?> returnType = null;
 		Method setter = null;
-		
+
 		Method[] methods = getMethods(classRef);
 		for (Method current : methods)
 		{
 			name = current.getName();
 			key = "";
-			
+
 			// check whether the current method is a getter
 			if (name.startsWith("get"))
 			{
@@ -148,49 +151,49 @@ public class POJOUtil
 					continue;
 			// check whether the current getter is a valid POJO getter
 			if (key.length() == 0 || Character.isLowerCase(key.charAt(0))
-				|| current.getParameterTypes().length > 0)
-				continue;
+				|| current.getParameterTypes().length > 0) continue;
 			returnType = current.getReturnType();
 			// find for the corresponding setter
 			try
 			{
 				setter = classRef.getMethod("set" + key, returnType);
+				key = toCamelCase(key);
 				list.put(key, new POJOInfo(key, returnType, current, setter));
 			} catch (Exception e)
 			{
 				continue;
 			}
 		}
-		
+
 		return list;
 	}
-	
+
 	public static Method getGetter( Method methods[], String key )
 	{
 		if (key == null || key.isEmpty() || methods == null || methods.length == 0) return null;
-		
-		String nameIs = "is" + key;
-		String nameGet = "get" + key;
-		if (Character.isLowerCase(key.charAt(0)))
+
+		String nameIs = "is" + toPascalCase(key);//key
+		String nameGet = "get" + toPascalCase(key);//key
+		/*if (Character.isLowerCase(key.charAt(0)))
 		{
 			nameIs = "is" + Character.toUpperCase(key.charAt(0)) + key.substring(1);
 			nameGet = "get" + Character.toUpperCase(key.charAt(0)) + key.substring(1);
-		}
-		
+		}*/
+
 		for (Method current : methods)
 			if (current.getName().equals(nameIs) || current.getName().equals(nameGet))
 				return current;
 		return null;
 	}
-	
+
 	public static Method getSetter( Method methods[], String key )
 	{
 		if (key == null || key.isEmpty() || methods == null || methods.length == 0) return null;
-	
-		String nameSet = "set" + key;
-		if (Character.isLowerCase(key.charAt(0)))
-			 nameSet = "set" + Character.toUpperCase(key.charAt(0)) + key.substring(1);
-		
+
+		String nameSet = "set" + toPascalCase(key);//key
+		//if (Character.isLowerCase(key.charAt(0)))
+		//	nameSet = "set" + Character.toUpperCase(key.charAt(0)) + key.substring(1);
+
 		for (Method current : methods)
 			if (current.getName().equals(nameSet)) return current;
 		return null;
@@ -209,5 +212,38 @@ public class POJOUtil
 		else
 			return classRef.getDeclaredMethods();
 	}
-	
+
+	/**
+	 * <p>
+	 * Transform the original field name (already without the prefix) from the form "Foo" to "foo".
+	 * The current POJO implementation require this change because some SOAP frameworks (like Axis)
+	 * don't understand POJO fields with another form (buggie?).
+	 * </p>
+	 * 
+	 * @param name
+	 * @return
+	 */
+	protected static String toCamelCase( String name )
+	{
+		if (name == null || name.isEmpty()) return "";
+
+		if (Character.isLowerCase( name.charAt(0) )) return name;
+		
+		if (name.length() == 1)
+			return Character.toLowerCase(name.charAt(0)) + "";
+		else
+			return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+	}
+
+	protected static String toPascalCase( String name )
+	{
+		if (name == null || name.isEmpty()) return "";
+
+		if (Character.isUpperCase( name.charAt(0) )) return name;
+		
+		if (name.length() == 1)
+			return Character.toUpperCase(name.charAt(0)) + "";
+		else
+			return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+	}
 }

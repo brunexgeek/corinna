@@ -52,6 +52,7 @@ public abstract class SOAPBindlet extends javax.bindlet.soap.SoapBindlet
 		} catch (Exception e)
 		{
 			proto.writeException(response, e);
+			return;
 		}
 
 		proto.writeResponse(response, procedure, result);

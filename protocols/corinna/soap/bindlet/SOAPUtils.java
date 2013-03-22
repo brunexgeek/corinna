@@ -62,8 +62,9 @@ public class SOAPUtils
 		if (value == null || TypeConverter.isPrimitive(value))
 		{
 			// create the return value element
-			qname = new QName(name);
+			qname = new QName(parent.getNamespaceURI(), name);
 			element = parent.addChildElement(qname);
+			element.setPrefix(parent.getPrefix());
 			element.setValue( (value == null) ? "" : value.toString() );
 		}
 	}
@@ -79,8 +80,10 @@ public class SOAPUtils
 			pojo = new BeanObject(value);
 		else
 			pojo = (BeanObject) value;
-		
-		SOAPElement subElement = parent.addChildElement(name);
+
+		QName qname = new QName(parent.getNamespaceURI(), name);
+		SOAPElement subElement = parent.addChildElement(qname);
+		subElement.setPrefix(parent.getPrefix());
 		
 		// create the POJO fields
 		Iterator<String> it = pojo.keys();

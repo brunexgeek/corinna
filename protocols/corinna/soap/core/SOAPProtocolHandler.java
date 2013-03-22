@@ -143,6 +143,7 @@ public class SOAPProtocolHandler implements
 		SOAPBody body = message.getSOAPBody();
 		QName qname = new QName(namespace, prototype + WSDLGenerator.SUFFIX_OUTPUT_MESSAGE);
 		SOAPElement element = body.addChildElement(qname);
+		element.setPrefix("sxsd");
 		// create the return value element
 		SOAPUtils.generateElement(element, WSDLGenerator.RETURN_VALUE_NAME, result);
 
@@ -169,15 +170,21 @@ public class SOAPProtocolHandler implements
 		SOAPBody body = message.getSOAPBody();
 		QName qname = new QName(body.getNamespaceURI(), "fault");
 		SOAPElement element = body.addChildElement(qname);
+		element.setPrefix(body.getPrefix());
 		// create the 'faultcode' element
 		qname = new QName(body.getNamespaceURI(), "faultcode");
 		SOAPElement sub = element.addChildElement(qname);
+		//sub.setValue(body.getPrefix() + ":Server.userException");
 		sub.setValue(errorCode);
 		// create the 'faultstring' element
 		qname = new QName(body.getNamespaceURI(), "faultstring");
 		sub = element.addChildElement(qname);
 		sub.setValue(text);
-
+		// create the 'detail' element
+		qname = new QName(body.getNamespaceURI(), "detail");
+		sub = element.addChildElement(qname);
+		sub.setValue("");
+		
 		return message;
 	}
 
@@ -234,6 +241,7 @@ public class SOAPProtocolHandler implements
 		{
 			String content = marshall(resp);
 			response.setContentType("text/xml");
+			//response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 
 			BindletOutputStream out = response.getOutputStream();
 			out.writeString(content);

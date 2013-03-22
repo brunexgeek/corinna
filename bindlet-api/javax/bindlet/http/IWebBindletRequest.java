@@ -17,6 +17,9 @@
 package javax.bindlet.http;
 
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+
 import javax.bindlet.IBindletRequest;
 
 
@@ -323,5 +326,13 @@ public interface IWebBindletRequest extends IBindletRequest
 	public String getUserName();
 	
 	public void setUserName( String userName );
+	
+	/**
+	 * Returns the IP address of the remote host. The remote host of a request is the
+	 * client that send the request for the connector.
+	 * 
+	 * @return
+	 */
+	public InetSocketAddress getRemoteAddress();
 	
 }
