@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.bindlet.http.HttpMethod;
-import javax.bindlet.http.IWebBindletRequest;
+import javax.bindlet.http.IHttpBindletRequest;
 
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 
@@ -102,7 +102,7 @@ public class DigestAuthenticator implements IHttpAuthenticator
 	}
 	
 	@Override
-	public boolean authenticate( IWebBindletRequest request )
+	public boolean authenticate( IHttpBindletRequest request )
 	{
 		String value = request.getHeader(HttpHeaders.Names.AUTHORIZATION);
 		if (value != null)

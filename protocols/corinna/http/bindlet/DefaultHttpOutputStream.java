@@ -50,7 +50,7 @@ public class DefaultHttpOutputStream extends HttpBindletOutputStream implements 
 
 	protected ChannelBuffer buffer = null;
 
-	protected WebBindletResponse response;
+	protected HttpBindletResponse response;
 
 	protected Channel channel = null;
 
@@ -62,7 +62,7 @@ public class DefaultHttpOutputStream extends HttpBindletOutputStream implements 
 
 	private Long writtenBytes = 0L;
 
-	public DefaultHttpOutputStream( WebBindletResponse resp, long bufferSize )
+	public DefaultHttpOutputStream( HttpBindletResponse resp, long bufferSize )
 	{
 		if (resp == null)
 			throw new NullPointerException("The HTTP response object can not be null");
@@ -98,7 +98,7 @@ public class DefaultHttpOutputStream extends HttpBindletOutputStream implements 
 		buffer = ChannelBuffers.buffer((int)bufferSize);
 	}
 
-	public DefaultHttpOutputStream( WebBindletResponse resp )
+	public DefaultHttpOutputStream( HttpBindletResponse resp )
 	{
 		this(resp, DEFAULT_BUFFER_SIZE);
 	}

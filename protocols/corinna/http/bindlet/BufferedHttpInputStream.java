@@ -32,11 +32,11 @@ public class BufferedHttpInputStream extends HttpBindletInputStream
 	
 	protected ChannelBuffer content = null;
 
-	protected WebBindletRequest request;
+	protected HttpBindletRequest request;
 
 	protected Channel channel = null;
 	
-	public BufferedHttpInputStream( WebBindletRequest request )
+	public BufferedHttpInputStream( HttpBindletRequest request )
 	{
 		this.content = request.getContent();
 		this.request = request;

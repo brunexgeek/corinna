@@ -27,7 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import javax.bindlet.http.IWebBindletRequest;
+import javax.bindlet.http.IHttpBindletRequest;
 
 
 public class HttpUtils
@@ -85,7 +85,7 @@ public class HttpUtils
 		}
 	}
 
-	public static StringBuffer getRequestURL( IWebBindletRequest req )
+	public static StringBuffer getRequestURL( IHttpBindletRequest req )
 	{
 		StringBuffer url = new StringBuffer();
 		String scheme = req.getScheme();
@@ -105,7 +105,7 @@ public class HttpUtils
 		return url;
 	}
 
-	public static StringBuffer getRequestURI( IWebBindletRequest req )
+	public static StringBuffer getRequestURI( IHttpBindletRequest req )
 	{
 		StringBuffer uri = getRequestURL(req);
 		String query = req.getQueryString();
@@ -117,7 +117,7 @@ public class HttpUtils
 		return uri;
 	}
 
-	public static StringBuffer getRequestURN( IWebBindletRequest req )
+	public static StringBuffer getRequestURN( IHttpBindletRequest req )
 	{
 		StringBuffer urn = new StringBuffer();
 		urn.append(req.getContextPath());

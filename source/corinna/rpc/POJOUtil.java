@@ -17,12 +17,9 @@ package corinna.rpc;
 
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-
-import com.sun.java.swing.plaf.nimbus.LoweredBorder;
 
 
 public class POJOUtil
@@ -74,50 +71,10 @@ public class POJOUtil
 		return false;
 	}
 
-	public static List<String> getPOJOKeys( Class<?> classRef )
+	public static Collection<String> getPOJOKeys( Class<?> classRef )
 	{
-		List<String> list = new LinkedList<String>();
-
-		String name = "";
-		String key = "";
-		Class<?> returnType = null;
-
-		Method[] methods = getMethods(classRef);
-		for (Method current : methods)
-		{
-			name = current.getName();
-			key = "";
-
-			// check whether the current method is a getter
-			if (name.startsWith("get"))
-			{
-				if ("getClass".equals(name) || "getDeclaringClass".equals(name))
-					key = "";
-				else
-					key = name.substring(3);
-			}
-			else
-				if (name.startsWith("is"))
-					key = name.substring(2);
-				else
-					continue;
-			// check whether the current getter is a valid POJO getter
-			if (key.length() == 0 || Character.isLowerCase(key.charAt(0))
-				|| current.getParameterTypes().length > 0) continue;
-			returnType = current.getReturnType();
-			// find for the corresponding setter
-			try
-			{
-				classRef.getMethod("set" + key, returnType);
-				key = toCamelCase(key);
-				list.add(key);
-			} catch (Exception e)
-			{
-				continue;
-			}
-		}
-
-		return list;
+		Map<String,POJOInfo> infos = getPOJOInfo(classRef);
+		return infos.keySet();
 	}
 
 	// TODO: create a cache for already processed types

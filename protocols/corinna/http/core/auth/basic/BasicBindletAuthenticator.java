@@ -4,8 +4,8 @@ import javax.bindlet.IBindletAuthenticator;
 import javax.bindlet.IBindletRequest;
 import javax.bindlet.IBindletResponse;
 import javax.bindlet.http.HttpStatus;
-import javax.bindlet.http.IWebBindletRequest;
-import javax.bindlet.http.IWebBindletResponse;
+import javax.bindlet.http.IHttpBindletRequest;
+import javax.bindlet.http.IHttpBindletResponse;
 
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 
@@ -32,10 +32,10 @@ public class BasicBindletAuthenticator implements IBindletAuthenticator
 	@Override
 	public boolean authenticate( IBindletRequest request, IBindletResponse response )
 	{
-		if (!(request instanceof IWebBindletRequest)) return false;
-		if (!(response instanceof IWebBindletResponse)) return false;
+		if (!(request instanceof IHttpBindletRequest)) return false;
+		if (!(response instanceof IHttpBindletResponse)) return false;
 		
-		IWebBindletRequest req = (IWebBindletRequest) request;
+		IHttpBindletRequest req = (IHttpBindletRequest) request;
 		
 		String value = req.getHeader(HttpHeaders.Names.AUTHORIZATION);
 		if (value != null && authenticate(req)) return true;
@@ -47,16 +47,16 @@ public class BasicBindletAuthenticator implements IBindletAuthenticator
 	@Override
 	public Class<?> getRequestType()
 	{
-		return IWebBindletRequest.class;
+		return IHttpBindletRequest.class;
 	}
 
 	@Override
 	public Class<?> getResponseType()
 	{
-		return IWebBindletResponse.class;
+		return IHttpBindletResponse.class;
 	}
 
-	protected boolean authenticate( IWebBindletRequest request )
+	protected boolean authenticate( IHttpBindletRequest request )
 	{
 		String data = request.getHeader(HttpHeaders.Names.AUTHORIZATION);
 
@@ -85,8 +85,8 @@ public class BasicBindletAuthenticator implements IBindletAuthenticator
 	@Override
 	public void unauthorize( IBindletRequest request, IBindletResponse response )
 	{
-		if (!(response instanceof IWebBindletResponse)) return;
-		IWebBindletResponse res = (IWebBindletResponse) response;
+		if (!(response instanceof IHttpBindletResponse)) return;
+		IHttpBindletResponse res = (IHttpBindletResponse) response;
 		
 		res.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"vaas.tts\"");
 		res.setStatus(HttpStatus.UNAUTHORIZED);

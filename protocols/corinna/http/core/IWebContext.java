@@ -17,13 +17,13 @@
 package corinna.http.core;
 
 
-import javax.bindlet.http.IWebBindletRequest;
-import javax.bindlet.http.IWebBindletResponse;
+import javax.bindlet.http.IHttpBindletRequest;
+import javax.bindlet.http.IHttpBindletResponse;
 
 import corinna.core.IContext;
 
 
-public interface IWebContext<R extends IWebBindletRequest, P extends IWebBindletResponse> extends
+public interface IWebContext<R extends IHttpBindletRequest, P extends IHttpBindletResponse> extends
 	IContext<R, P>
 {
 
