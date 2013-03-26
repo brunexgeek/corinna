@@ -30,7 +30,7 @@ import corinna.http.bindlet.HttpBindletContext;
 import corinna.http.bindlet.HttpBindletRequest;
 
 
-public class HttpContext extends Context<IHttpBindletRequest, IHttpBindletResponse> implements IWebContext<IHttpBindletRequest, IHttpBindletResponse>
+public class HttpContext extends Context<IHttpBindletRequest, IHttpBindletResponse>
 {
 
 	private HttpBindletContext bindletContext = null;
