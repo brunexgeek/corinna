@@ -112,18 +112,24 @@ public abstract class Context<R, P> extends Lifecycle implements IContext<R, P>
 		// find the registration of the bindlet that should process this request
 		IBindletRegistration reg = getBindletRegistration(request);
 		if (reg == null) return false;
+		// create a bindlet instance (do different things depending on the state model)
 		IBindlet<R, P> bindlet = (IBindlet<R, P>) reg.createBindlet();
 		Model model = bindlet.getBindletModel();
-		
-		// initialize the bindlet only if is not STATELESS, because it's already initialized
-		if (model != Model.STATELESS) bindlet.init(reg.getBindletConfig());
-		// process the request
-		bindlet.process(request, response);
-		// destroy the bindlet only if is not STATELESS
-		if (model != Model.STATELESS) bindlet.destroy();
-		
-		// release the bindlet (do different things depending on the state model)
-		reg.releaseBindlet(bindlet);
+
+		try
+		{
+			// initialize the bindlet only if is not STATELESS, because it's already initialized
+			if (model != Model.STATELESS) bindlet.init(reg.getBindletConfig());
+			// process the request
+			bindlet.process(request, response);
+			// destroy the bindlet only if is not STATELESS
+			if (model != Model.STATELESS) bindlet.destroy();
+		} finally
+		{
+			// TODO: an exception here can hide the original one
+			// release the bindlet (do different things depending on the state model)
+			reg.releaseBindlet(bindlet);
+		}
 		
 		return true;
 	}

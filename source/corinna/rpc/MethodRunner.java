@@ -37,6 +37,7 @@ import corinna.exception.InvalidRpcClassException;
 import corinna.exception.InvocationTargetException;
 import corinna.exception.MethodNotFoundException;
 import corinna.exception.ParameterNotFoundException;
+import corinna.persistence.PersistenceManager;
 import corinna.rpc.annotation.Parameter;
 import corinna.util.StateModel;
 
@@ -363,6 +364,8 @@ public class MethodRunner implements IMethodRunner
 			impl = (IComponentInterface) getImplementationClass().newInstance();
 			// inject all referenced service beans
 			BeanManager.getInstance().inject(impl);
+			// inject all referenced entity managers
+			PersistenceManager.getInstance().inject(impl);
 			// initialize the component
 			impl.init(getData());
 		} catch (ComponentException e)

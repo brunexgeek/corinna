@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import corinna.bean.BeanManager;
+import corinna.persistence.PersistenceManager;
 import corinna.thread.ObjectLocker;
 import corinna.util.ObjectPool;
 
@@ -167,6 +168,15 @@ public class BindletRegistration implements IBindletRegistration
 	{
 		if (bindlet == null) return;
 		
+		try
+		{
+			// release all injected entity managers (for the current thread)
+			PersistenceManager.getInstance().releaseEntityManager();
+		} catch (Exception e)
+		{
+			serverLog.error("Error releasing entity manager", e);
+		}
+		
 		if (bindletClass.isAssignableFrom(bindlet.getClass()) && bindletModel == Model.RECYCLABLE)
 		{
 			((IRecyclable)bindlet).recycle();
@@ -248,6 +258,8 @@ public class BindletRegistration implements IBindletRegistration
 		
 		// inject all referenced service beans
 		BeanManager.getInstance().inject(instance);
+		// inject all referenced entity managers
+		PersistenceManager.getInstance().inject(instance);
 		
 		return instance;
 	}
