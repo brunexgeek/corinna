@@ -16,6 +16,7 @@
 			<fileset dir="${global.dir.libs}" includes="**/slf4j-*.jar" />
 			<fileset dir="${global.dir.libs}" includes="**/netty*Final.jar" />
 			<fileset dir="${global.dir.dist}" includes="**/bindlet*.jar" />
+			<fileset dir="${global.dir.libs}" includes="**/hibernate-jpa-*.jar" />
 		</path>
 		
 		<pathconvert property="core.classpath" pathsep=" ">

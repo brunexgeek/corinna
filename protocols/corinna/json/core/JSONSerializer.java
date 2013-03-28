@@ -101,7 +101,7 @@ public class JSONSerializer implements ISerializer
 				
 				// get the field type and value
 				Class<?> fieldType = method.getParameterTypes()[0];
-				Object value = TypeConverter.convert(fieldType, json.get(key).toString());
+				Object value = TypeConverter.convert(fieldType, (Object)json.get(key).toString());
 				
 				try
 				{
