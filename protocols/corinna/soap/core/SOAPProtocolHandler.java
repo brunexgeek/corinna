@@ -113,13 +113,19 @@ public class SOAPProtocolHandler implements
 				Object value;
 				SOAPElement param = (SOAPElement) current;
 
+				// verifica se o parâmetro é nulo
+				if (param.hasAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "nil"))
+					value = null;
+				else
+				// verifica se o parâmetro é um POJO
 				if (SOAPUtils.canParseAsPOJO(param))
 					value = SOAPUtils.parseAsPOJO(param);
 				else
-					if (SOAPUtils.canParseAsPrimitive(param))
-						value = SOAPUtils.parseAsPrimitive(param);
-					else
-						throw new BindletException("Invalid SOAP parameter value for \""
+				// verifica se o parâmetro é um valor simples
+				if (SOAPUtils.canParseAsPrimitive(param))
+					value = SOAPUtils.parseAsPrimitive(param);
+				else
+					throw new BindletException("Invalid SOAP parameter value for \""
 							+ param.getLocalName() + "\"");
 				procedure.setParameter(param.getLocalName(), value);
 			}

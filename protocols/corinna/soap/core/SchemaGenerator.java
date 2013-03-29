@@ -271,7 +271,6 @@ public class SchemaGenerator
 		// build the full qualified type name
 		typeName = name;
 		if (typeName == null) typeName = classRef.getSimpleName() + SUFFIX_TYPE;
-		typeName = PREFIX_TYPES + ":" + typeName;
 		
 		Element element = createElement(context, context.schemaElement, "simpleType");
 		element.setAttribute("name", typeName);
@@ -287,9 +286,9 @@ public class SchemaGenerator
 		}
 				
 		// register the new type
-		types.put(classRef, typeName);
+		types.put(classRef, PREFIX_TYPES + ":" + typeName);
 		
-		return typeName;
+		return PREFIX_TYPES + ":" + typeName;
 	}
 		
 	protected boolean containsBeanMethod( Method[] methods, String fieldname, MethodPrefix prefix )

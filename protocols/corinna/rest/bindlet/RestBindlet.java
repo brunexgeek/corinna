@@ -35,6 +35,8 @@ import javax.bindlet.io.BindletOutputStream;
 import javax.bindlet.rpc.IProcedureCall;
 
 import org.jboss.netty.handler.codec.http.HttpHeaders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import corinna.core.ContextInfo;
 import corinna.rpc.ParameterList;
@@ -62,6 +64,8 @@ import corinna.rpc.ReflectionUtil;
 public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBindletResponse>
 {
 
+	private Logger log = LoggerFactory.getLogger(RestBindlet.class);
+	
 	private static final String MIME_TYPE = "application/x-www-form-urlencoded";
 	
 	public static final String CONFIG_COMPATILIBITY_MODE = "CompatibilityMode"; 
@@ -117,6 +121,7 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		} catch (Exception e)
 		{
 			exception = e;
+			log.error("Error processing REST bindlet", e);
 		}
 
 		try
@@ -143,8 +148,14 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 		if (exception != null)
 		{
+			Throwable t = exception;
+			// find the first error with a message
+			while (t != null && t.getCause() != null && t.getCause().getMessage() != null)
+			{
+				t = t.getCause();
+			}
 			buffer.setValue("result", "ERROR");
-			buffer.setValue("message", exception.getMessage());
+			buffer.setValue("message", t.getMessage());
 		}
 		else
 		{

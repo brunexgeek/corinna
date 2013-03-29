@@ -371,7 +371,8 @@ public class HttpBindletResponse implements IHttpBindletResponse
 		if (value instanceof Date)
 			addDateHeader(name, (Date) value);
 		else
-			addHeader(name, value);
+			// TODO: implements this!
+			setHeader(name, value);
 	}
 
 	@Override
