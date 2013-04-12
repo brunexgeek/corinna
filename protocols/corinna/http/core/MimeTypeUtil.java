@@ -23,7 +23,7 @@ public class MimeTypeUtil
 		prop = new Properties();
 		try
 		{
-			prop.load(ResourceLoader.getResourceAsStream("MimeTypeUtil.properties"));
+			prop.load(ResourceLoader.getResourceAsStream("corinna/http/core/MimeTypeUtil.properties"));
 		} catch (IOException e)
 		{
 		}

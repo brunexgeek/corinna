@@ -82,10 +82,10 @@ public class DefaultHttpOutputStream extends HttpBindletOutputStream implements 
 		response.getResponse().setContent(null);
 		charset = response.getCharacterEncoding();
 		// TODO: criar um pool de "ChannelBuffer"
-		buffer = ChannelBuffers.buffer((int)bufferSize);
+		buffer = ChannelBuffers.buffer( (int)bufferSize + 1 );
 		
 		// limits the buffer size in a valid range
-		if (bufferSize < MIN_BUFFER_SIZE)
+		/*if (bufferSize < MIN_BUFFER_SIZE)
 			bufferSize = MIN_BUFFER_SIZE;
 		else
 			if (bufferSize > MAX_BUFFER_SIZE) bufferSize = MAX_BUFFER_SIZE;
@@ -95,7 +95,7 @@ public class DefaultHttpOutputStream extends HttpBindletOutputStream implements 
 		response.getResponse().setContent(null);
 		charset = response.getCharacterEncoding();
 		// TODO: criar um pool de "ChannelBuffer"
-		buffer = ChannelBuffers.buffer((int)bufferSize);
+		buffer = ChannelBuffers.buffer((int)bufferSize);*/
 	}
 
 	public DefaultHttpOutputStream( HttpBindletResponse resp )
@@ -257,7 +257,7 @@ public class DefaultHttpOutputStream extends HttpBindletOutputStream implements 
 			if (length > buffer.writableBytes()) length = buffer.writableBytes();
 			buffer.writeBytes(value, cursor, length);
 			// check if need flush
-			if (buffer.writableBytes() == 0) flush();
+			if (buffer.writableBytes() == 0 && remaining > 0) flush();
 
 			cursor += length;
 			remaining -= length;

@@ -147,9 +147,8 @@ public class SOAPProtocolHandler implements
 
 		// create the SOAP method response element
 		SOAPBody body = message.getSOAPBody();
-		QName qname = new QName(namespace, prototype + WSDLGenerator.SUFFIX_OUTPUT_MESSAGE);
+		QName qname = new QName(namespace, prototype + WSDLGenerator.SUFFIX_OUTPUT_MESSAGE, "sxsd");
 		SOAPElement element = body.addChildElement(qname);
-		element.setPrefix("sxsd");
 		// create the return value element
 		SOAPUtils.generateElement(element, WSDLGenerator.RETURN_VALUE_NAME, result);
 

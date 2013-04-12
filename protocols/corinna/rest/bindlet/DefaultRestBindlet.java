@@ -80,8 +80,8 @@ public class DefaultRestBindlet extends RestBindlet
 	 * Parameter name to define whether the bindlet must accept the old way to specify the method
 	 * name (through REST parameter 'method').
 	 */
-	public static final String PARAMETER_COMPATILITY = "rpc.compatibilityMode";
-
+	//public static final String PARAMETER_COMPATILITY = "rpc.compatibilityMode";
+	
 	/**
 	 * Instance of the method runner used to access the web service methods.
 	 */

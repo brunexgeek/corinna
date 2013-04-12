@@ -275,19 +275,20 @@ public class HttpBindletRequest implements IHttpBindletRequest
 
 		int pos = value.indexOf(";");
 		if (pos < 0)
-		{
 			contentType = value.trim();
-			if (contentType.equalsIgnoreCase("application/x-www-form-urlencoded"))
-			{
-				characterEncoding = "ANSI";
-				parseForm();
-			}
-			return;
-		}
-
-		contentType = value.substring(0, pos).trim();
+		else
+			contentType = value.substring(0, pos).trim();
 		pos = value.indexOf("charset=");
 		if (pos >= 0) characterEncoding = value.substring(pos + 8);
+		
+		if (pos < 0)
+		{
+			if (contentType.equalsIgnoreCase("application/x-www-form-urlencoded"))
+			{
+				//characterEncoding = "ANSI";
+				parseForm();
+			}
+		}
 	}
 
 	protected void parseForm()

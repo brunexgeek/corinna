@@ -143,7 +143,9 @@ public class HttpBindletResponse implements IHttpBindletResponse
 		outputLocker.writeLock();
 		try
 		{
-			if (outputStream == null) outputStream = new DefaultHttpOutputStream(this);
+			long length = getContentLength();
+			if (length <= 0) length = DefaultHttpOutputStream.DEFAULT_BUFFER_SIZE;
+			if (outputStream == null) outputStream = new DefaultHttpOutputStream(this, length);
 			out = outputStream;
 		} finally
 		{
@@ -198,8 +200,10 @@ public class HttpBindletResponse implements IHttpBindletResponse
 	public void setCharacterEncoding( Charset charset )
 	{
 		throwIfCommited();
-		if (charset == null) charset = Charset.defaultCharset();
-		this.charset = charset.displayName();
+		if (charset == null) 
+			this.charset = null;//Charset.defaultCharset();
+		else
+			this.charset = charset.displayName();
 	}
 
 	@Override
@@ -214,7 +218,10 @@ public class HttpBindletResponse implements IHttpBindletResponse
 	{
 		throwIfCommited();
 		this.contentType = contentType;
-		this.charset = charset;
+		if (charset == null)
+			this.charset = null;
+		else
+			this.charset = charset;
 	}
 
 	@Override
@@ -399,7 +406,10 @@ public class HttpBindletResponse implements IHttpBindletResponse
 		throwIfCommited();
 
 		this.contentType = contentType;
-		this.charset = charset.displayName();
+		if (charset != null)
+			this.charset = charset.displayName();
+		else
+			this.charset = null;
 	}
 
 	@Override

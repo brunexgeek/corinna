@@ -111,7 +111,10 @@ public class ServerPageBindlet extends HttpBindlet
 		if (ext == null)
 			return MimeTypeUtil.MIME_APPLICATION_OCTET_STREAM;
 		
-		return MimeTypeUtil.getMimeType( ext );
+		String mime = MimeTypeUtil.getMimeType(ext);
+		if (mime == null) 
+			return MimeTypeUtil.MIME_APPLICATION_OCTET_STREAM;
+		return mime;
 	}
 	
 	protected void processFile( File file, String mime, IHttpBindletRequest request, IHttpBindletResponse response )

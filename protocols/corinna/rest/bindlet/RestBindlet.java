@@ -68,7 +68,12 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	
 	private static final String MIME_TYPE = "application/x-www-form-urlencoded";
 	
-	public static final String CONFIG_COMPATILIBITY_MODE = "CompatibilityMode"; 
+	public static final String PARAMETER_COMPATILITY = "rpc.compatibilityMode";
+	
+	/**
+	 * Parameter name to define a forced character encoding for received texts.
+	 */
+	public static final String PARAMETER_FORCEENCODING = "rpc.forceEncoding";
 	
 	private static final String COMPONENT_NAME = "REST Bindlet";
 
@@ -154,12 +159,14 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 			{
 				t = t.getCause();
 			}
-			buffer.setValue("result", "ERROR");
+			// TODO: sistemas legados usam em minúsculo
+			buffer.setValue("result", "error");
 			buffer.setValue("message", t.getMessage());
 		}
 		else
 		{
-			buffer.setValue("result", "OK");
+			// TODO: sistemas legados usam em minúsculo
+			buffer.setValue("result", "ok");
 			if (returnValue == null) returnValue = "";
 			buffer.setValue("return", returnValue);
 		}
@@ -224,9 +231,13 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	{
 		try
 		{
-			if (request.getHttpMethod() == HttpMethod.GET)
-				return Charset.forName("UTF-8");
+			String encoding = getInitParameter(PARAMETER_FORCEENCODING);
+			if (encoding != null && !encoding.isEmpty())
+				return Charset.forName(encoding);
 			else
+			/*if (request.getHttpMethod() == HttpMethod.GET )
+				return Charset.forName("UTF-8");
+			else*/
 				return Charset.forName(request.getCharacterEncoding());
 		} catch (Exception e)
 		{
@@ -235,6 +246,12 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 	}
 
+	protected boolean isCompatibilityMode()
+	{
+		String option = getInitParameter(PARAMETER_COMPATILITY);
+		return (option != null && option.equalsIgnoreCase("true"));
+	}
+	
 	protected IProcedureCall getProcedureCall( IHttpBindletRequest request ) throws BindletException
 	{
 		ProcedureCall procedureCall;
@@ -250,11 +267,15 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 			ParameterList.parseString(list, params, "&", "=");
 			String[] keys = list.getParameterNames();
 			// check whether the procedure prototype was obtained
-			if (proto == null)
+			if (proto == null && isCompatibilityMode())
 			{
-				String option = getInitParameter(CONFIG_COMPATILIBITY_MODE);
-				if (option != null && option.equalsIgnoreCase("true"))
-					proto = (String)list.getParameter("method", null);
+				proto = (String)list.getParameter("method", null);
+				if (proto != null)
+				{
+					int dot = proto.lastIndexOf('.');
+					if (dot >= 0 && dot < proto.length())
+						proto = proto.substring(dot+1);
+				}
 			}
 			// check whether we have a valid prototype
 			if (proto == null)
