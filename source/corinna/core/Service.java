@@ -18,6 +18,8 @@ package corinna.core;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.bindlet.IBindletService;
@@ -32,8 +34,10 @@ import corinna.thread.ObjectLocker;
 public abstract class Service extends Lifecycle implements IService
 {
 	
-	private Map<String, IContext<?,?>> contexts;
+	private Map<String, IContext<?,?>> contextsByName;
 
+	private List<IContext<?,?>> contextsByOrder;
+	
 	private ObjectLocker contextsLock;
 
 	private IServer server = null;
@@ -45,7 +49,8 @@ public abstract class Service extends Lifecycle implements IService
 		if (server == null)
 			throw new IllegalArgumentException("The server instance can not be null");
 
-		this.contexts = new HashMap<String, IContext<?,?>>();
+		this.contextsByName = new HashMap<String, IContext<?,?>>();
+		this.contextsByOrder = new LinkedList<IContext<?,?>>();
 		this.contextsLock = new ObjectLocker();
 		this.server = server;
 		this.config  = config;
@@ -91,7 +96,7 @@ public abstract class Service extends Lifecycle implements IService
 		contextsLock.readLock();
 		try
 		{
-			return contexts.get(name);
+			return contextsByName.get(name);
 		} finally
 		{
 			contextsLock.readUnlock();
@@ -106,7 +111,8 @@ public abstract class Service extends Lifecycle implements IService
 		contextsLock.writeLock();
 		try
 		{
-			contexts.put(context.getName(), context);
+			contextsByName.put(context.getName(), context);
+			contextsByOrder.add(context);
 		} finally
 		{
 			contextsLock.writeUnlock();
@@ -125,7 +131,9 @@ public abstract class Service extends Lifecycle implements IService
 		contextsLock.writeLock();
 		try
 		{
-			return contexts.remove(name);
+			IContext<?,?> ctx = contextsByName.remove(name);
+			if (ctx != null) contextsByOrder.remove(ctx);
+			return ctx;
 		} finally
 		{
 			contextsLock.writeUnlock();
@@ -144,10 +152,8 @@ public abstract class Service extends Lifecycle implements IService
 		contextsLock.readLock();
 		try
 		{
-			for (Map.Entry<String,IContext<?, ?>> entry : contexts.entrySet())
+			for (IContext<?, ?> context : contextsByOrder)
 			{
-				IContext<?, ?> context = entry.getValue();
-
 				// get the request and response types accepted by the current context
 				Class<?> contextRequest = context.getRequestType();
 				Class<?> contextResponse = context.getResponseType();
@@ -158,7 +164,7 @@ public abstract class Service extends Lifecycle implements IService
 				if ( contextRequest.isAssignableFrom(requestType) &&
 					contextResponse.isAssignableFrom(responseType) )
 				{
-					entry.getValue().serviceRequestReceived(this, event);
+					context.serviceRequestReceived(this, event);
 					if ( event.isHandled() ) break;
 				}
 			}
@@ -190,7 +196,7 @@ public abstract class Service extends Lifecycle implements IService
 		contextsLock.readLock();
 		try
 		{
-			for (Map.Entry<String,IContext<?,?>> entry : contexts.entrySet())
+			for (Map.Entry<String,IContext<?,?>> entry : contextsByName.entrySet())
 				sb.append( entry.getValue() );
 		} finally
 		{
@@ -206,7 +212,7 @@ public abstract class Service extends Lifecycle implements IService
 		try
 		{
 			// itera entre os servidores
-			for (Map.Entry<String,IContext<?,?>> entry : contexts.entrySet())
+			for (Map.Entry<String,IContext<?,?>> entry : contextsByName.entrySet())
 				entry.getValue().start();
 		} finally
 		{
@@ -226,7 +232,7 @@ public abstract class Service extends Lifecycle implements IService
 		try
 		{
 			// itera entre os servidores
-			for (Map.Entry<String,IContext<?,?>> entry : contexts.entrySet())
+			for (Map.Entry<String,IContext<?,?>> entry : contextsByName.entrySet())
 				entry.getValue().stop();
 		} finally
 		{
@@ -246,7 +252,7 @@ public abstract class Service extends Lifecycle implements IService
 		try
 		{
 			// itera entre os servidores
-			for (Map.Entry<String,IContext<?,?>> entry : contexts.entrySet())
+			for (Map.Entry<String,IContext<?,?>> entry : contextsByName.entrySet())
 				entry.getValue().init();
 		} finally
 		{
@@ -266,7 +272,7 @@ public abstract class Service extends Lifecycle implements IService
 		try
 		{
 			// itera entre os servidores
-			for (Map.Entry<String,IContext<?,?>> entry : contexts.entrySet())
+			for (Map.Entry<String,IContext<?,?>> entry : contextsByName.entrySet())
 				entry.getValue().destroy();
 		} finally
 		{
@@ -286,13 +292,13 @@ public abstract class Service extends Lifecycle implements IService
 	{
 		contextsLock.readLock();
 		
-		String names[] = new String[contexts.size()];
+		String names[] = new String[contextsByName.size()];
 		int i = 0;
 		
 		try
 		{
 			// itera entre os servidores
-			for (Map.Entry<String,IContext<?,?>> entry : contexts.entrySet())
+			for (Map.Entry<String,IContext<?,?>> entry : contextsByName.entrySet())
 			{
 				names[i] = entry.getValue().getName();
 				++i;
@@ -304,5 +310,6 @@ public abstract class Service extends Lifecycle implements IService
 		
 		return names;
 	}
+	
 	
 }
