@@ -34,7 +34,7 @@ public abstract class BasicConfig implements IBasicConfig
 			throw new IllegalArgumentException("The name can not be null or empty");
 		
 		this.name = name;
-		section = new Section(name + "Parameters", false);
+		section = new Section(name + "Parameters", true);
 	}
 	
 	@Override

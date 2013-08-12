@@ -62,7 +62,7 @@ public interface IProtocolHandler<R, P>
 	 * @param returnValue
 	 * @return
 	 */
-	public void writeException( P response, Exception exception ) throws BindletException,
+	public void writeException( P response, IProcedureCall procedure, Exception exception ) throws BindletException,
 		IOException;
 
 	public IProtocol getProtocol();

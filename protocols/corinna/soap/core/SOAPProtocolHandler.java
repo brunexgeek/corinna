@@ -206,7 +206,7 @@ public class SOAPProtocolHandler implements
 				returnValue);
 		} catch (Exception e)
 		{
-			writeException(response, e);
+			writeException(response, procedure, e);
 			return;
 		}
 
@@ -230,8 +230,8 @@ public class SOAPProtocolHandler implements
 	}
 
 	@Override
-	public void writeException( IHttpBindletResponse response, Exception exception )
-		throws BindletException, IOException
+	public void writeException( IHttpBindletResponse response, IProcedureCall procedure,
+		Exception exception ) throws BindletException, IOException
 	{
 		SOAPMessage resp = null;
 

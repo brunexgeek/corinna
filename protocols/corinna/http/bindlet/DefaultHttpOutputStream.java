@@ -81,21 +81,9 @@ public class DefaultHttpOutputStream extends HttpBindletOutputStream implements 
 		channel = response.getChannel();
 		response.getResponse().setContent(null);
 		charset = response.getCharacterEncoding();
+		if (charset == null) charset = "UTF-8";
 		// TODO: criar um pool de "ChannelBuffer"
 		buffer = ChannelBuffers.buffer( (int)bufferSize + 1 );
-		
-		// limits the buffer size in a valid range
-		/*if (bufferSize < MIN_BUFFER_SIZE)
-			bufferSize = MIN_BUFFER_SIZE;
-		else
-			if (bufferSize > MAX_BUFFER_SIZE) bufferSize = MAX_BUFFER_SIZE;
-
-		response = resp;
-		channel = response.getChannel();
-		response.getResponse().setContent(null);
-		charset = response.getCharacterEncoding();
-		// TODO: criar um pool de "ChannelBuffer"
-		buffer = ChannelBuffers.buffer((int)bufferSize);*/
 	}
 
 	public DefaultHttpOutputStream( HttpBindletResponse resp )

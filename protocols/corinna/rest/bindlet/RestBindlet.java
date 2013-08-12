@@ -22,24 +22,21 @@ import java.nio.charset.Charset;
 
 import javax.bindlet.Bindlet;
 import javax.bindlet.BindletModel;
+import javax.bindlet.BindletModel.Model;
 import javax.bindlet.IBindletAuthenticator;
 import javax.bindlet.IComponentInformation;
-import javax.bindlet.BindletModel.Model;
 import javax.bindlet.exception.BindletException;
 import javax.bindlet.http.HttpMethod;
 import javax.bindlet.http.HttpStatus;
 import javax.bindlet.http.IHttpBindletRequest;
 import javax.bindlet.http.IHttpBindletResponse;
-import javax.bindlet.io.BindletInputStream;
-import javax.bindlet.io.BindletOutputStream;
 import javax.bindlet.rpc.IProcedureCall;
 
-import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import corinna.core.ContextInfo;
-import corinna.rpc.ParameterList;
+import corinna.rest.core.RestProtocolHandler;
 import corinna.rpc.ProcedureCall;
 import corinna.rpc.ReflectionUtil;
 
@@ -65,16 +62,7 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 {
 
 	private Logger log = LoggerFactory.getLogger(RestBindlet.class);
-	
-	private static final String MIME_TYPE = "application/x-www-form-urlencoded";
-	
-	public static final String PARAMETER_COMPATILITY = "rpc.compatibilityMode";
-	
-	/**
-	 * Parameter name to define a forced character encoding for received texts.
-	 */
-	public static final String PARAMETER_FORCEENCODING = "rpc.forceEncoding";
-	
+			
 	private static final String COMPONENT_NAME = "REST Bindlet";
 
 	private static final String COMPONENT_VERSION = "1.0";
@@ -100,7 +88,8 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 	{
 		Exception exception = null;
 		Object result = null;
-		Charset charset = Charset.defaultCharset();
+		RestProtocolHandler handler = getProtocolHandler();
+		Charset charset = handler.getProcedureCharset(request);
 
 		if (request.getHttpMethod() != HttpMethod.GET && request.getHttpMethod() != HttpMethod.POST)
 		{
@@ -116,10 +105,10 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		if (isRestricted() && !doAuthentication(request, response)) return;
 		
 		// extract a 'ProcedureCall' from the HTTP request
+		ProcedureCall call = null;
 		try
 		{
-			charset = getProcedureCharset(request);
-			ProcedureCall call = (ProcedureCall) getProcedureCall(request);
+			call = handler.readRequest(request);
 			call.setParameter(ProcedureCall.PARAM_REQUEST, request);
 			call.setParameter(ProcedureCall.PARAM_RESPONSE, response);
 			result = doCall(call);
@@ -131,57 +120,21 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 
 		try
 		{
-			setResponse(response, charset, result, exception);
+			if (response.isClosed()) return;
+
+			// TODO: this shouldn't be here!
+			response.addHeader("Access-Control-Allow-Origin", "*");
+			response.addHeader("Access-Control-Allow-Methods", "*");
+			response.setCharacterEncoding(charset);
+
+			if (exception == null)
+				handler.writeResponse(response, call, result);
+			else
+				handler.writeException(response, call, exception);
 		} catch (IOException e)
 		{
 			throw new BindletException("Error writing the REST response", e);
 		}
-	}
-
-	public void setResponse( IHttpBindletResponse response, Charset charset, Object returnValue, Exception exception )
-		throws IOException
-	{
-		if (response.isClosed()) return;
-
-		if (charset == null) charset = Charset.defaultCharset();
-		// TODO: this shouldn't be here!
-		response.addHeader("Access-Control-Allow-Origin", "*");
-		response.addHeader("Access-Control-Allow-Methods", "*");
-		response.setCharacterEncoding(charset);
-
-		ParameterList buffer = new ParameterList(charset);
-
-		if (exception != null)
-		{
-			Throwable t = exception;
-			// find the first error with a message
-			while (t != null && t.getCause() != null && t.getCause().getMessage() != null)
-			{
-				t = t.getCause();
-			}
-			// TODO: sistemas legados usam em minúsculo
-			buffer.setValue("result", "error");
-			buffer.setValue("message", t.getMessage());
-		}
-		else
-		{
-			// TODO: sistemas legados usam em minúsculo
-			buffer.setValue("result", "ok");
-			if (returnValue == null) returnValue = "";
-			buffer.setValue("return", returnValue);
-		}
-		byte[] output = buffer.toString().getBytes(charset);
-		
-		response.setContentLength(output.length);
-		BindletOutputStream out = response.getOutputStream();
-		try
-		{
-			if (!out.isClosed() && out.writtenBytes() == 0) out.write(output);
-		} catch (Exception e)
-		{
-			// suprime os erros
-		}
-		if (out != null && !out.isClosed()) out.close();
 	}
 
 	@Override
@@ -190,110 +143,6 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		return COMPONENT_INFO;
 	}
 
-	protected String getProcedurePrototype( IHttpBindletRequest request )
-	{
-		String path = request.getResourcePath();
-		if (path == null || path.isEmpty()) return null;
-
-		int end = path.indexOf("?");
-		if (end < 0) end = path.length();
-		int start = path.lastIndexOf("/");
-		if (start + 1 < path.length())
-			return path.substring(start + 1, end);
-		else
-			return null;
-	}
-
-	protected String getProcedureParameters( IHttpBindletRequest request )
-	{
-		if (request.getHttpMethod() == HttpMethod.GET) return request.getQueryString();
-		if (request.getHttpMethod() == HttpMethod.POST)
-		{
-			// check if the content type is valid for a POST request 
-			String contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE);
-			if (!contentType.equals(MIME_TYPE)) return null;
-			
-			try
-			{
-				BindletInputStream is = request.getInputStream();
-				String value = is.readString();
-				is.close();
-				return value;
-			} catch (IOException e)
-			{
-				return null;
-			}
-		}
-		return null;
-	}
-
-	protected Charset getProcedureCharset( IHttpBindletRequest request )
-	{
-		try
-		{
-			String encoding = getInitParameter(PARAMETER_FORCEENCODING);
-			if (encoding != null && !encoding.isEmpty())
-				return Charset.forName(encoding);
-			else
-			/*if (request.getHttpMethod() == HttpMethod.GET )
-				return Charset.forName("UTF-8");
-			else*/
-				return Charset.forName(request.getCharacterEncoding());
-		} catch (Exception e)
-		{
-			return Charset.defaultCharset();
-		}
-
-	}
-
-	protected boolean isCompatibilityMode()
-	{
-		String option = getInitParameter(PARAMETER_COMPATILITY);
-		return (option != null && option.equalsIgnoreCase("true"));
-	}
-	
-	protected IProcedureCall getProcedureCall( IHttpBindletRequest request ) throws BindletException
-	{
-		ProcedureCall procedureCall;
-
-		// try to get the procedure prototype
-		String proto = getProcedurePrototype(request);
-		String params = getProcedureParameters(request);
-
-		try
-		{
-			// parse the procedure call parameters
-			ParameterList list = new ParameterList(getProcedureCharset(request));
-			ParameterList.parseString(list, params, "&", "=");
-			String[] keys = list.getParameterNames();
-			// check whether the procedure prototype was obtained
-			if (proto == null && isCompatibilityMode())
-			{
-				proto = (String)list.getParameter("method", null);
-				if (proto != null)
-				{
-					int dot = proto.lastIndexOf('.');
-					if (dot >= 0 && dot < proto.length())
-						proto = proto.substring(dot+1);
-				}
-			}
-			// check whether we have a valid prototype
-			if (proto == null)
-				throw new BindletException("Missing procedure prototype");
-			// create the procedure call
-			procedureCall = new ProcedureCall(proto);
-			for (String key : keys)
-				procedureCall.setParameter(key, list.getParameter(key, ""));
-		} catch (BindletException e)
-		{
-			throw e;
-		}
-		catch (Exception e)
-		{
-			throw new BindletException("Error parsing REST procedure call", e);
-		}
-		return procedureCall;
-	}
 
 	public boolean isRestricted()
 	{
@@ -331,6 +180,17 @@ public abstract class RestBindlet extends Bindlet<IHttpBindletRequest, IHttpBind
 		} catch (Exception e)
 		{
 			return Model.STATEFULL;
+		}
+	}
+	
+	protected RestProtocolHandler getProtocolHandler() throws BindletException
+	{
+		try
+		{
+			return new RestProtocolHandler( getBindletConfig() );
+		} catch (Exception e)
+		{
+			throw new BindletException("Error creating a REST protocol handler", e);
 		}
 	}
 	

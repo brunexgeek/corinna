@@ -34,7 +34,7 @@ import corinna.util.StateModel;
 
 
 /**
- * A REST bindlet that translates HTTP POST messages into RPC calls.
+ * A REST bindlet that translates HTTP GET/POST messages into RPC calls.
  * 
  * <h1>Custom parameters</h1>
  * 
