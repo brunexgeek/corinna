@@ -1,5 +1,5 @@
-Corinna
-=======
+Corinna Bindlet Framework
+=========================
 
 Corinna is an open source software implementation of the Java Bindlet technology.
 
